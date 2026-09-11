@@ -50,7 +50,8 @@
       }
       link.append(
         el('span', { textContent: p.display }),
-        el('span', { className: 'op', textContent: p.label }),
+        // sur mobile il n'y a pas de survol : le canal doit se lire dans le libellé
+        el('span', { className: 'op', textContent: p.whatsapp ? `${p.label} · WhatsApp` : p.label }),
       );
       box.append(link);
     }

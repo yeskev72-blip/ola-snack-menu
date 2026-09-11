@@ -19,7 +19,8 @@ natifs, alimentés par un seul fichier de données.
 - **Panier** qui compose un récapitulatif de commande, puis permet de l'envoyer
   sur **WhatsApp**, d'**appeler**, de l'**envoyer par SMS** pré-rempli, ou de
   le **copier**.
-- Les trois numéros de l'en-tête ouvrent une discussion **WhatsApp**.
+- Le numéro **MTN** ouvre une discussion **WhatsApp** ; les lignes MOOV et
+  Celtiis sont de simples liens d'appel.
 - Responsive (testé à 390 px), thème clair/sombre automatique, et une feuille
   d'impression qui masque les éléments interactifs.
 
@@ -104,8 +105,8 @@ pas de la saisie :
   partiellement différentes du menu.
 - Le PDF ne contient **aucun horaire d'ouverture ni zone de livraison** ;
   ils ne figurent donc pas sur le site.
-- Le PDF n'accole « (WhatsApp) » qu'au seul numéro MOOV ; les trois lignes
-  sont en réalité joignables sur WhatsApp (information du restaurant, non
+- Le PDF accole « (WhatsApp) » au numéro **MOOV**, mais c'est la ligne
+  **MTN** qui porte le compte WhatsApp (information du restaurant, non
   déductible du document).
 
 Quatre photos du PDF (Double Cheese Burger, Le Titan, et les bandeaux
