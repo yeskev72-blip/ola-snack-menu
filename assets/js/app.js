@@ -336,7 +336,9 @@
   /* ---------- démarrage ---------- */
   async function init() {
     try {
-      const res = await fetch('data/menu.json');
+      // no-cache force la revalidation auprès du serveur : sans cela un navigateur
+      // peut resservir un menu.json périmé (prix, numéros) longtemps après une mise à jour
+      const res = await fetch('data/menu.json', { cache: 'no-cache' });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       DATA = await res.json();
     } catch (err) {

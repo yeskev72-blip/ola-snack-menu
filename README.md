@@ -52,6 +52,9 @@ tools/verify.py       compare data/menu.json au PDF
 ## Modifier le menu
 
 Tout se trouve dans `data/menu.json` ; la page se met à jour toute seule.
+Ce fichier étant chargé à l'exécution, il est demandé avec revalidation
+obligatoire (`cache: 'no-cache'`) : les visiteurs voient la nouvelle version au
+rechargement suivant, sans rester bloqués sur un menu en cache.
 Un article a soit un prix unique, soit des prix par taille :
 
 ```jsonc
