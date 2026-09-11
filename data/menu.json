@@ -1,0 +1,153 @@
+{
+  "restaurant": {
+    "name": "Ola'Snack",
+    "tagline": "Vente à emporter — Livraison à domicile",
+    "address": "Haie-Vive, Cotonou, Bénin",
+    "logo": "assets/img/logo.jpg",
+    "phones": [
+      { "label": "MTN", "display": "01 50 53 53 53", "tel": "+2290150535353" },
+      { "label": "MOOV", "display": "01 45 63 63 63", "tel": "+2290145636363", "whatsapp": "2290145636363" },
+      { "label": "Celtiis", "display": "01 44 16 16 16", "tel": "+2290144161616" }
+    ]
+  },
+  "currency": { "code": "XOF", "suffix": "F" },
+  "sizes": { "R": "Regular", "M": "Mega (frites + boisson)" },
+  "source": {
+    "document": "OlaSnack_Menu.pdf",
+    "note": "Données saisies depuis le menu papier (dépliant 3 volets). Les prix marqués « à confirmer » diffèrent d'une photo à l'autre du menu d'origine."
+  },
+  "categories": [
+    {
+      "id": "entrees",
+      "name": "Entrées",
+      "items": [
+        { "id": "assiette-labneh", "name": "Assiette labneh", "price": 2000, "image": "assets/img/assiette-labneh.jpg" },
+        { "id": "assiette-mixte", "name": "Assiette mixte", "description": "2 pièces de kebbeh, 2 pièces de fatayer épinards, 2 pièces sambousk viande", "price": 3000, "image": "assets/img/assiette-mixte.jpg" },
+        { "id": "assiette-homos", "name": "Assiette homos", "price": 3000, "image": "assets/img/assiette-homos.jpg" },
+        { "id": "salade-fattouche", "name": "Salade fattouche", "description": "laitue, concombre, oignon vert, tomate, menthe, persil, carotte, choux violet, pain grillé", "price": 4000, "image": "assets/img/salade-fattouche.jpg" },
+        { "id": "salade-cesar", "name": "Salade César", "description": "laitue, parmesan, poulet, croûton, maïs", "price": 5000, "image": "assets/img/salade-cesar.jpg" },
+        { "id": "taboule", "name": "Taboulé", "description": "persil, menthe, blé concassé, tomate, grenadine, huile d'olive, jus de citron", "price": 5000, "image": null }
+      ]
+    },
+    {
+      "id": "menu-enfants",
+      "name": "Menu enfants",
+      "items": [
+        { "id": "nuggets", "name": "Nuggets", "description": "frites + jus", "price": 4000, "image": "assets/img/nuggets.jpg" },
+        { "id": "crispy-chicken-popcorn", "name": "Crispy chicken popcorn", "description": "10 pièces — frites + jus", "price": 4000, "image": "assets/img/crispy-chicken-popcorn.jpg" }
+      ]
+    },
+    {
+      "id": "sandwichs",
+      "name": "Sandwichs",
+      "note": "R = regular, M = mega (frites + boisson)",
+      "items": [
+        { "id": "sandwich-frites-libanaise", "name": "Sandwich frites à la libanaise", "description": "coleslaw, ketchup, ail, cornichon", "price": 2000, "image": "assets/img/sandwich-frites-libanaise.jpg" },
+        { "id": "chawarma-kafta", "name": "Chawarma kafta", "description": "viande hachée, frite, légume mixte, oignon, sauce", "prices": { "R": 2000, "M": 3500 }, "image": "assets/img/chawarma-kafta.jpg" },
+        { "id": "hot-dog", "name": "Hot dog", "description": "saucisse de volaille, mayonnaise, moutarde, ketchup, oignon caramélisé", "prices": { "R": 2000, "M": 3500 }, "image": "assets/img/hot-dog.jpg" },
+        { "id": "chawarma-viande", "name": "Chawarma viande", "description": "filet de bœuf, laitue, persil, oignon, tomate, cornichon, tarator", "prices": { "R": 2500, "M": 4000 }, "image": "assets/img/chawarma-viande.jpg" },
+        { "id": "chawarma-poulet", "name": "Chawarma poulet", "description": "poulet mariné, laitue, cornichon, ail", "prices": { "R": 2500, "M": 4000 }, "image": "assets/img/chawarma-poulet.jpg" },
+        { "id": "taouk", "name": "Taouk", "description": "brochette de poulet, ail, cornichon, salade choux", "prices": { "R": 2500, "M": 4000 }, "image": "assets/img/taouk.jpg" },
+        { "id": "kafta-braise", "name": "Kafta braisé", "description": "homos, cornichon, sauce maison", "prices": { "R": 2500, "M": 4000 }, "image": "assets/img/kafta-braise.jpg" },
+        { "id": "brochette-mouton", "name": "Brochette viande de mouton", "description": "homos, salade", "prices": { "R": 2500, "M": 4000 }, "image": "assets/img/brochette-mouton.jpg" },
+        { "id": "falafel", "name": "Falafel", "description": "boulettes de pois chiches, tomate, cornichon, salade mixte, tarator", "prices": { "R": 2500, "M": 4000 }, "image": "assets/img/falafel.jpg" },
+        { "id": "kebbeh-frit", "name": "Kebbeh frit", "description": "homos, tomate, cornichon", "prices": { "R": 2500, "M": 4000 }, "image": "assets/img/kebbeh-frit.jpg" },
+        { "id": "special-chef", "name": "Spécial chef", "description": "émincé de poulet braisé, ail, sauce Ola'Snack, cornichon", "prices": { "R": 3000, "M": 4500 }, "image": "assets/img/special-chef.jpg" },
+        { "id": "foie-de-poulet", "name": "Foie de poulet", "description": "cornichon, mayonnaise, tomate, menthe", "prices": { "R": 3000, "M": 4500 }, "image": "assets/img/foie-de-poulet.jpg" },
+        { "id": "fajita", "name": "Fajita", "description": "blanc de poulet, oignon, poivron, maïs, guacamole, champignon, laitue, fromage mozzarella", "prices": { "R": 3500, "M": 5000 }, "image": "assets/img/fajita.jpg" },
+        { "id": "francisco", "name": "Francisco", "description": "blanc de poulet, mayonnaise, fromage mozzarella, maïs, laitue, cornichon, soja sauce", "prices": { "R": 3500, "M": 5000 }, "image": "assets/img/francisco.jpg" },
+        { "id": "sojok", "name": "Sojok", "description": "saucisses libanaises aux épices, tomate, cornichon, mayonnaise", "prices": { "R": 3500, "M": 5000 }, "image": null },
+        { "id": "makanik", "name": "Makanik", "description": "saucisses libanaises, cornichon, mayonnaise", "prices": { "R": 3500, "M": 5000 }, "image": "assets/img/makanik.jpg" },
+        { "id": "rosto", "name": "Rosto", "description": "tranche de bœuf, tomate, cornichon, menthe, mayonnaise, moutarde", "prices": { "R": 3500, "M": 5000 }, "image": "assets/img/rosto.jpg" },
+        { "id": "double-cheese-burger", "name": "Double Cheese Burger", "description": "tomate, laitue, oignon, fromage, cornichon, sauce cocktail", "prices": { "R": 6000, "M": 7500 }, "image": null },
+        { "id": "le-titan", "name": "Le Titan", "description": "laitue, tomate, cornichon, poulet croustillant, viande burger, sauce cheddar", "prices": { "R": 7000, "M": 8500 }, "image": null },
+        { "id": "portion-frites-sandwichs", "name": "Portion frites", "price": 1000, "image": null }
+      ]
+    },
+    {
+      "id": "burgers",
+      "name": "Burgers",
+      "note": "R = regular, M = mega (frites + boisson)",
+      "items": [
+        { "id": "hamburger", "name": "Hamburger", "description": "tomate, laitue, oignon, sauce cocktail", "prices": { "R": 2500, "M": 4000 }, "image": "assets/img/hamburger.jpg" },
+        { "id": "chicken-burger", "name": "Chicken burger", "description": "laitue, cornichon, tomate, sauce cocktail", "prices": { "R": 2500, "M": 4000 }, "image": "assets/img/chicken-burger.jpg" },
+        { "id": "cheese-burger", "name": "Cheese burger", "description": "tomate, laitue, oignon, sauce cocktail, fromage et cornichon", "prices": { "R": 3000, "M": 4500 }, "image": "assets/img/cheese-burger.jpg" },
+        { "id": "crazy-burger", "name": "Crazy burger", "description": "double viande, oignon caramélisé, double fromage, sauce du chef", "prices": { "R": 5000, "M": 6000 }, "image": "assets/img/crazy-burger.jpg" },
+        { "id": "crispy-burger", "name": "Crispy burger", "description": "poulet croustillant, laitue, tomate, cornichon, sauce fromage", "prices": { "R": 5000, "M": 6000 }, "image": "assets/img/crispy-burger.jpg" },
+        { "id": "zinger-burger", "name": "Zinger burger", "description": "poulet croustillant pimenté, laitue, tomate, cornichon, sauce fromage", "prices": { "R": 5000, "M": 6000 }, "image": "assets/img/zinger-burger.jpg" },
+        { "id": "portion-frites-burgers", "name": "Portion frites", "price": 1000, "image": null }
+      ]
+    },
+    {
+      "id": "manakish-saj",
+      "name": "Manakish saj",
+      "image": "assets/img/cat-manakish-saj.jpg",
+      "note": "Rubrique reconstituée à partir de deux photos partiellement différentes du menu — à confirmer auprès du restaurant.",
+      "items": [
+        { "id": "manakish-zaatar", "name": "Zaatar", "price": 1500, "image": null },
+        { "id": "manakish-fromage", "name": "Fromage", "price": 2000, "image": null },
+        { "id": "manakish-cocktail-zaatar-fromage", "name": "Cocktail zaatar-fromage", "price": 2000, "image": null },
+        { "id": "manakish-cocktail-viande-fromage", "name": "Cocktail viande-fromage", "price": 2500, "image": null },
+        { "id": "manakish-vegetarien", "name": "Végétarien", "description": "tomate-oignon", "price": 2000, "image": null },
+        { "id": "manakish-labneh", "name": "Labneh", "price": 2000, "image": null },
+        { "id": "manakish-pizza-olasnack", "name": "Pizza Ola'Snack", "description": "sauce pizza, maïs, champignon, poivron, oignon, olive", "price": 3500, "image": null }
+      ]
+    },
+    {
+      "id": "pizza-saj",
+      "name": "Pizza saj",
+      "image": "assets/img/cat-pizza-saj.jpg",
+      "items": [
+        { "id": "pizza-marguerita", "name": "Marguérita", "description": "fromage, basilic, sauce pizza", "price": 4000, "image": null },
+        { "id": "pizza-vegetarien", "name": "Végétarien", "description": "champignons, maïs, poivron, oignon, tomate, fromage, sauce pizza", "price": 4500, "image": null },
+        { "id": "pizza-sojok", "name": "Sojok", "description": "sojok, fromage, oignon, sauce", "price": 5500, "image": null },
+        { "id": "pizza-farita", "name": "Farita", "description": "poulet, champignon, poivron, maïs, sauce avocat", "price": 5500, "image": null },
+        { "id": "pizza-poulet", "name": "Poulet", "description": "poulet émincé, fromage, ail, sauce", "price": 5500, "image": null },
+        { "id": "pizza-viandes", "name": "Viandes", "description": "viandes, oignon, persil, fromage, sauce", "price": 5500, "image": null },
+        { "id": "pizza-olasnack", "name": "Ola'Snack", "description": "hot-dog, poivron, maïs, oignon, tomate, champignon, origan, sauce pizza", "price": 5500, "image": null }
+      ]
+    },
+    {
+      "id": "grillades",
+      "name": "Grillades",
+      "items": [
+        { "id": "demi-poulet-braise", "name": "Demi poulet braisé désossé", "description": "frites, ail, cornichon, sauce du chef", "price": 5000, "priceAlt": 6000, "unconfirmed": true, "image": null },
+        { "id": "poulet-braise", "name": "Poulet braisé désossé", "description": "frites, ail, cornichon, sauce du chef", "price": 9000, "priceAlt": 10000, "unconfirmed": true, "image": null }
+      ]
+    },
+    {
+      "id": "supplements",
+      "name": "Suppléments",
+      "items": [
+        { "id": "creme-ail", "name": "Crème ail / Sauce du chef", "price": 500, "image": null },
+        { "id": "salade-coleslaw", "name": "Salade coleslaw", "price": 1000, "image": null },
+        { "id": "sauce-cheddar", "name": "Sauce cheddar", "price": 1000, "image": null }
+      ]
+    },
+    {
+      "id": "kneffe",
+      "name": "Kneffe",
+      "items": [
+        { "id": "portion-kneffe", "name": "Portion de kneffe", "price": 2500, "image": null },
+        { "id": "galette-kneffe", "name": "Galette kneffe", "price": 3000, "image": null },
+        { "id": "kg-kneffe", "name": "1 kg kneffe", "price": 16000, "image": null }
+      ]
+    },
+    {
+      "id": "sodas",
+      "name": "Sodas",
+      "items": [
+        { "id": "eau-05", "name": "Eau minérale 0.5 L", "price": 500, "image": null },
+        { "id": "eau-15", "name": "Eau minérale 1.5 L", "price": 1000, "image": null },
+        { "id": "coca-fanta-sprite", "name": "Coca, Fanta, Sprite", "price": 1000, "image": null },
+        { "id": "jus-naturel", "name": "Jus naturel", "price": 1000, "image": null },
+        { "id": "yaourt-ayran", "name": "Yaourt ayran", "price": 1000, "image": null },
+        { "id": "eau-gazeuse", "name": "Eau gazeuse", "price": 1500, "image": null },
+        { "id": "coca-zero", "name": "Coca zéro", "price": 1500, "image": null },
+        { "id": "energy-drink", "name": "Energy drink", "price": 1500, "image": null },
+        { "id": "espresso", "name": "Espresso", "price": 1500, "image": null },
+        { "id": "limonade", "name": "Limonade", "price": 1500, "image": null }
+      ]
+    }
+  ]
+}

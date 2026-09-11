@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ola'Snack — Menu</title>
+<meta name="description" content="Menu Ola'Snack, Haie-Vive (Cotonou) : chawarma, burgers, pizza saj, manakish, grillades. Vente à emporter et livraison à domicile.">
+<meta name="theme-color" content="#e01b22">
+<meta property="og:title" content="Ola'Snack — Menu">
+<meta property="og:description" content="Chawarma, burgers, pizza saj, manakish, grillades. À emporter ou livré à domicile.">
+<meta property="og:image" content="assets/img/logo.jpg">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/img/logo.jpg">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+<a class="skip" href="#menu">Aller au menu</a>
+
+<header class="hero">
+  <div class="hero-inner">
+    <img class="logo" src="assets/img/logo.jpg" alt="Logo Ola'Snack" width="120" height="117">
+    <div>
+      <h1>Ola&rsquo;Snack</h1>
+      <p class="tagline" data-tagline></p>
+      <p class="addr" data-address></p>
+      <div class="phones" data-phones></div>
+    </div>
+  </div>
+</header>
+
+<nav class="catnav" aria-label="Catégories">
+  <div class="catnav-scroll" data-catnav></div>
+</nav>
+
+<div class="toolbar">
+  <div class="search">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input type="search" id="q" placeholder="Rechercher un plat, un ingrédient…" autocomplete="off"
+           aria-label="Rechercher dans le menu">
+    <button type="button" class="clear" data-clear hidden aria-label="Effacer la recherche">&times;</button>
+  </div>
+  <p class="count" data-count aria-live="polite"></p>
+</div>
+
+<main id="menu" data-menu>
+  <p class="loading">Chargement du menu…</p>
+</main>
+
+<footer class="foot">
+  <p data-foot-note></p>
+  <p class="src" data-foot-src></p>
+</footer>
+
+<button class="cart-fab" data-cart-open hidden>
+  <span>Ma commande</span>
+  <span class="badge" data-cart-count>0</span>
+  <span class="fab-total" data-cart-fab-total></span>
+</button>
+
+<div class="sheet-backdrop" data-cart-backdrop hidden></div>
+<aside class="sheet" data-cart aria-label="Ma commande" hidden>
+  <div class="sheet-head">
+    <h2>Ma commande</h2>
+    <button type="button" data-cart-close aria-label="Fermer">&times;</button>
+  </div>
+  <ul class="cart-lines" data-cart-lines></ul>
+  <div class="sheet-foot">
+    <p class="cart-total"><span>Total</span> <strong data-cart-total></strong></p>
+    <p class="cart-hint">Le récapitulatif s&rsquo;ouvre dans WhatsApp&nbsp;; la commande est confirmée par le restaurant.</p>
+    <a class="btn-wa" data-cart-send href="#" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
+    <button type="button" class="btn-clear" data-cart-clear>Vider la commande</button>
+  </div>
+</aside>
+
+<script src="assets/js/app.js" defer></script>
+</body>
+</html>
