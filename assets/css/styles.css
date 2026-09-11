@@ -63,7 +63,9 @@ h1, h2, h3 { line-height: 1.2; margin: 0; }
   border: 1px solid rgba(255,255,255,.28); backdrop-filter: blur(4px);
 }
 .phones a:hover { background: rgba(255,255,255,.28); }
-.phones a.wa { background: var(--wa); border-color: transparent; color: #08331a; }
+.phones a.wa { padding-left: 10px; }
+.wa-ico { display: flex; flex: none; }
+.wa-ico svg { width: 15px; height: 15px; fill: #fff; }
 .phones .op { opacity: .75; font-weight: 500; }
 
 /* ---------- category nav ---------- */

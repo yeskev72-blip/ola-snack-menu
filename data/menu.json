@@ -5,16 +5,16 @@
     "address": "Haie-Vive, Cotonou, Bénin",
     "logo": "assets/img/logo.jpg",
     "phones": [
-      { "label": "MTN", "display": "01 50 53 53 53", "tel": "+2290150535353" },
-      { "label": "MOOV", "display": "01 45 63 63 63", "tel": "+2290145636363" },
-      { "label": "Celtiis", "display": "01 44 16 16 16", "tel": "+2290144161616" }
+      { "label": "MTN", "display": "01 50 53 53 53", "tel": "+2290150535353", "whatsapp": "2290150535353" },
+      { "label": "MOOV", "display": "01 45 63 63 63", "tel": "+2290145636363", "whatsapp": "2290145636363" },
+      { "label": "Celtiis", "display": "01 44 16 16 16", "tel": "+2290144161616", "whatsapp": "2290144161616" }
     ]
   },
   "currency": { "code": "XOF", "suffix": "F" },
   "ordering": {
     "tel": "+2290150535353",
-    "whatsapp": null,
-    "note": "Commandes par appel ou SMS. Le restaurant confirme la disponibilité et le délai."
+    "whatsapp": "2290150535353",
+    "note": "Commandes sur WhatsApp, par appel ou par SMS. Le restaurant confirme la disponibilité et le délai."
   },
   "sizes": { "R": "Regular", "M": "Mega (frites + boisson)" },
   "source": {

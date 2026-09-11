@@ -16,8 +16,10 @@ natifs, alimentés par un seul fichier de données.
 - **Navigation par rubrique** collante, avec surlignage de la rubrique visible.
 - **Prix R / M** (regular / mega) affichés séparément pour les sandwichs et
   les burgers, chacun commandable indépendamment.
-- **Panier** qui compose un récapitulatif de commande, puis permet d'**appeler**,
-  de l'**envoyer par SMS** pré-rempli, ou de le **copier**.
+- **Panier** qui compose un récapitulatif de commande, puis permet de l'envoyer
+  sur **WhatsApp**, d'**appeler**, de l'**envoyer par SMS** pré-rempli, ou de
+  le **copier**.
+- Les trois numéros de l'en-tête ouvrent une discussion **WhatsApp**.
 - Responsive (testé à 390 px), thème clair/sombre automatique, et une feuille
   d'impression qui masque les éléments interactifs.
 
@@ -69,17 +71,16 @@ L'objet `ordering` décide de ce qu'affiche le panier :
 
 ```jsonc
 "ordering": {
-  "tel": "+2290150535353",   // numéro appelé et destinataire du SMS
-  "whatsapp": null,          // ex. "2290145636363" pour afficher le bouton WhatsApp
-  "note": "Commandes par appel ou SMS…"
+  "tel": "+2290150535353",        // numéro appelé et destinataire du SMS
+  "whatsapp": "2290150535353",    // null pour masquer le bouton WhatsApp
+  "note": "Commandes sur WhatsApp, par appel ou par SMS…"
 }
 ```
 
-Le restaurant **n'a pas de WhatsApp** : le bouton correspondant reste donc
-masqué. Le PDF source annote pourtant la ligne MOOV d'un « (WhatsApp) », mais
-ce document est lui-même « compilé à partir de photos du menu » et cette
-mention n'est pas fiable. Si un compte est ouvert un jour, renseigner
-`ordering.whatsapp` suffit à faire réapparaître le bouton — rien à coder.
+Chaque numéro de `restaurant.phones` porte de même un champ `whatsapp`
+optionnel : présent, la pastille ouvre la discussion WhatsApp ; absent, elle
+compose l'appel. Retirer le champ d'une ligne suffit donc à la repasser en
+simple appel, sans toucher au code.
 
 ## Fidélité au menu d'origine
 
@@ -103,8 +104,9 @@ pas de la saisie :
   partiellement différentes du menu.
 - Le PDF ne contient **aucun horaire d'ouverture ni zone de livraison** ;
   ils ne figurent donc pas sur le site.
-- Le « (WhatsApp) » que le PDF accole au numéro MOOV est **erroné** (voir
-  « Canal de commande » ci-dessus).
+- Le PDF n'accole « (WhatsApp) » qu'au seul numéro MOOV ; les trois lignes
+  sont en réalité joignables sur WhatsApp (information du restaurant, non
+  déductible du document).
 
 Quatre photos du PDF (Double Cheese Burger, Le Titan, et les bandeaux
 Grillades et Kneffe) mesurent moins de 40 px de côté et ont été écartées :
