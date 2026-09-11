@@ -16,8 +16,8 @@ natifs, alimentés par un seul fichier de données.
 - **Navigation par rubrique** collante, avec surlignage de la rubrique visible.
 - **Prix R / M** (regular / mega) affichés séparément pour les sandwichs et
   les burgers, chacun commandable indépendamment.
-- **Panier** qui compose un récapitulatif et l'ouvre dans **WhatsApp** sur le
-  numéro MOOV du restaurant.
+- **Panier** qui compose un récapitulatif de commande, puis permet d'**appeler**,
+  de l'**envoyer par SMS** pré-rempli, ou de le **copier**.
 - Responsive (testé à 390 px), thème clair/sombre automatique, et une feuille
   d'impression qui masque les éléments interactifs.
 
@@ -61,7 +61,25 @@ Un article a soit un prix unique, soit des prix par taille :
 
 Champs annexes : `priceAlt` (second prix affiché), `unconfirmed: true`
 (ajoute le badge « à confirmer »), `note` et `image` au niveau d'une rubrique.
-Les coordonnées et le numéro WhatsApp sont dans l'objet `restaurant`.
+Les coordonnées sont dans l'objet `restaurant`.
+
+### Canal de commande
+
+L'objet `ordering` décide de ce qu'affiche le panier :
+
+```jsonc
+"ordering": {
+  "tel": "+2290150535353",   // numéro appelé et destinataire du SMS
+  "whatsapp": null,          // ex. "2290145636363" pour afficher le bouton WhatsApp
+  "note": "Commandes par appel ou SMS…"
+}
+```
+
+Le restaurant **n'a pas de WhatsApp** : le bouton correspondant reste donc
+masqué. Le PDF source annote pourtant la ligne MOOV d'un « (WhatsApp) », mais
+ce document est lui-même « compilé à partir de photos du menu » et cette
+mention n'est pas fiable. Si un compte est ouvert un jour, renseigner
+`ordering.whatsapp` suffit à faire réapparaître le bouton — rien à coder.
 
 ## Fidélité au menu d'origine
 
@@ -85,6 +103,8 @@ pas de la saisie :
   partiellement différentes du menu.
 - Le PDF ne contient **aucun horaire d'ouverture ni zone de livraison** ;
   ils ne figurent donc pas sur le site.
+- Le « (WhatsApp) » que le PDF accole au numéro MOOV est **erroné** (voir
+  « Canal de commande » ci-dessus).
 
 Quatre photos du PDF (Double Cheese Burger, Le Titan, et les bandeaux
 Grillades et Kneffe) mesurent moins de 40 px de côté et ont été écartées :

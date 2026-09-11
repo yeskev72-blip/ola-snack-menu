@@ -66,8 +66,11 @@
   <ul class="cart-lines" data-cart-lines></ul>
   <div class="sheet-foot">
     <p class="cart-total"><span>Total</span> <strong data-cart-total></strong></p>
-    <p class="cart-hint">Le récapitulatif s&rsquo;ouvre dans WhatsApp&nbsp;; la commande est confirmée par le restaurant.</p>
-    <a class="btn-wa" data-cart-send href="#" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
+    <p class="cart-hint">La commande est confirmée par le restaurant.</p>
+    <a class="btn-order" data-cart-call href="#">Appeler pour commander</a>
+    <a class="btn-order alt" data-cart-sms href="#">Envoyer par SMS</a>
+    <a class="btn-order wa" data-cart-wa href="#" target="_blank" rel="noopener" hidden>Envoyer sur WhatsApp</a>
+    <button type="button" class="btn-copy" data-cart-copy>Copier la commande</button>
     <button type="button" class="btn-clear" data-cart-clear>Vider la commande</button>
   </div>
 </aside>

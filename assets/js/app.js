@@ -26,15 +26,9 @@
     const box = $('[data-phones]');
     box.textContent = '';
     for (const p of r.phones || []) {
-      const wa = !!p.whatsapp;
-      box.append(el('a', {
-        href: wa ? `https://wa.me/${p.whatsapp}` : `tel:${p.tel}`,
-        className: wa ? 'wa' : '',
-        target: wa ? '_blank' : '',
-        rel: wa ? 'noopener' : '',
-      }, [
+      box.append(el('a', { href: `tel:${p.tel}` }, [
         el('span', { textContent: p.display }),
-        el('span', { className: 'op', textContent: wa ? `${p.label} · WhatsApp` : p.label }),
+        el('span', { className: 'op', textContent: p.label }),
       ]));
     }
   }
@@ -236,20 +230,55 @@
 
     $('[data-cart-total]').textContent = money(total);
 
-    const send = $('[data-cart-send]');
-    send.href = waLink();
-    send.setAttribute('aria-disabled', n === 0 ? 'true' : 'false');
+    const links = orderLinks();
+    const wa = $('[data-cart-wa]');
+    wa.hidden = !links.whatsapp;
+    if (links.whatsapp) wa.href = links.whatsapp;
+    $('[data-cart-call]').href = links.call;
+    $('[data-cart-sms]').href = links.sms;
+    for (const sel of ['[data-cart-call]', '[data-cart-sms]', '[data-cart-wa]']) {
+      $(sel).setAttribute('aria-disabled', n === 0 ? 'true' : 'false');
+    }
   }
 
-  function waLink() {
-    const wa = (DATA?.restaurant.phones || []).find((p) => p.whatsapp);
+  function orderSummary() {
     const lines = [`Bonjour ${DATA?.restaurant.name || ''}, je souhaite commander :`, ''];
     for (const l of cart.values()) {
       lines.push(`• ${l.qty} × ${l.name}${l.size ? ` (${l.size})` : ''} — ${money(l.price * l.qty)}`);
     }
     lines.push('', `Total : ${money(cartTotal())}`);
-    const text = encodeURIComponent(lines.join('\n'));
-    return wa ? `https://wa.me/${wa.whatsapp}?text=${text}` : `https://wa.me/?text=${text}`;
+    return lines.join('\n');
+  }
+
+  /* Canal de commande : piloté par « ordering » dans menu.json.
+     Si un jour le restaurant ouvre un compte WhatsApp, il suffit d'y renseigner
+     « whatsapp » pour que le bouton correspondant réapparaisse. */
+  function orderLinks() {
+    const o = DATA?.ordering || {};
+    const tel = o.tel || DATA?.restaurant.phones?.[0]?.tel || '';
+    const text = orderSummary();
+    return {
+      call: `tel:${tel}`,
+      sms: `sms:${tel}?body=${encodeURIComponent(text)}`,
+      whatsapp: o.whatsapp ? `https://wa.me/${o.whatsapp}?text=${encodeURIComponent(text)}` : null,
+    };
+  }
+
+  async function copySummary(btn) {
+    const text = orderSummary();
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // clipboard indisponible (http, permission refusée) : sélection manuelle
+      const ta = el('textarea', { value: text, style: 'position:fixed;opacity:0' });
+      document.body.append(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch { /* rien de plus à tenter */ }
+      ta.remove();
+    }
+    const old = btn.textContent;
+    btn.textContent = 'Commande copiée';
+    setTimeout(() => { btn.textContent = old; }, 1800);
   }
 
   function openCart() {
@@ -303,6 +332,7 @@
     drawCart();
 
     document.title = `${DATA.restaurant.name} — Menu`;
+    if (DATA.ordering?.note) $('.cart-hint').textContent = DATA.ordering.note;
     $('[data-foot-note]').textContent = DATA.source?.note || '';
     $('[data-foot-src]').textContent = DATA.source?.document
       ? `Source : ${DATA.source.document}`
@@ -324,6 +354,7 @@
     $('[data-cart-close]').addEventListener('click', closeCart);
     $('[data-cart-backdrop]').addEventListener('click', closeCart);
     $('[data-cart-clear]').addEventListener('click', () => { cart.clear(); drawCart(); });
+    $('[data-cart-copy]').addEventListener('click', (e) => copySummary(e.currentTarget));
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeCart();
     });
