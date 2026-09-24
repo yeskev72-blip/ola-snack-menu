@@ -1,9 +1,21 @@
-# Mise en route (ce que tu dois faire toi-même)
+# Mise en route et build de l'APK
 
-Ces étapes demandent tes identifiants : elles ne sont pas automatisées. Compte environ 20 minutes.
-Les libellés du tableau de bord Supabase peuvent légèrement varier selon les versions.
+Ce guide couvre tout ce qui demande **tes** identifiants : rien de cela n'est automatisé.
+Compte environ 1 heure la première fois (dont 15 à 20 minutes d'attente pour le build).
+Les libellés des tableaux de bord Supabase et Expo peuvent légèrement varier selon les versions.
 
-Prérequis sur ton ordinateur : Node.js 22 ou plus récent, et Git.
+## Ce que tu dois faire toi-même (liste de contrôle)
+
+- [ ] Créer un projet **Supabase** (région Europe) et noter son URL, sa clé `anon` et le mot de passe de la base — étape 1
+- [ ] Appliquer les migrations et charger la table des plats — étape 2
+- [ ] Régler l'authentification (invités, confirmation par code, modèles d'e-mail) — étape 3
+- [ ] Créer une clé **Gemini** sur Google AI Studio, l'envoyer dans les secrets Supabase, déployer les 2 fonctions — étape 4
+- [ ] Remplir `.env` et tester avec Expo Go (facultatif mais conseillé) — étape 5
+- [ ] Créer un compte **Expo**, relier le projet, déclarer les 2 variables publiques, lancer le build — étape 6
+- [ ] Installer l'APK et dérouler la recette — étape 7
+- [ ] Avant d'ouvrir l'app à d'autres personnes : SMTP, CAPTCHA, vérification des valeurs nutritionnelles — étape 9
+
+Prérequis sur ton ordinateur : **Node.js 22** ou plus récent, et **Git**.
 
 ```bash
 git clone <url-du-dépôt> calebasse && cd calebasse
@@ -16,114 +28,134 @@ npm install
    Région : **Europe (Paris `eu-west-3` ou Francfort `eu-central-1`)**, la plus proche de Cotonou.
 2. Note le **mot de passe de la base** choisi à la création.
 3. Dans *Project Settings > API*, relève :
-   - l'**URL du projet** (`https://xxxx.supabase.co`) ;
+   - l'**URL du projet** (`https://<ref>.supabase.co`) ;
    - la **clé `anon` / publishable** (publique, destinée à l'app).
-   - Ne copie **jamais** la clé `service_role` / secret dans l'app ni dans ce dépôt.
+   - Ne copie **jamais** la clé `service_role` / secret dans l'app, dans `.env` ni dans ce dépôt.
 
 ## 2. Créer les tables et charger les plats
 
 ```bash
 npx supabase@latest login
-npx supabase@latest link --project-ref <ref-du-projet>   # le ref est dans l'URL : https://<ref>.supabase.co
+npx supabase@latest link --project-ref <ref>        # le ref est dans l'URL : https://<ref>.supabase.co
 npx supabase@latest db push --include-seed
 ```
 
-`db push` applique `supabase/migrations/` (tables, RLS, quota). `--include-seed` charge `supabase/seed.sql`
-(69 plats, valeurs approximatives : voir `docs/FOODS_TODO.md`).
+`db push` applique `supabase/migrations/` (tables, RLS, quota, suivi des scans, bucket photos).
+`--include-seed` charge `supabase/seed.sql` : 69 plats aux valeurs **approximatives** (voir `docs/FOODS_TODO.md`).
+Plus tard, après une modification de `supabase/seed/foods.json` : `npm run db:seed` puis la même commande.
 
 Vérification facultative : dans *SQL Editor*, colle le contenu de `supabase/tests/rls_test.sql` et exécute-le.
-La dernière ligne doit afficher « Tous les tests RLS sont passés » (rien n'est conservé, tout est annulé à la fin).
+La dernière ligne doit afficher « Tous les tests RLS sont passés » (tout est annulé à la fin, rien n'est conservé).
 
-## 3. Réglages d'authentification (tableau de bord)
+## 3. Réglages d'authentification (tableau de bord Supabase)
 
 Dans *Authentication* :
 
 1. **Sign In / Providers**
    - Active **Allow anonymous sign-ins** (mode invité).
-   - Fournisseur **Email** : active-le et laisse **Confirm email** activé.
+   - Fournisseur **Email** : actif, avec **Confirm email** activé.
    - Longueur minimale du mot de passe : **8**.
 2. **Emails > Templates** : l'app demande un **code à 6 chiffres**, pas un lien. Remplace le contenu de :
-   - **Confirm signup** par le fichier `supabase/templates/confirmation.html` ;
-   - **Change email address** par le fichier `supabase/templates/email_change.html`.
-   (Les deux contiennent `{{ .Token }}`, c'est ce qui affiche le code.)
-3. **Emails > SMTP Settings** : le serveur d'e-mails par défaut de Supabase n'envoie qu'aux membres de ton
-   équipe Supabase, et seulement quelques e-mails par heure. Pour tes premiers tests, utilise ta propre adresse.
-   Avant d'ouvrir l'app à d'autres personnes, configure un SMTP (Brevo, Resend, Mailjet… ont une offre gratuite).
-4. Recommandé avant la diffusion : **Attack Protection > CAPTCHA** pour limiter la création d'invités en masse
-   (à brancher dans l'app plus tard).
+   - **Confirm signup** par `supabase/templates/confirmation.html` ;
+   - **Change email address** par `supabase/templates/email_change.html`.
+   (Les deux contiennent `{{ .Token }}` : c'est ce qui affiche le code.)
+3. **Emails > SMTP Settings** : le serveur d'e-mails par défaut n'envoie qu'aux membres de ton équipe Supabase,
+   et seulement quelques e-mails par heure. Suffisant pour tes tests avec ta propre adresse ; voir l'étape 9 avant diffusion.
 
-## 4. Relier l'app à Supabase
+## 4. Analyse des photos (Gemini) et fonctions serveur
 
-Copie `.env.example` en `.env` et remplis-le :
+La clé Gemini reste **uniquement** dans les secrets Supabase : elle n'est jamais dans l'app ni dans l'APK.
 
+1. Crée une clé API sur [Google AI Studio](https://aistudio.google.com/apikey)
+   (active la facturation du projet Google Cloud associé si tu dépasses le niveau gratuit).
+2. Copie `supabase/functions/.env.example` en `supabase/functions/.env` et mets ta clé dans `GEMINI_API_KEY`.
+   Ce fichier est ignoré par Git : ne le partage pas.
+3. Envoie les secrets et déploie les deux fonctions :
+   ```bash
+   npx supabase@latest secrets set --env-file supabase/functions/.env
+   npx supabase@latest functions deploy analyze-meal
+   npx supabase@latest functions deploy delete-account
+   ```
+4. Teste l'analyse avec une photo JPEG de plat :
+   ```bash
+   EXPO_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co EXPO_PUBLIC_SUPABASE_ANON_KEY=<clé anon> \
+     scripts/test-analyze-meal.sh photo.jpg "riz, sauce graine, poulet"
+   ```
+   (Si `.env` est déjà rempli — étape 5 — le script le lit tout seul.)
+   Sans `TEST_EMAIL` / `TEST_PASSWORD`, il crée un invité (1 scan par jour). Avec ton compte de test,
+   `REPEAT=4` envoie 4 scans : les 3 premiers répondent `HTTP 200`, le 4e `HTTP 429` (`quota_exceeded`).
+
+Pour changer de modèle plus tard, sans republier l'app : `npx supabase@latest secrets set GEMINI_MODEL=<identifiant>`.
+
+## 5. Relier l'app et tester avec Expo Go (conseillé)
+
+```bash
+cp .env.example .env     # puis remplis EXPO_PUBLIC_SUPABASE_URL et EXPO_PUBLIC_SUPABASE_ANON_KEY
+npx expo start           # ajoute --tunnel si le téléphone n'atteint pas l'ordinateur
 ```
-EXPO_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co
-EXPO_PUBLIC_SUPABASE_ANON_KEY=<clé anon / publishable>
-```
 
-## 5. Tester sur ton téléphone Android
+Installe **Expo Go** (compatible SDK 57) depuis le Play Store et scanne le QR code.
+C'est le moyen le plus rapide de voir tes modifications ; l'APK de l'étape 6 est ce que tu distribues.
 
-### Option A : Expo Go (le plus rapide, avec un ordinateur)
+## 6. Construire l'APK avec EAS
 
-1. Installe **Expo Go** depuis le Play Store (version compatible SDK 57).
-2. Sur l'ordinateur, sur le même Wi-Fi que le téléphone : `npx expo start`.
-3. Scanne le QR code avec Expo Go.
-   Si le Wi-Fi bloque la connexion : `npx expo start --tunnel`.
+EAS Build compile l'APK dans le cloud d'Expo : pas besoin d'Android Studio.
 
-### Option B : APK installable (sans ordinateur pour la suite)
-
-1. Crée un compte sur [expo.dev](https://expo.dev), puis :
+1. **Compte et projet Expo** (une seule fois)
    ```bash
    npx eas-cli@latest login
    npx eas-cli@latest init
    ```
-   `init` affiche un `projectId` : colle-le dans `EAS_PROJECT_ID` dans `app.config.ts`.
-2. Déclare les deux variables publiques pour le build :
+   `init` crée le projet `calebasse` sur expo.dev et affiche son **projectId**. Comme la configuration est
+   dynamique (`app.config.ts`), colle-le dans la constante `EAS_PROJECT_ID` de `app.config.ts`, puis commite.
+2. **Variables publiques du build** (une seule fois par environnement)
    ```bash
    npx eas-cli@latest env:set --environment preview --visibility plaintext --name EXPO_PUBLIC_SUPABASE_URL --value https://<ref>.supabase.co
    npx eas-cli@latest env:set --environment preview --visibility plaintext --name EXPO_PUBLIC_SUPABASE_ANON_KEY --value <clé anon>
    ```
-3. Lance le build : `npx eas-cli@latest build -p android --profile preview`.
-   À la première fois, accepte la génération d'une clé de signature Android (EAS la conserve pour toi).
-4. À la fin (10 à 20 minutes), la commande affiche un **lien et un QR code** : ouvre-le sur le téléphone,
-   télécharge l'APK et autorise l'installation depuis cette source.
-   Le lien reste aussi disponible sur expo.dev, dans *Projects > calebasse > Builds*.
-
-## 6. Activer l'analyse des photos (Gemini)
-
-La clé Gemini reste **uniquement** dans les secrets Supabase : elle n'est jamais dans l'app ni dans l'APK.
-
-1. Crée une clé API sur [Google AI Studio](https://aistudio.google.com/apikey).
-   Active la facturation du projet Google Cloud associé si tu dépasses le niveau gratuit.
-2. Applique la nouvelle migration (tables `scans` et `scan_calls`) :
+   Refais les deux commandes avec `--environment production` si tu utilises le profil `production`.
+   Seules ces deux valeurs publiques vont dans l'app ; **aucune autre clé**.
+3. **Vérification facultative avant le build** : `npm run check:secrets` doit afficher « Aucun secret dans le bundle ».
+4. **Lancer le build**
    ```bash
-   npx supabase@latest db push
+   npx eas-cli@latest build -p android --profile preview
    ```
-3. Copie `supabase/functions/.env.example` en `supabase/functions/.env`, mets ta clé dans `GEMINI_API_KEY`,
-   puis envoie les secrets et déploie la fonction :
-   ```bash
-   npx supabase@latest secrets set --env-file supabase/functions/.env
-   npx supabase@latest functions deploy analyze-meal
-   ```
-   Pour changer de modèle plus tard, sans republier l'app :
-   `npx supabase@latest secrets set GEMINI_MODEL=<nouvel-identifiant>` (effet immédiat).
-4. Teste avec une photo JPEG de plat :
-   ```bash
-   scripts/test-analyze-meal.sh photo.jpg "riz, sauce graine, poulet"
-   ```
-   Sans `TEST_EMAIL` / `TEST_PASSWORD`, le script crée un invité (1 scan par jour).
-   Avec ton compte de test :
-   ```bash
-   TEST_EMAIL=toi@exemple.com TEST_PASSWORD='…' REPEAT=4 scripts/test-analyze-meal.sh photo.jpg
-   ```
-   Les 3 premiers scans répondent `HTTP 200`, le 4e `HTTP 429` (`quota_exceeded`).
-   Pour tester une relance après question : reprends le `scan_id` renvoyé et lance
-   `SCAN_ID=<scan_id> QUESTION="<texte>" ANSWER="<option choisie>" scripts/test-analyze-meal.sh photo.jpg`.
+   La première fois, accepte la **génération d'une clé de signature Android** : EAS la conserve pour toi.
+   Garde ce même projet Expo pour toutes les versions : un APK signé avec une autre clé ne pourra pas
+   mettre à jour l'app déjà installée.
+5. **Récupérer l'APK** : à la fin (10 à 20 minutes), la commande affiche un **lien et un QR code**.
+   Le lien reste disponible sur [expo.dev](https://expo.dev), dans *Projects > calebasse > Builds* :
+   bouton **Download** pour le fichier `.apk`, ou **Share** pour envoyer le lien.
 
-### Suivre le coût réel
+Profils (`eas.json`) :
 
-Chaque appel Gemini est journalisé dans `scan_calls` (tokens d'entrée, de sortie, de réflexion, durée).
-Dans *SQL Editor* :
+| Profil | Usage | Numéro de version (`versionCode`) |
+|---|---|---|
+| `preview` | APK de test, distribution interne | géré par EAS |
+| `production` | APK à diffuser | incrémenté automatiquement à chaque build |
+
+Pour une nouvelle version visible des utilisateurs, change `version` dans `app.config.ts` (ex. `0.2.0`),
+puis `npx eas-cli@latest build -p android --profile production`. Le numéro s'affiche en bas de l'écran Profil.
+
+## 7. Installer l'APK et recette
+
+Sur le téléphone : ouvre le lien, télécharge l'APK, puis autorise l'installation depuis cette source
+(*Paramètres > Sécurité > Sources inconnues*, ou la demande affichée par Android).
+
+Recette (critères d'acceptation) :
+
+1. Entrer **en invité**, faire l'onboarding : le journal affiche la cible.
+2. **Scanner un plat** : le résultat est modifiable (quantités en louches, boules…, ajout, suppression).
+3. Les calories viennent de la table des plats ; un élément hors table est marqué « estimé ».
+4. **Mode avion** : « Saisir sans photo » → le repas s'enregistre et reste consultable ; au retour du réseau
+   il est synchronisé (le message « en attente » disparaît).
+5. Profil > **Créer mon compte** : code reçu par e-mail, journal conservé.
+6. Avec un compte gratuit, le **4e scan** du jour est refusé avec un message clair.
+7. Profil > **Supprimer mon compte** : retour à l'accueil ; dans Supabase, l'utilisateur et ses repas ont disparu.
+
+## 8. Suivre le coût réel de Gemini
+
+Chaque appel est journalisé dans `scan_calls` (tokens d'entrée, de sortie, de réflexion, durée). Dans *SQL Editor* :
 
 ```sql
 -- Tokens par utilisateur et par jour (heure du Bénin)
@@ -134,23 +166,19 @@ select round(avg(total_tokens)) as tokens_moyens, count(*) as appels
 from scan_calls where ok and created_at > now() - interval '7 days';
 ```
 
-Multiplie par le tarif en vigueur du modèle (entrée et sortie, réflexion comprise dans la sortie) pour obtenir le coût.
+Multiplie par le tarif en vigueur du modèle (la réflexion est facturée comme de la sortie).
 
-### Température
-
-Le cahier des charges fixe la température à 0,3 (`GEMINI_TEMPERATURE=0.3`). Google recommande pourtant de garder
-la valeur par défaut sur les modèles Gemini 3 (baisser la température peut dégrader les réponses ou les faire boucler).
-Si tu observes des réponses invalides ou tronquées dans `scan_calls.error`, passe à
+**Température** : le cahier des charges fixe 0,3 (`GEMINI_TEMPERATURE=0.3`), alors que Google recommande de garder
+la valeur par défaut sur les modèles Gemini 3 (la baisser peut dégrader les réponses ou les faire boucler).
+Si `scan_calls.error` montre des réponses invalides ou tronquées :
 `npx supabase@latest secrets set GEMINI_TEMPERATURE=default`.
 
-## 7. Suppression de compte
+## 9. Avant d'ouvrir l'app à d'autres personnes
 
-L'app permet de supprimer son compte et toutes ses données (Profil > « Supprimer mon compte et mes données »).
-Il faut déployer la fonction qui s'en charge (elle utilise la clé service role fournie automatiquement par Supabase) :
-
-```bash
-npx supabase@latest functions deploy delete-account
-```
-
-Elle supprime les photos éventuelles du bucket `meal-photos`, puis l'utilisateur : profil, repas, éléments,
-corrections, quota et journaux de scans partent en cascade.
+- **SMTP** : configure un vrai serveur d'e-mails (*Authentication > Emails > SMTP Settings* ; Brevo, Resend,
+  Mailjet… ont une offre gratuite), sinon les codes n'arrivent qu'aux membres de ton équipe Supabase.
+- **CAPTCHA** (*Authentication > Attack Protection*) : limite la création d'invités en masse. Il faudra aussi
+  brancher le jeton CAPTCHA dans l'app (non fait dans ce MVP).
+- **Valeurs nutritionnelles** : faire vérifier `docs/FOODS_TODO.md` avec la table FAO avant toute communication.
+- **Photos** : `STORE_PHOTOS=false` par défaut. Ne l'active qu'avec une politique de confidentialité à jour ;
+  seules les photos des utilisateurs ayant coché le partage sont alors conservées.

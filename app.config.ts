@@ -25,9 +25,15 @@ const config: ExpoConfig = {
       foregroundImage: './assets/images/android-icon-foreground.png',
       monochromeImage: './assets/images/android-icon-monochrome.png',
     },
-    // Seule la caméra est demandée ; la galerie passe par le sélecteur système.
+    // Seule la caméra est demandée ; la galerie passe par le sélecteur système
+    // (stockage seulement sur Android 12 et moins). Les permissions inutiles ajoutées
+    // par le modèle Expo sont retirées du manifeste.
     permissions: ['android.permission.CAMERA'],
-    blockedPermissions: ['android.permission.RECORD_AUDIO'],
+    blockedPermissions: [
+      'android.permission.RECORD_AUDIO',
+      'android.permission.SYSTEM_ALERT_WINDOW',
+      'android.permission.VIBRATE',
+    ],
     predictiveBackGestureEnabled: false,
   },
   plugins: [

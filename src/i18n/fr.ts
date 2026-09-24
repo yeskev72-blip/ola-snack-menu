@@ -1,11 +1,9 @@
 export const fr = {
   common: {
     continue: 'Continuer',
-    back: 'Retour',
     save: 'Enregistrer',
     cancel: 'Annuler',
     confirm: 'Confirmer',
-    comingSoon: 'Bientôt disponible',
     kcal: 'kcal',
     grams: 'g',
     kcalPerDay: '{kcal} kcal / jour',
@@ -104,7 +102,6 @@ export const fr = {
     empty: "Aucun repas enregistré aujourd'hui.",
     scanCta: 'Scanner un plat',
     pending: '{count} repas en attente de synchronisation (hors ligne).',
-    itemsCount: '{count} élément(s)',
   },
   meals: {
     breakfast: 'Petit-déjeuner',
@@ -239,6 +236,7 @@ export const fr = {
     deleteOffline: 'La suppression du compte a besoin d’internet.',
     deleteError: 'La suppression a échoué. Réessaie.',
     saveError: 'Enregistrement impossible. Vérifie ta connexion et réessaie.',
+    version: 'Version {version}',
   },
   profileEdit: {
     title: 'Modifier mon profil',

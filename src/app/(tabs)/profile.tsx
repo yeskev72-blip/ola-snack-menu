@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, StyleSheet, Switch, View } from 'react-native';
@@ -119,6 +120,9 @@ export default function Profile() {
       <Button label={t('profile.signOut')} variant="secondary" onPress={() => void confirmSignOut()} />
       <Button label={t('profile.deleteAccount')} variant="ghost" loading={remove.loading} onPress={() => void confirmDelete()} />
       <Notice message={error} />
+      <AppText variant="small" style={styles.version}>
+        {t('profile.version', { version: Constants.expoConfig?.version ?? '?' })}
+      </AppText>
     </Screen>
   );
 }
@@ -126,4 +130,5 @@ export default function Profile() {
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   flex: { flex: 1 },
+  version: { textAlign: 'center' },
 });

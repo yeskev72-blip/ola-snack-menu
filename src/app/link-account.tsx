@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { ToastAndroid } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
@@ -25,6 +26,7 @@ export default function LinkAccount() {
   });
   const confirm = useAction(async () => {
     await finishLinkEmail(email.trim(), code.trim(), password);
+    ToastAndroid.show(t('auth.linkDone'), ToastAndroid.SHORT);
     router.back();
   });
 

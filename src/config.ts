@@ -6,15 +6,6 @@ import brand from './brand.json';
  */
 export const APP_NAME: string = brand.appName;
 
-/** Fuseau de référence pour le « jour » du journal et du quota de scans. */
-export const APP_TIMEZONE = 'Africa/Porto-Novo';
-
-/** Scans IA autorisés par jour, vérifiés côté serveur (Edge Function). */
-export const DAILY_SCAN_QUOTA = {
-  guest: 1,
-  free: 3,
-} as const;
-
 /** Compression appliquée à la photo avant envoi. */
 export const PHOTO = {
   maxSide: 1024,
