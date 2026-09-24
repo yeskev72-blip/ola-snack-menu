@@ -33,6 +33,13 @@ const config: ExpoConfig = {
   plugins: [
     'expo-router',
     [
+      'expo-image-picker',
+      {
+        cameraPermission: `${brand.appName} utilise l'appareil photo pour photographier tes repas.`,
+        microphonePermission: false,
+      },
+    ],
+    [
       'expo-splash-screen',
       {
         backgroundColor: '#FBF6EE',

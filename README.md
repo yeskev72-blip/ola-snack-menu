@@ -12,7 +12,7 @@ Stack : Expo SDK 57 (React Native, TypeScript strict, Expo Router), Supabase, Ge
 - [x] Phase 1 : initialisation, navigation, i18n, thème
 - [x] Phase 2 : Supabase (migrations, RLS, seed des plats, auth invité + compte, onboarding)
 - [x] Phase 3 : Edge Function `analyze-meal` (Gemini, sortie JSON validée, quota, suivi des tokens)
-- [ ] Phase 4 : scan → résultat → édition → enregistrement
+- [x] Phase 4 : scan → résultat → édition → enregistrement (journal local + synchro, corrections)
 - [ ] Phase 5 : journal, historique, onboarding, profil, hors ligne
 - [ ] Phase 6 : EAS, build APK, documentation complète
 
@@ -31,6 +31,7 @@ npm run typecheck      # TypeScript strict
 npm run lint
 npm test               # tests unitaires (calcul de la cible calorique…)
 npm run db:seed        # valide supabase/seed/foods.json et régénère supabase/seed.sql
+npm run check:secrets  # vérifie qu'aucune clé secrète n'est dans le bundle de l'app
 ```
 
 Tests de sécurité de la base (RLS, quota) : `psql "$DATABASE_URL" -f supabase/tests/rls_test.sql`.
@@ -43,8 +44,9 @@ Tester la fonction d'analyse déployée : `scripts/test-analyze-meal.sh photo.jp
 2. La fonction vérifie le jeton, consomme un scan du quota (invité 1, gratuit 3, premium 30 par jour),
    charge la table `foods` et appelle Gemini avec un schéma JSON qui limite `food_key` aux plats connus (ou `autre`).
 3. La réponse est validée strictement (une seule relance si elle est invalide) ; en cas d'échec, le scan est rendu.
-4. Les calories ne viennent pas du modèle : l'app les calcule avec la table `foods`. Pour `autre`,
-   l'estimation du modèle est renvoyée et marquée comme estimée.
+4. Les calories ne viennent pas du modèle : l'app les calcule avec la table `foods`
+   (`src/lib/nutrition.ts`, mise en cache sur le téléphone). Pour `autre`, l'estimation du modèle
+   est utilisée et affichée « estimé ». Fourchette affichée si la confiance pondérée est < 0,7.
 5. Si Gemini pose des questions, l'app peut relancer **une fois**, gratuitement, avec les réponses
    (`scan_id` + `answers`, en renvoyant la **même** photo et l'indice ; l'empreinte SHA-256 de la photo est vérifiée).
 
@@ -78,3 +80,10 @@ docs/
 
 Le nom de l'application se change uniquement dans `src/brand.json`. L'identifiant Android
 `com.calebasse.app` est défini dans `app.config.ts` et ne doit plus changer après publication.
+
+## Journal hors ligne
+
+Les repas sont écrits d'abord dans SQLite sur le téléphone (`src/lib/meals.ts`), puis envoyés à Supabase
+dès que le réseau revient (identifiants générés par l'app : la synchro peut être rejouée sans doublon).
+Sans réseau, on peut toujours saisir un repas « sans photo » à partir de la table des plats en cache.
+Chaque différence entre la prédiction de l'IA et la saisie finale est enregistrée dans `corrections`.
