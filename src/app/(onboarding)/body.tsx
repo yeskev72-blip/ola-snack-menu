@@ -8,19 +8,11 @@ import { Choice } from '@/components/Choice';
 import { Notice } from '@/components/Notice';
 import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
-import { t, type MessageKey } from '@/i18n';
-import type { ActivityLevel } from '@/lib/calories';
+import { t } from '@/i18n';
+import { ACTIVITIES } from '@/lib/profileOptions';
 import { parseNumber } from '@/lib/validation';
 import { useOnboardingDraft } from '@/state/onboardingDraft';
 import { spacing } from '@/theme';
-
-const ACTIVITIES: { value: ActivityLevel; label: MessageKey }[] = [
-  { value: 'sedentaire', label: 'onboarding.activitySedentaire' },
-  { value: 'leger', label: 'onboarding.activityLeger' },
-  { value: 'modere', label: 'onboarding.activityModere' },
-  { value: 'actif', label: 'onboarding.activityActif' },
-  { value: 'tres_actif', label: 'onboarding.activityTresActif' },
-];
 
 const inRange = (v: number | null, min: number, max: number) => v !== null && v >= min && v <= max;
 

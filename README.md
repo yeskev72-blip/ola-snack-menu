@@ -13,7 +13,7 @@ Stack : Expo SDK 57 (React Native, TypeScript strict, Expo Router), Supabase, Ge
 - [x] Phase 2 : Supabase (migrations, RLS, seed des plats, auth invité + compte, onboarding)
 - [x] Phase 3 : Edge Function `analyze-meal` (Gemini, sortie JSON validée, quota, suivi des tokens)
 - [x] Phase 4 : scan → résultat → édition → enregistrement (journal local + synchro, corrections)
-- [ ] Phase 5 : journal, historique, onboarding, profil, hors ligne
+- [x] Phase 5 : journal, historique (7 et 30 jours), profil, suppression du compte, synchro dans les deux sens
 - [ ] Phase 6 : EAS, build APK, documentation complète
 
 ## Mise en route
@@ -84,6 +84,10 @@ Le nom de l'application se change uniquement dans `src/brand.json`. L'identifian
 ## Journal hors ligne
 
 Les repas sont écrits d'abord dans SQLite sur le téléphone (`src/lib/meals.ts`), puis envoyés à Supabase
-dès que le réseau revient (identifiants générés par l'app : la synchro peut être rejouée sans doublon).
+dès que le réseau revient, au retour de l'app au premier plan ou à l'ouverture d'un écran
+(identifiants générés par l'app : la synchro peut être rejouée sans doublon).
+Les suppressions suivent le même chemin. Les repas des 35 derniers jours sont rapatriés depuis le serveur
+(nouveau téléphone, réinstallation) sans jamais écraser un repas local pas encore envoyé.
+La journée affichée suit l'heure du téléphone.
 Sans réseau, on peut toujours saisir un repas « sans photo » à partir de la table des plats en cache.
 Chaque différence entre la prédiction de l'IA et la saisie finale est enregistrée dans `corrections`.

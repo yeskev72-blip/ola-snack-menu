@@ -427,3 +427,8 @@ enabled = true
 [functions.analyze-meal]
 enabled = true
 verify_jwt = false
+
+# Suppression du compte : jeton vérifié dans la fonction (auth.getUser).
+[functions.delete-account]
+enabled = true
+verify_jwt = false

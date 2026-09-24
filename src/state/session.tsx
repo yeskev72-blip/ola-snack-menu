@@ -3,6 +3,7 @@ import Storage from 'expo-sqlite/kv-store';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 import type { Profile, ProfileUpdate } from '@/lib/database.types';
+import { clearLocalData } from '@/lib/meals';
 import { supabase } from '@/lib/supabase';
 
 type Status = 'loading' | 'signedOut' | 'signedIn';
@@ -31,7 +32,10 @@ type Session = {
   /** Invité → compte : valide le code puis fixe le mot de passe. Même identifiant, données conservées. */
   finishLinkEmail: (email: string, code: string, password: string) => Promise<void>;
   updateProfile: (patch: ProfileUpdate) => Promise<void>;
+  /** Déconnexion : efface aussi le journal et le profil gardés sur le téléphone. */
   signOut: () => Promise<void>;
+  /** Supprime définitivement le compte et toutes ses données (serveur puis téléphone). */
+  deleteAccount: () => Promise<void>;
 };
 
 const SessionContext = createContext<Session | null>(null);
@@ -137,8 +141,19 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         }
       },
       signOut: async () => {
-        if (user) await Storage.removeItem(profileCacheKey(user.id));
+        if (user) {
+          await clearLocalData(user.id);
+          await Storage.removeItem(profileCacheKey(user.id));
+        }
         // scope local : fonctionne même hors ligne.
+        await supabase.auth.signOut({ scope: 'local' });
+      },
+      deleteAccount: async () => {
+        if (!user) return;
+        const { error } = await supabase.functions.invoke('delete-account', { body: {}, timeout: 30_000 });
+        if (error) throw error;
+        await clearLocalData(user.id);
+        await Storage.removeItem(profileCacheKey(user.id));
         await supabase.auth.signOut({ scope: 'local' });
       },
     }),

@@ -142,3 +142,15 @@ Le cahier des charges fixe la température à 0,3 (`GEMINI_TEMPERATURE=0.3`). Go
 la valeur par défaut sur les modèles Gemini 3 (baisser la température peut dégrader les réponses ou les faire boucler).
 Si tu observes des réponses invalides ou tronquées dans `scan_calls.error`, passe à
 `npx supabase@latest secrets set GEMINI_TEMPERATURE=default`.
+
+## 7. Suppression de compte
+
+L'app permet de supprimer son compte et toutes ses données (Profil > « Supprimer mon compte et mes données »).
+Il faut déployer la fonction qui s'en charge (elle utilise la clé service role fournie automatiquement par Supabase) :
+
+```bash
+npx supabase@latest functions deploy delete-account
+```
+
+Elle supprime les photos éventuelles du bucket `meal-photos`, puis l'utilisateur : profil, repas, éléments,
+corrections, quota et journaux de scans partent en cascade.

@@ -1,34 +1,34 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { CalorieRing } from '@/components/CalorieRing';
 import { Card } from '@/components/Card';
+import { DayMeals } from '@/components/DayMeals';
 import { Macros } from '@/components/Macros';
 import { Notice } from '@/components/Notice';
 import { Screen } from '@/components/Screen';
 import { t } from '@/i18n';
-import { MEAL_TYPES } from '@/lib/mealTypes';
-import { pendingCount, syncMeals, useMealsOfDay } from '@/lib/meals';
+import { syncMeals, todayKey, useMealsOfDay, usePendingCount } from '@/lib/meals';
 import type { Nutrients } from '@/lib/nutrition';
 import { useSession } from '@/state/session';
 import { spacing } from '@/theme';
 
 export default function Journal() {
   const { profile, user } = useSession();
-  const [today, setToday] = useState(() => new Date());
-  const [pending, setPending] = useState(0);
-  const meals = useMealsOfDay(user?.id ?? null, today);
+  const userId = user?.id ?? null;
+  const [today, setToday] = useState(todayKey);
+  const meals = useMealsOfDay(userId, today);
+  const pending = usePendingCount(userId);
 
-  // À chaque retour sur l'onglet : nouvelle journée éventuelle, synchro, repas en attente.
+  // À chaque retour sur l'onglet : nouvelle journée éventuelle et synchro.
   useFocusEffect(
     useCallback(() => {
-      setToday(new Date());
-      if (!user) return;
-      void syncMeals(user.id).then(() => pendingCount(user.id).then(setPending));
-    }, [user]),
+      setToday(todayKey());
+      if (userId) void syncMeals(userId);
+    }, [userId]),
   );
 
   const total = meals.reduce<Nutrients>(
@@ -55,36 +55,12 @@ export default function Journal() {
       </Card>
 
       {pending > 0 ? <Notice tone="info" message={t('journal.pending', { count: pending })} /> : null}
-
       {meals.length === 0 ? <AppText variant="muted">{t('journal.empty')}</AppText> : null}
-      {MEAL_TYPES.map(({ value, label }) => {
-        const ofType = meals.filter((m) => m.type_repas === value);
-        if (ofType.length === 0) return null;
-        const kcal = ofType.reduce((sum, m) => sum + m.total.kcal, 0);
-        return (
-          <Card key={value}>
-            <View style={styles.row}>
-              <AppText variant="large" style={styles.flex}>
-                {t(label)}
-              </AppText>
-              <AppText variant="large">
-                {Math.round(kcal)} {t('common.kcal')}
-              </AppText>
-            </View>
-            {ofType.map((meal) => (
-              <AppText key={meal.id} variant="muted">
-                {meal.items.map((it) => it.label).join(', ')}
-              </AppText>
-            ))}
-          </Card>
-        );
-      })}
+      <DayMeals meals={meals} />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   summary: { alignItems: 'center', paddingVertical: spacing.lg, gap: spacing.md },
-  row: { flexDirection: 'row', alignItems: 'center' },
-  flex: { flex: 1 },
 });
