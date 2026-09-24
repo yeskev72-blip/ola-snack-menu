@@ -421,3 +421,9 @@ enabled = true
 # formatted with uppercase keywords, indent 2, max width 180, trailing commas,
 # and column/key alignment. Set to "null" to emit raw, unformatted SQL.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":180,\"commaStyle\":\"trailing\"}"
+
+# Analyse des photos de repas. La vérification du jeton est faite dans la fonction
+# (auth.getUser), ce qui fonctionne aussi avec les nouvelles clés de signature JWT.
+[functions.analyze-meal]
+enabled = true
+verify_jwt = false

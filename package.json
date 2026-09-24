@@ -8,8 +8,9 @@
     "android": "expo start --android",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
-    "test": "node --test src/lib/*.test.ts",
-    "db:seed": "node scripts/seed-foods.mjs"
+    "test": "node --test \"src/**/*.test.ts\" \"supabase/functions/**/*.test.ts\"",
+    "db:seed": "node scripts/seed-foods.mjs",
+    "test:analyze": "bash scripts/test-analyze-meal.sh"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.1",

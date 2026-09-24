@@ -88,3 +88,57 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=<clé anon / publishable>
 4. À la fin (10 à 20 minutes), la commande affiche un **lien et un QR code** : ouvre-le sur le téléphone,
    télécharge l'APK et autorise l'installation depuis cette source.
    Le lien reste aussi disponible sur expo.dev, dans *Projects > calebasse > Builds*.
+
+## 6. Activer l'analyse des photos (Gemini)
+
+La clé Gemini reste **uniquement** dans les secrets Supabase : elle n'est jamais dans l'app ni dans l'APK.
+
+1. Crée une clé API sur [Google AI Studio](https://aistudio.google.com/apikey).
+   Active la facturation du projet Google Cloud associé si tu dépasses le niveau gratuit.
+2. Applique la nouvelle migration (tables `scans` et `scan_calls`) :
+   ```bash
+   npx supabase@latest db push
+   ```
+3. Copie `supabase/functions/.env.example` en `supabase/functions/.env`, mets ta clé dans `GEMINI_API_KEY`,
+   puis envoie les secrets et déploie la fonction :
+   ```bash
+   npx supabase@latest secrets set --env-file supabase/functions/.env
+   npx supabase@latest functions deploy analyze-meal
+   ```
+   Pour changer de modèle plus tard, sans republier l'app :
+   `npx supabase@latest secrets set GEMINI_MODEL=<nouvel-identifiant>` (effet immédiat).
+4. Teste avec une photo JPEG de plat :
+   ```bash
+   scripts/test-analyze-meal.sh photo.jpg "riz, sauce graine, poulet"
+   ```
+   Sans `TEST_EMAIL` / `TEST_PASSWORD`, le script crée un invité (1 scan par jour).
+   Avec ton compte de test :
+   ```bash
+   TEST_EMAIL=toi@exemple.com TEST_PASSWORD='…' REPEAT=4 scripts/test-analyze-meal.sh photo.jpg
+   ```
+   Les 3 premiers scans répondent `HTTP 200`, le 4e `HTTP 429` (`quota_exceeded`).
+   Pour tester une relance après question : reprends le `scan_id` renvoyé et lance
+   `SCAN_ID=<scan_id> QUESTION="<texte>" ANSWER="<option choisie>" scripts/test-analyze-meal.sh photo.jpg`.
+
+### Suivre le coût réel
+
+Chaque appel Gemini est journalisé dans `scan_calls` (tokens d'entrée, de sortie, de réflexion, durée).
+Dans *SQL Editor* :
+
+```sql
+-- Tokens par utilisateur et par jour (heure du Bénin)
+select * from scan_costs_daily order by day desc, total_tokens desc limit 50;
+
+-- Moyenne par scan réussi sur les 7 derniers jours
+select round(avg(total_tokens)) as tokens_moyens, count(*) as appels
+from scan_calls where ok and created_at > now() - interval '7 days';
+```
+
+Multiplie par le tarif en vigueur du modèle (entrée et sortie, réflexion comprise dans la sortie) pour obtenir le coût.
+
+### Température
+
+Le cahier des charges fixe la température à 0,3 (`GEMINI_TEMPERATURE=0.3`). Google recommande pourtant de garder
+la valeur par défaut sur les modèles Gemini 3 (baisser la température peut dégrader les réponses ou les faire boucler).
+Si tu observes des réponses invalides ou tronquées dans `scan_calls.error`, passe à
+`npx supabase@latest secrets set GEMINI_TEMPERATURE=default`.

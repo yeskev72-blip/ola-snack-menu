@@ -125,6 +125,23 @@ begin
   assert r.allowed and r.used = 3, 'un scan rendu après échec peut être réutilisé';
 end $$;
 
+-- Relance après questions : une seule par scan, uniquement par son propriétaire.
+do $$
+declare v_scan uuid;
+begin
+  insert into public.scans (user_id, image_sha256) values ('00000000-0000-0000-0000-00000000000a', repeat('a', 64)) returning id into v_scan;
+  assert not public.claim_follow_up(v_scan, '00000000-0000-0000-0000-00000000000b', repeat('a', 64)), 'B ne peut pas relancer le scan de A';
+  assert not public.claim_follow_up(v_scan, '00000000-0000-0000-0000-00000000000a', repeat('b', 64)), 'relance refusée avec une autre photo';
+  assert public.claim_follow_up(v_scan, '00000000-0000-0000-0000-00000000000a', repeat('a', 64)), 'première relance autorisée';
+  assert not public.claim_follow_up(v_scan, '00000000-0000-0000-0000-00000000000a', repeat('a', 64)), 'deuxième relance refusée';
+  perform public.release_follow_up(v_scan);
+  assert public.claim_follow_up(v_scan, '00000000-0000-0000-0000-00000000000a', repeat('a', 64)), 'relance rendue après échec';
+  update public.scans set follow_up_used = false, created_at = now() - interval '2 hours' where id = v_scan;
+  assert not public.claim_follow_up(v_scan, '00000000-0000-0000-0000-00000000000a', repeat('a', 64)), 'relance expirée après 30 min';
+  insert into public.scan_calls (scan_id, user_id, kind, model, ok, total_tokens)
+  values (v_scan, '00000000-0000-0000-0000-00000000000a', 'initial', 'gemini-3.8-flash', true, 1230);
+end $$;
+
 -- A consulte son quota restant.
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000a","role":"authenticated"}', true);
@@ -145,6 +162,21 @@ do $$ begin
   assert (select count(*) from public.corrections) = 0, 'corrections supprimées avec le compte';
   assert (select count(*) from public.profiles where id = '00000000-0000-0000-0000-00000000000a') = 0, 'profil supprimé';
 end $$;
+
+-- Les journaux de scans restent invisibles pour les clients.
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000b","role":"authenticated"}', true);
+do $$ begin
+  perform 1 from public.scan_calls;
+  raise exception 'DEVAIT ÉCHOUER : lecture de scan_calls par un client';
+exception when insufficient_privilege then null;
+end $$;
+do $$ begin
+  perform public.claim_follow_up(gen_random_uuid(), auth.uid(), repeat('a', 64));
+  raise exception 'DEVAIT ÉCHOUER : claim_follow_up appelé par un client';
+exception when insufficient_privilege then null;
+end $$;
+reset role;
 
 select 'Tous les tests RLS sont passés' as resultat;
 rollback;

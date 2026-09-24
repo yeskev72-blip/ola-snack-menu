@@ -11,7 +11,7 @@ Stack : Expo SDK 57 (React Native, TypeScript strict, Expo Router), Supabase, Ge
 
 - [x] Phase 1 : initialisation, navigation, i18n, thème
 - [x] Phase 2 : Supabase (migrations, RLS, seed des plats, auth invité + compte, onboarding)
-- [ ] Phase 3 : Edge Function `analyze-meal`
+- [x] Phase 3 : Edge Function `analyze-meal` (Gemini, sortie JSON validée, quota, suivi des tokens)
 - [ ] Phase 4 : scan → résultat → édition → enregistrement
 - [ ] Phase 5 : journal, historique, onboarding, profil, hors ligne
 - [ ] Phase 6 : EAS, build APK, documentation complète
@@ -35,6 +35,19 @@ npm run db:seed        # valide supabase/seed/foods.json et régénère supabase
 
 Tests de sécurité de la base (RLS, quota) : `psql "$DATABASE_URL" -f supabase/tests/rls_test.sql`.
 
+Tester la fonction d'analyse déployée : `scripts/test-analyze-meal.sh photo.jpg "indice"` (voir `docs/SETUP.md`, étape 6).
+
+## Analyse d'un repas
+
+1. L'app envoie la photo compressée (JPEG base64) et l'indice facultatif à l'Edge Function `analyze-meal`.
+2. La fonction vérifie le jeton, consomme un scan du quota (invité 1, gratuit 3, premium 30 par jour),
+   charge la table `foods` et appelle Gemini avec un schéma JSON qui limite `food_key` aux plats connus (ou `autre`).
+3. La réponse est validée strictement (une seule relance si elle est invalide) ; en cas d'échec, le scan est rendu.
+4. Les calories ne viennent pas du modèle : l'app les calcule avec la table `foods`. Pour `autre`,
+   l'estimation du modèle est renvoyée et marquée comme estimée.
+5. Si Gemini pose des questions, l'app peut relancer **une fois**, gratuitement, avec les réponses
+   (`scan_id` + `answers`, en renvoyant la **même** photo et l'indice ; l'empreinte SHA-256 de la photo est vérifiée).
+
 ## Organisation
 
 ```
@@ -55,6 +68,7 @@ supabase/
   migrations/       schéma SQL versionné (RLS partout)
   seed/foods.json   table des plats locaux (source du seed)
   seed.sql          généré par scripts/seed-foods.mjs
+  functions/        Edge Functions (Deno) : analyze-meal + logique partagée testée
   templates/        e-mails avec code à 6 chiffres
   tests/            tests RLS et quota
 docs/
