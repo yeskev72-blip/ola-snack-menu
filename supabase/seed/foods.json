@@ -1,0 +1,1305 @@
+[
+  {
+    "food_key": "riz_blanc",
+    "label_fr": "Riz blanc cuit",
+    "aliases": [
+      "riz nature",
+      "riz sauce"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 130,
+    "proteines_100g": 2.7,
+    "glucides_100g": 28.2,
+    "lipides_100g": 0.3,
+    "portion_reperes": {
+      "cuillere": 20,
+      "bol": 200,
+      "assiette": 300
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "riz_jollof",
+    "label_fr": "Riz jollof / riz au gras",
+    "aliases": [
+      "jollof",
+      "riz au gras",
+      "riz gras"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 170,
+    "proteines_100g": 3.2,
+    "glucides_100g": 26,
+    "lipides_100g": 6,
+    "portion_reperes": {
+      "cuillere": 20,
+      "bol": 220,
+      "assiette": 330
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "atassi",
+    "label_fr": "Atassi (riz et haricots)",
+    "aliases": [
+      "watchi",
+      "waakye",
+      "riz haricot"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 150,
+    "proteines_100g": 5,
+    "glucides_100g": 27,
+    "lipides_100g": 2.2,
+    "portion_reperes": {
+      "bol": 220,
+      "assiette": 350
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "attieke",
+    "label_fr": "Attiéké",
+    "aliases": [
+      "atieke",
+      "acheke"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 157,
+    "proteines_100g": 1,
+    "glucides_100g": 37,
+    "lipides_100g": 0.5,
+    "portion_reperes": {
+      "cuillere": 20,
+      "bol": 180,
+      "assiette": 250
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "pate_mais",
+    "label_fr": "Pâte de maïs blanche (wɔ, owo)",
+    "aliases": [
+      "wo",
+      "owo",
+      "pâte blanche",
+      "akoumé",
+      "tô",
+      "ugali"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 110,
+    "proteines_100g": 2.5,
+    "glucides_100g": 24,
+    "lipides_100g": 0.6,
+    "portion_reperes": {
+      "boule": 300,
+      "assiette": 400
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "amiwo",
+    "label_fr": "Amiwo (pâte rouge)",
+    "aliases": [
+      "pâte rouge",
+      "djenkoumé"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 150,
+    "proteines_100g": 3,
+    "glucides_100g": 25,
+    "lipides_100g": 4.5,
+    "portion_reperes": {
+      "boule": 300,
+      "assiette": 400
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "akassa",
+    "label_fr": "Akassa / agidi (pâte de maïs fermentée)",
+    "aliases": [
+      "agidi",
+      "eko",
+      "ablo"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 80,
+    "proteines_100g": 1.5,
+    "glucides_100g": 18,
+    "lipides_100g": 0.3,
+    "portion_reperes": {
+      "unite": 150
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "igname_pilee",
+    "label_fr": "Igname pilée (foufou d'igname)",
+    "aliases": [
+      "foufou",
+      "fufu",
+      "agou",
+      "pounded yam",
+      "télibo"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 130,
+    "proteines_100g": 1.5,
+    "glucides_100g": 31,
+    "lipides_100g": 0.2,
+    "portion_reperes": {
+      "boule": 350
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "foufou_manioc",
+    "label_fr": "Foufou de manioc",
+    "aliases": [
+      "fufu manioc",
+      "placali",
+      "kokonte"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 155,
+    "proteines_100g": 0.8,
+    "glucides_100g": 37,
+    "lipides_100g": 0.3,
+    "portion_reperes": {
+      "boule": 300
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "gari",
+    "label_fr": "Gari sec (semoule de manioc)",
+    "aliases": [
+      "garri",
+      "tapioca gari"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 360,
+    "proteines_100g": 1.2,
+    "glucides_100g": 86,
+    "lipides_100g": 0.5,
+    "portion_reperes": {
+      "cuillere": 12,
+      "bol": 120
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "eba",
+    "label_fr": "Eba / piron (gari à l'eau chaude)",
+    "aliases": [
+      "piron",
+      "eba"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 150,
+    "proteines_100g": 0.5,
+    "glucides_100g": 36,
+    "lipides_100g": 0.2,
+    "portion_reperes": {
+      "boule": 300
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "haricots_niebe",
+    "label_fr": "Haricots niébé cuits",
+    "aliases": [
+      "haricot",
+      "niébé",
+      "ayikoun",
+      "beans"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 116,
+    "proteines_100g": 7.7,
+    "glucides_100g": 21,
+    "lipides_100g": 0.5,
+    "portion_reperes": {
+      "louche": 150,
+      "bol": 200
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "alloco",
+    "label_fr": "Alloco (banane plantain frite)",
+    "aliases": [
+      "aloko",
+      "dodo",
+      "plantain frit"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 260,
+    "proteines_100g": 1.3,
+    "glucides_100g": 38,
+    "lipides_100g": 12,
+    "portion_reperes": {
+      "morceau": 15,
+      "assiette": 200
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "plantain_bouilli",
+    "label_fr": "Banane plantain bouillie",
+    "aliases": [
+      "plantain cuit",
+      "agbôkin"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 123,
+    "proteines_100g": 0.8,
+    "glucides_100g": 31.2,
+    "lipides_100g": 0.2,
+    "portion_reperes": {
+      "unite": 180
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "igname_bouillie",
+    "label_fr": "Igname bouillie",
+    "aliases": [
+      "igname cuite"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 115,
+    "proteines_100g": 1.5,
+    "glucides_100g": 27.5,
+    "lipides_100g": 0.1,
+    "portion_reperes": {
+      "morceau": 100
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "igname_frite",
+    "label_fr": "Igname frite",
+    "aliases": [
+      "frites d'igname",
+      "dundun"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 230,
+    "proteines_100g": 2,
+    "glucides_100g": 32,
+    "lipides_100g": 10.5,
+    "portion_reperes": {
+      "morceau": 40,
+      "assiette": 200
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "manioc_bouilli",
+    "label_fr": "Manioc bouilli",
+    "aliases": [
+      "manioc cuit",
+      "bâton de manioc",
+      "chikwangue"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 125,
+    "proteines_100g": 1,
+    "glucides_100g": 30,
+    "lipides_100g": 0.3,
+    "portion_reperes": {
+      "morceau": 100
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "pain",
+    "label_fr": "Pain (baguette)",
+    "aliases": [
+      "baguette",
+      "pain blanc"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 270,
+    "proteines_100g": 9,
+    "glucides_100g": 55,
+    "lipides_100g": 1.5,
+    "portion_reperes": {
+      "morceau": 60,
+      "unite": 250
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "spaghetti",
+    "label_fr": "Spaghetti cuits",
+    "aliases": [
+      "pâtes",
+      "macaroni",
+      "spaghetti sautés"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 158,
+    "proteines_100g": 5.8,
+    "glucides_100g": 31,
+    "lipides_100g": 0.9,
+    "portion_reperes": {
+      "assiette": 250
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "couscous_mil",
+    "label_fr": "Couscous de mil (thiéré)",
+    "aliases": [
+      "thiéré",
+      "cere",
+      "couscous"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 140,
+    "proteines_100g": 3.5,
+    "glucides_100g": 29,
+    "lipides_100g": 1,
+    "portion_reperes": {
+      "bol": 200,
+      "assiette": 300
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "bouillie_mil",
+    "label_fr": "Bouillie de mil sucrée",
+    "aliases": [
+      "koko",
+      "hausa koko",
+      "bouillie",
+      "lakh",
+      "ogi"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 67,
+    "proteines_100g": 1.3,
+    "glucides_100g": 14,
+    "lipides_100g": 0.6,
+    "portion_reperes": {
+      "bol": 300
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "bouillie_mais",
+    "label_fr": "Bouillie de maïs sucrée (akassa délayé)",
+    "aliases": [
+      "koko maïs",
+      "pap",
+      "akamu"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 60,
+    "proteines_100g": 1,
+    "glucides_100g": 13,
+    "lipides_100g": 0.4,
+    "portion_reperes": {
+      "bol": 300
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "thieboudienne",
+    "label_fr": "Thiéboudienne (riz au poisson)",
+    "aliases": [
+      "ceebu jën",
+      "tieb",
+      "riz au poisson"
+    ],
+    "categorie": "plat_complet",
+    "kcal_100g": 160,
+    "proteines_100g": 8,
+    "glucides_100g": 20,
+    "lipides_100g": 5.5,
+    "portion_reperes": {
+      "assiette": 450
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "poulet_dg",
+    "label_fr": "Poulet DG",
+    "aliases": [
+      "poulet directeur général"
+    ],
+    "categorie": "plat_complet",
+    "kcal_100g": 190,
+    "proteines_100g": 10,
+    "glucides_100g": 15,
+    "lipides_100g": 10,
+    "portion_reperes": {
+      "assiette": 350
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "yassa_poulet",
+    "label_fr": "Poulet yassa (sans riz)",
+    "aliases": [
+      "yassa"
+    ],
+    "categorie": "plat_complet",
+    "kcal_100g": 150,
+    "proteines_100g": 13,
+    "glucides_100g": 6,
+    "lipides_100g": 8,
+    "portion_reperes": {
+      "louche": 150,
+      "assiette": 250
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "degue",
+    "label_fr": "Dèguè / thiakry (mil au lait caillé)",
+    "aliases": [
+      "dèguè",
+      "thiakry",
+      "dégué"
+    ],
+    "categorie": "plat_complet",
+    "kcal_100g": 150,
+    "proteines_100g": 4,
+    "glucides_100g": 24,
+    "lipides_100g": 4,
+    "portion_reperes": {
+      "bol": 250
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "sauce_graine",
+    "label_fr": "Sauce graine (noix de palme)",
+    "aliases": [
+      "banga",
+      "sauce palmiste",
+      "abenkwan"
+    ],
+    "categorie": "sauce",
+    "kcal_100g": 180,
+    "proteines_100g": 4,
+    "glucides_100g": 5,
+    "lipides_100g": 16,
+    "portion_reperes": {
+      "louche": 120
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "sauce_arachide",
+    "label_fr": "Sauce arachide (mafé)",
+    "aliases": [
+      "mafé",
+      "maafe",
+      "groundnut soup",
+      "azindessi"
+    ],
+    "categorie": "sauce",
+    "kcal_100g": 173,
+    "proteines_100g": 7,
+    "glucides_100g": 6,
+    "lipides_100g": 13.5,
+    "portion_reperes": {
+      "louche": 120
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "sauce_tomate",
+    "label_fr": "Sauce tomate à l'huile",
+    "aliases": [
+      "sauce rouge",
+      "stew",
+      "sauce tomate"
+    ],
+    "categorie": "sauce",
+    "kcal_100g": 93,
+    "proteines_100g": 1.5,
+    "glucides_100g": 6,
+    "lipides_100g": 7,
+    "portion_reperes": {
+      "louche": 100
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "sauce_feuilles",
+    "label_fr": "Sauce feuilles (gboma, épinards)",
+    "aliases": [
+      "gboma dessi",
+      "sauce feuille",
+      "efo riro",
+      "sauce épinard"
+    ],
+    "categorie": "sauce",
+    "kcal_100g": 113,
+    "proteines_100g": 4,
+    "glucides_100g": 4,
+    "lipides_100g": 9,
+    "portion_reperes": {
+      "louche": 120
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "sauce_gombo",
+    "label_fr": "Sauce gombo",
+    "aliases": [
+      "gombo",
+      "okra",
+      "févi",
+      "fetri"
+    ],
+    "categorie": "sauce",
+    "kcal_100g": 70,
+    "proteines_100g": 2.5,
+    "glucides_100g": 5,
+    "lipides_100g": 4.5,
+    "portion_reperes": {
+      "louche": 120
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "sauce_crincrin",
+    "label_fr": "Sauce crincrin (corète)",
+    "aliases": [
+      "crincrin",
+      "ewedu",
+      "adémè"
+    ],
+    "categorie": "sauce",
+    "kcal_100g": 44,
+    "proteines_100g": 2.5,
+    "glucides_100g": 4,
+    "lipides_100g": 2,
+    "portion_reperes": {
+      "louche": 120
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "sauce_pistache",
+    "label_fr": "Sauce pistache / egusi",
+    "aliases": [
+      "egusi",
+      "agoussi",
+      "sauce pistache"
+    ],
+    "categorie": "sauce",
+    "kcal_100g": 200,
+    "proteines_100g": 9,
+    "glucides_100g": 5,
+    "lipides_100g": 16,
+    "portion_reperes": {
+      "louche": 120
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "sauce_claire",
+    "label_fr": "Sauce claire / soupe de poisson",
+    "aliases": [
+      "pepper soup",
+      "light soup",
+      "sauce claire"
+    ],
+    "categorie": "sauce",
+    "kcal_100g": 46,
+    "proteines_100g": 5,
+    "glucides_100g": 2.5,
+    "lipides_100g": 1.8,
+    "portion_reperes": {
+      "louche": 150
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "ndole",
+    "label_fr": "Ndolé",
+    "aliases": [
+      "ndole"
+    ],
+    "categorie": "sauce",
+    "kcal_100g": 150,
+    "proteines_100g": 9,
+    "glucides_100g": 5,
+    "lipides_100g": 10.5,
+    "portion_reperes": {
+      "louche": 150
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "sauce_feuille_manioc",
+    "label_fr": "Sauce feuilles de manioc (saka-saka)",
+    "aliases": [
+      "saka saka",
+      "pondu",
+      "pondou",
+      "sauce feuille manioc"
+    ],
+    "categorie": "sauce",
+    "kcal_100g": 121,
+    "proteines_100g": 4,
+    "glucides_100g": 6,
+    "lipides_100g": 9,
+    "portion_reperes": {
+      "louche": 120
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "poulet_braise",
+    "label_fr": "Poulet braisé",
+    "aliases": [
+      "poulet grillé",
+      "poulet bicyclette braisé",
+      "choukouya poulet"
+    ],
+    "categorie": "proteine",
+    "kcal_100g": 208,
+    "proteines_100g": 25,
+    "glucides_100g": 0,
+    "lipides_100g": 12,
+    "portion_reperes": {
+      "morceau": 120
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "poulet_frit",
+    "label_fr": "Poulet frit",
+    "aliases": [
+      "poulet sauté"
+    ],
+    "categorie": "proteine",
+    "kcal_100g": 251,
+    "proteines_100g": 24,
+    "glucides_100g": 5,
+    "lipides_100g": 15,
+    "portion_reperes": {
+      "morceau": 120
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "poisson_braise",
+    "label_fr": "Poisson braisé (tilapia, carpe)",
+    "aliases": [
+      "poisson grillé",
+      "tilapia braisé",
+      "carpe braisée"
+    ],
+    "categorie": "proteine",
+    "kcal_100g": 149,
+    "proteines_100g": 22,
+    "glucides_100g": 0,
+    "lipides_100g": 6.8,
+    "portion_reperes": {
+      "unite": 300,
+      "morceau": 100
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "poisson_frit",
+    "label_fr": "Poisson frit",
+    "aliases": [
+      "friture de poisson",
+      "fritures",
+      "chinchard frit"
+    ],
+    "categorie": "proteine",
+    "kcal_100g": 218,
+    "proteines_100g": 20,
+    "glucides_100g": 3,
+    "lipides_100g": 14,
+    "portion_reperes": {
+      "morceau": 80,
+      "unite": 150
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "poisson_fume",
+    "label_fr": "Poisson fumé",
+    "aliases": [
+      "poisson sec",
+      "kpanla fumé",
+      "akpavi"
+    ],
+    "categorie": "proteine",
+    "kcal_100g": 280,
+    "proteines_100g": 45,
+    "glucides_100g": 0,
+    "lipides_100g": 11,
+    "portion_reperes": {
+      "morceau": 30
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "crevettes_sechees",
+    "label_fr": "Crevettes séchées",
+    "aliases": [
+      "crevettes",
+      "ablo crevette"
+    ],
+    "categorie": "proteine",
+    "kcal_100g": 280,
+    "proteines_100g": 60,
+    "glucides_100g": 2,
+    "lipides_100g": 3,
+    "portion_reperes": {
+      "cuillere": 8
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "viande_boeuf",
+    "label_fr": "Viande de bœuf cuite",
+    "aliases": [
+      "boeuf",
+      "viande",
+      "bœuf sauce"
+    ],
+    "categorie": "proteine",
+    "kcal_100g": 221,
+    "proteines_100g": 26,
+    "glucides_100g": 0,
+    "lipides_100g": 13,
+    "portion_reperes": {
+      "morceau": 40
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "viande_chevre",
+    "label_fr": "Viande de chèvre / mouton cuite",
+    "aliases": [
+      "chèvre",
+      "mouton",
+      "cabri",
+      "agneau"
+    ],
+    "categorie": "proteine",
+    "kcal_100g": 140,
+    "proteines_100g": 27,
+    "glucides_100g": 0,
+    "lipides_100g": 3.5,
+    "portion_reperes": {
+      "morceau": 40
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "suya",
+    "label_fr": "Suya / choukouya (brochette grillée)",
+    "aliases": [
+      "choukouya",
+      "brochette",
+      "kilichi",
+      "dibi"
+    ],
+    "categorie": "proteine",
+    "kcal_100g": 249,
+    "proteines_100g": 28,
+    "glucides_100g": 5,
+    "lipides_100g": 13,
+    "portion_reperes": {
+      "unite": 60
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "oeuf_dur",
+    "label_fr": "Œuf dur",
+    "aliases": [
+      "oeuf",
+      "œuf bouilli"
+    ],
+    "categorie": "proteine",
+    "kcal_100g": 152,
+    "proteines_100g": 12.6,
+    "glucides_100g": 1.1,
+    "lipides_100g": 10.6,
+    "portion_reperes": {
+      "unite": 50
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "omelette",
+    "label_fr": "Omelette",
+    "aliases": [
+      "oeuf frit",
+      "omelette pain"
+    ],
+    "categorie": "proteine",
+    "kcal_100g": 189,
+    "proteines_100g": 12,
+    "glucides_100g": 1.5,
+    "lipides_100g": 15,
+    "portion_reperes": {
+      "unite": 90
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "wagashi",
+    "label_fr": "Wagashi (fromage peul)",
+    "aliases": [
+      "wagasi",
+      "fromage peul",
+      "waragashi"
+    ],
+    "categorie": "proteine",
+    "kcal_100g": 202,
+    "proteines_100g": 16,
+    "glucides_100g": 3,
+    "lipides_100g": 14,
+    "portion_reperes": {
+      "morceau": 60
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "wagashi_frit",
+    "label_fr": "Wagashi frit",
+    "aliases": [
+      "fromage peul frit"
+    ],
+    "categorie": "proteine",
+    "kcal_100g": 300,
+    "proteines_100g": 17,
+    "glucides_100g": 4,
+    "lipides_100g": 24,
+    "portion_reperes": {
+      "morceau": 60
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "fromage_soja",
+    "label_fr": "Fromage de soja frit (tofu)",
+    "aliases": [
+      "tofu",
+      "soja frit",
+      "fromage de soja"
+    ],
+    "categorie": "proteine",
+    "kcal_100g": 280,
+    "proteines_100g": 17,
+    "glucides_100g": 9,
+    "lipides_100g": 20,
+    "portion_reperes": {
+      "morceau": 50
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "beignets_haricot",
+    "label_fr": "Beignets de haricot (ata, akara)",
+    "aliases": [
+      "ata",
+      "akara",
+      "accra",
+      "klaklou haricot"
+    ],
+    "categorie": "proteine",
+    "kcal_100g": 290,
+    "proteines_100g": 10,
+    "glucides_100g": 22,
+    "lipides_100g": 18,
+    "portion_reperes": {
+      "unite": 25
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "crudites",
+    "label_fr": "Crudités (salade, tomate, oignon, sans sauce)",
+    "aliases": [
+      "salade",
+      "tomate oignon"
+    ],
+    "categorie": "legume",
+    "kcal_100g": 20,
+    "proteines_100g": 1,
+    "glucides_100g": 3.5,
+    "lipides_100g": 0.2,
+    "portion_reperes": {
+      "assiette": 100
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "avocat",
+    "label_fr": "Avocat",
+    "aliases": [
+      "avocat"
+    ],
+    "categorie": "fruit",
+    "kcal_100g": 160,
+    "proteines_100g": 2,
+    "glucides_100g": 8.5,
+    "lipides_100g": 14.7,
+    "portion_reperes": {
+      "unite": 150
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "banane_douce",
+    "label_fr": "Banane douce",
+    "aliases": [
+      "banane"
+    ],
+    "categorie": "fruit",
+    "kcal_100g": 89,
+    "proteines_100g": 1.1,
+    "glucides_100g": 22.8,
+    "lipides_100g": 0.3,
+    "portion_reperes": {
+      "unite": 120
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "mangue",
+    "label_fr": "Mangue",
+    "aliases": [
+      "mango"
+    ],
+    "categorie": "fruit",
+    "kcal_100g": 60,
+    "proteines_100g": 0.8,
+    "glucides_100g": 15,
+    "lipides_100g": 0.4,
+    "portion_reperes": {
+      "unite": 250
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "ananas",
+    "label_fr": "Ananas",
+    "aliases": [
+      "ananas"
+    ],
+    "categorie": "fruit",
+    "kcal_100g": 50,
+    "proteines_100g": 0.5,
+    "glucides_100g": 13,
+    "lipides_100g": 0.1,
+    "portion_reperes": {
+      "morceau": 80
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "orange",
+    "label_fr": "Orange",
+    "aliases": [
+      "orange"
+    ],
+    "categorie": "fruit",
+    "kcal_100g": 47,
+    "proteines_100g": 0.9,
+    "glucides_100g": 11.8,
+    "lipides_100g": 0.1,
+    "portion_reperes": {
+      "unite": 150
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "papaye",
+    "label_fr": "Papaye",
+    "aliases": [
+      "papaye"
+    ],
+    "categorie": "fruit",
+    "kcal_100g": 43,
+    "proteines_100g": 0.5,
+    "glucides_100g": 9.8,
+    "lipides_100g": 0.3,
+    "portion_reperes": {
+      "morceau": 150
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "huile_palme",
+    "label_fr": "Huile de palme (rouge)",
+    "aliases": [
+      "zomi",
+      "huile rouge"
+    ],
+    "categorie": "matiere_grasse",
+    "kcal_100g": 884,
+    "proteines_100g": 0,
+    "glucides_100g": 0,
+    "lipides_100g": 100,
+    "portion_reperes": {
+      "cuillere": 13
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "huile_vegetale",
+    "label_fr": "Huile végétale (arachide, soja, tournesol)",
+    "aliases": [
+      "huile",
+      "huile d'arachide"
+    ],
+    "categorie": "matiere_grasse",
+    "kcal_100g": 884,
+    "proteines_100g": 0,
+    "glucides_100g": 0,
+    "lipides_100g": 100,
+    "portion_reperes": {
+      "cuillere": 13
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "mayonnaise",
+    "label_fr": "Mayonnaise",
+    "aliases": [
+      "mayo"
+    ],
+    "categorie": "matiere_grasse",
+    "kcal_100g": 680,
+    "proteines_100g": 1,
+    "glucides_100g": 1,
+    "lipides_100g": 75,
+    "portion_reperes": {
+      "cuillere": 15
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "arachides_grillees",
+    "label_fr": "Arachides grillées",
+    "aliases": [
+      "cacahuètes",
+      "arachides",
+      "kouli-kouli"
+    ],
+    "categorie": "snack",
+    "kcal_100g": 590,
+    "proteines_100g": 25,
+    "glucides_100g": 16,
+    "lipides_100g": 49,
+    "portion_reperes": {
+      "poignee": 30
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "beignet_farine",
+    "label_fr": "Beignet de farine (botokoin, puff-puff)",
+    "aliases": [
+      "botokoin",
+      "puff puff",
+      "gaou",
+      "beignet"
+    ],
+    "categorie": "snack",
+    "kcal_100g": 340,
+    "proteines_100g": 6,
+    "glucides_100g": 45,
+    "lipides_100g": 15,
+    "portion_reperes": {
+      "unite": 40
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "chips_plantain",
+    "label_fr": "Chips de plantain",
+    "aliases": [
+      "chips banane",
+      "plantain chips"
+    ],
+    "categorie": "snack",
+    "kcal_100g": 528,
+    "proteines_100g": 2,
+    "glucides_100g": 58,
+    "lipides_100g": 32,
+    "portion_reperes": {
+      "sachet": 50
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "bissap",
+    "label_fr": "Bissap sucré",
+    "aliases": [
+      "jus d'oseille",
+      "zobo",
+      "foléré"
+    ],
+    "categorie": "boisson",
+    "kcal_100g": 45,
+    "proteines_100g": 0,
+    "glucides_100g": 11,
+    "lipides_100g": 0,
+    "portion_reperes": {
+      "verre": 250
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "jus_gingembre",
+    "label_fr": "Jus de gingembre sucré",
+    "aliases": [
+      "gingembre",
+      "ginger"
+    ],
+    "categorie": "boisson",
+    "kcal_100g": 50,
+    "proteines_100g": 0,
+    "glucides_100g": 12.5,
+    "lipides_100g": 0,
+    "portion_reperes": {
+      "verre": 250
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "soda",
+    "label_fr": "Soda sucré",
+    "aliases": [
+      "coca",
+      "fanta",
+      "sucrerie"
+    ],
+    "categorie": "boisson",
+    "kcal_100g": 42,
+    "proteines_100g": 0,
+    "glucides_100g": 10.6,
+    "lipides_100g": 0,
+    "portion_reperes": {
+      "canette": 330,
+      "bouteille": 500
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "lait_concentre",
+    "label_fr": "Lait concentré sucré",
+    "aliases": [
+      "lait concentré",
+      "lait sucré"
+    ],
+    "categorie": "sucre",
+    "kcal_100g": 321,
+    "proteines_100g": 7.9,
+    "glucides_100g": 54.4,
+    "lipides_100g": 8.7,
+    "portion_reperes": {
+      "cuillere": 20
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  },
+  {
+    "food_key": "sucre",
+    "label_fr": "Sucre",
+    "aliases": [
+      "sucre en poudre",
+      "morceau de sucre"
+    ],
+    "categorie": "sucre",
+    "kcal_100g": 400,
+    "proteines_100g": 0,
+    "glucides_100g": 100,
+    "lipides_100g": 0,
+    "portion_reperes": {
+      "cuillere": 5,
+      "morceau": 5
+    },
+    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
+    "verified": false
+  }
+]

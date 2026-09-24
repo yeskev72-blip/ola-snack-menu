@@ -1,119 +1,150 @@
-# Ola'Snack — menu numérique
+# Calebasse
 
-Version numérique du menu papier d'**Ola'Snack** (Haie-Vive, Cotonou — Bénin),
-saisie à partir du dépliant 3 volets fourni en PDF.
+Application **Android** de suivi calorique par photo, pensée pour l'Afrique francophone
+(marché de départ : Bénin / Cotonou). On prend son plat en photo, on peut dire ce qu'il contient,
+l'IA identifie les éléments et les portions, et **l'app calcule les calories avec une table de plats
+locaux** (attiéké, pâte de maïs, sauce graine, amiwo, poisson braisé…), pas avec des chiffres inventés
+par le modèle.
 
-Site statique, sans dépendance ni étape de build : HTML, CSS et JavaScript
-natifs, alimentés par un seul fichier de données.
+- **App** : Expo SDK 57 (React Native, TypeScript strict, Expo Router), interface en français
+- **Backend** : Supabase (Auth, Postgres avec RLS, Edge Functions, Storage facultatif)
+- **IA** : Gemini (`gemini-3.8-flash` par défaut), appelé **uniquement** depuis une Edge Function
+- **Build** : EAS Build, profils produisant un **APK** à distribuer directement
 
-## Ce que fait le site
+> **Mise en route, secrets et build de l'APK : [`docs/SETUP.md`](docs/SETUP.md)** (liste de contrôle
+> de tout ce qui demande tes identifiants, puis pas à pas).
 
-- **67 articles** répartis en **10 rubriques**, avec descriptions et prix.
-- **32 photos** extraites du menu d'origine ; les articles sans photo affichent
-  une vignette neutre pour garder l'alignement.
-- **Recherche instantanée** par plat, rubrique ou ingrédient, insensible aux
-  accents (« cesar » trouve « Salade César »).
-- **Navigation par rubrique** collante, avec surlignage de la rubrique visible.
-- **Prix R / M** (regular / mega) affichés séparément pour les sandwichs et
-  les burgers, chacun commandable indépendamment.
-- **Panier** qui compose un récapitulatif de commande, puis permet de l'envoyer
-  sur **WhatsApp**, d'**appeler**, de l'**envoyer par SMS** pré-rempli, ou de
-  le **copier**.
-- Le numéro **MTN** ouvre une discussion **WhatsApp** ; les lignes MOOV et
-  Celtiis sont de simples liens d'appel.
-- Responsive (testé à 390 px), thème clair/sombre automatique, et une feuille
-  d'impression qui masque les éléments interactifs.
+## Fonctionnalités
 
-## Lancer en local
+- **Comptes** : mode invité (sans e-mail), inscription par e-mail avec code à 6 chiffres, conversion
+  invité → compte sans perte de données, suppression du compte et de toutes les données.
+- **Onboarding** : objectif, informations corporelles, activité ; cible calculée avec Mifflin-St Jeor, ajustable.
+- **Scan** : photo (caméra ou galerie) compressée à 1024 px / JPEG 0,7, indice facultatif, quota restant affiché.
+- **Résultat modifiable** : éléments détectés, questions de clarification (une relance gratuite), quantités en
+  grammes ou en repères locaux (louche, boule, bol…), ajout depuis la table, fourchette de calories si
+  l'estimation est incertaine, éléments hors table marqués « estimé ».
+- **Journal du jour** : anneau des calories restantes, macros, repas par type ; détail et suppression d'un repas.
+- **Historique** : calories par jour sur 7 et 30 jours avec la cible, moyenne, détail par journée.
+- **Hors ligne** : journal consultable et enregistrable sans réseau (saisie sans photo), synchronisé au retour
+  du réseau ; le scan IA, lui, exige internet et le dit clairement.
+- **Quota** : invité 1, gratuit 3, premium 30 scans par jour (heure du Bénin), vérifié côté serveur.
+- **Corrections** : chaque écart entre la prédiction de l'IA et la saisie finale est enregistré pour améliorer la table.
 
-Le site charge `data/menu.json` via `fetch`, il faut donc un serveur HTTP
-(l'ouverture directe du fichier `index.html` est bloquée par le navigateur) :
-
-```sh
-python3 -m http.server 8000
-# puis http://localhost:8000
-```
-
-Pour mettre en ligne, publier le dossier tel quel (GitHub Pages, Netlify,
-n'importe quel hébergement statique) : il n'y a rien à compiler.
-
-## Structure
+## Architecture
 
 ```
-index.html            page unique
-assets/css/styles.css mise en forme
-assets/js/app.js      rendu, recherche, panier
-data/menu.json        toutes les données du menu  ← seul fichier à modifier
-assets/img/           photos extraites du PDF
-source/               le menu PDF d'origine
-tools/verify.py       compare data/menu.json au PDF
+Téléphone (APK)                                   Supabase
+┌───────────────────────────────┐   JWT    ┌──────────────────────────────────────┐
+│ Expo Router · écrans           │ ───────▶ │ Edge Function analyze-meal           │
+│ SQLite : journal local + file  │          │  ├ vérifie le jeton, consomme le quota│
+│ Cache : table des plats        │          │  ├ charge foods, appelle Gemini ─────┼─▶ Gemini
+│ Calcul kcal/macros (foods)     │          │  └ valide le JSON, journalise tokens │   (clé dans
+│ Clé anon Supabase seulement    │ ◀─────── │ Postgres + RLS : profils, repas,     │    les secrets)
+└───────────────────────────────┘  synchro │   éléments, corrections, quota…      │
+                                            │ Edge Function delete-account         │
+                                            └──────────────────────────────────────┘
 ```
 
-## Modifier le menu
+1. L'app envoie la photo compressée et l'indice à `analyze-meal` avec le jeton de l'utilisateur.
+2. La fonction consomme un scan (atomique, en SQL), charge la table `foods` et appelle Gemini avec un
+   **schéma JSON** qui limite `food_key` aux plats connus (ou `autre`).
+3. La réponse est validée strictement ; une seule relance si elle est invalide ; en cas d'échec, le scan est rendu.
+4. L'app calcule les calories avec la table `foods` (`src/lib/nutrition.ts`). Les valeurs de l'IA ne servent
+   que pour un élément `autre`, affiché « estimé ».
+5. Si l'IA pose des questions, l'app relance **une fois**, gratuitement, avec la **même** photo
+   (empreinte SHA-256 vérifiée) et les réponses.
+6. Les repas sont écrits d'abord dans SQLite (`src/lib/meals.ts`) puis envoyés à Supabase au retour du réseau
+   (identifiants générés par l'app : aucune duplication si la synchro est rejouée). Les 35 derniers jours
+   sont rapatriés depuis le serveur (nouveau téléphone), sans écraser un repas local pas encore envoyé.
 
-Tout se trouve dans `data/menu.json` ; la page se met à jour toute seule.
-Ce fichier étant chargé à l'exécution, il est demandé avec revalidation
-obligatoire (`cache: 'no-cache'`) : les visiteurs voient la nouvelle version au
-rechargement suivant, sans rester bloqués sur un menu en cache.
-Un article a soit un prix unique, soit des prix par taille :
+## Variables d'environnement
 
-```jsonc
-{ "id": "taboule", "name": "Taboulé", "description": "persil, menthe…",
-  "price": 5000, "image": null }
+| Où | Variable | Contenu |
+|---|---|---|
+| App (`.env` en local, EAS en build) | `EXPO_PUBLIC_SUPABASE_URL` | URL du projet Supabase (publique) |
+| | `EXPO_PUBLIC_SUPABASE_ANON_KEY` | clé `anon` / publishable (publique, sécurité assurée par la RLS) |
+| Secrets Supabase (`supabase/functions/.env`) | `GEMINI_API_KEY` | clé Gemini — **jamais dans l'app** |
+| | `GEMINI_MODEL` | défaut `gemini-3.8-flash`, modifiable sans republier l'app |
+| | `GEMINI_TEMPERATURE` | défaut `0.3` ; `default` = valeur du modèle |
+| | `GEMINI_THINKING_LEVEL` | défaut `low` (coût et latence) |
+| | `STORE_PHOTOS` | `false` par défaut ; `true` conserve les photos des utilisateurs consentants |
+| Fournies par Supabase | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | utilisées par les Edge Functions seulement |
 
-{ "id": "taouk", "name": "Taouk", "description": "brochette de poulet…",
-  "prices": { "R": 2500, "M": 4000 }, "image": "assets/img/taouk.jpg" }
+## Développement
+
+```bash
+npm install
+cp .env.example .env     # remplir l'URL et la clé anon Supabase
+npm start                # serveur Expo (Expo Go ou build de développement)
 ```
 
-Champs annexes : `priceAlt` (second prix affiché), `unconfirmed: true`
-(ajoute le badge « à confirmer »), `note` et `image` au niveau d'une rubrique.
-Les coordonnées sont dans l'objet `restaurant`.
+| Commande | Rôle |
+|---|---|
+| `npm run typecheck` | TypeScript strict |
+| `npm run lint` | ESLint (config Expo + React Compiler) |
+| `npm test` | tests : calories, portions, corrections, journées, SQL local, logique des Edge Functions |
+| `npm run db:seed` | valide `supabase/seed/foods.json` (cohérence kcal/macros) et régénère `supabase/seed.sql` |
+| `npm run check:secrets` | vérifie qu'aucune clé secrète n'est dans le bundle de l'app |
+| `scripts/test-db.sh` | migrations + seed + tests RLS sur un PostgreSQL vide (`DATABASE_URL`) |
+| `scripts/test-analyze-meal.sh photo.jpg "indice"` | appelle la fonction d'analyse déployée avec `curl` |
 
-### Canal de commande
+Edge Functions (Deno 2) : `deno check`, `deno lint` et `deno test` dans `supabase/functions`.
+La CI GitHub (`.github/workflows/ci.yml`) lance tout cela à chaque push.
 
-L'objet `ordering` décide de ce qu'affiche le panier :
+Le nom de l'app se change uniquement dans `src/brand.json`. L'identifiant Android `com.calebasse.app`
+(`app.config.ts`) ne doit plus changer une fois l'app publiée.
 
-```jsonc
-"ordering": {
-  "tel": "+2290150535353",        // numéro appelé et destinataire du SMS
-  "whatsapp": "2290150535353",    // null pour masquer le bouton WhatsApp
-  "note": "Commandes sur WhatsApp, par appel ou par SMS…"
-}
+## Build de l'APK (résumé)
+
+```bash
+npx eas-cli@latest login
+npx eas-cli@latest init                    # puis coller le projectId dans EAS_PROJECT_ID (app.config.ts)
+npx eas-cli@latest env:set --environment preview --visibility plaintext --name EXPO_PUBLIC_SUPABASE_URL --value https://<ref>.supabase.co
+npx eas-cli@latest env:set --environment preview --visibility plaintext --name EXPO_PUBLIC_SUPABASE_ANON_KEY --value <clé anon>
+npx eas-cli@latest build -p android --profile preview
 ```
 
-Chaque numéro de `restaurant.phones` porte de même un champ `whatsapp`
-optionnel : présent, la pastille ouvre la discussion WhatsApp ; absent, elle
-compose l'appel. Retirer le champ d'une ligne suffit donc à la repasser en
-simple appel, sans toucher au code.
+Le lien de téléchargement de l'APK s'affiche à la fin du build et reste sur expo.dev (*Projects > calebasse > Builds*).
+Détails, profil `production`, versions et recette : [`docs/SETUP.md`](docs/SETUP.md), étapes 6 et 7.
 
-## Fidélité au menu d'origine
+Permissions Android demandées : **caméra** uniquement (plus le stockage, limité à Android 12 et moins,
+pour la galerie) ; micro, superposition et vibreur sont retirés du manifeste. Android 7.0 minimum.
 
-`tools/verify.py` relit le PDF et vérifie que chaque nom, description et prix
-de `data/menu.json` s'y retrouve, que les images référencées existent, et que
-le nombre de prix saisis est égal au nombre de prix du PDF :
+## Organisation
 
-```sh
-pip install pypdf && python3 tools/verify.py
-# 67 articles / 93 prix vérifiés
-# ✓ noms, descriptions, prix et images concordent avec le menu source
+```
+src/
+  app/                routes Expo Router (un fichier = un écran)
+    (auth)/           accueil, connexion, inscription, code
+    (onboarding)/     objectif, infos corporelles, cible
+    (tabs)/           Journal, Scanner, Historique, Profil
+    result.tsx        résultat d'un scan · item-editor · food-picker
+    meal/[id].tsx     détail d'un repas · day/[day].tsx détail d'une journée
+    profile-edit.tsx  modification du profil · link-account.tsx invité → compte
+  components/         composants d'interface (boutons, anneau, graphique…)
+  i18n/               textes (fr.ts) et fonction t() typée
+  lib/                Supabase, calculs purs testés, journal local, synchro, analyse
+  state/              session, brouillon d'onboarding, scan en cours
+  brand.json          nom de l'app
+supabase/
+  migrations/         schéma SQL versionné (RLS partout)
+  seed/foods.json     table des plats (source) · seed.sql (généré)
+  functions/          analyze-meal, delete-account, logique partagée (_shared)
+  templates/          e-mails avec code à 6 chiffres
+  tests/              tests RLS/quota + imitation Supabase pour PostgreSQL nu
+docs/
+  SETUP.md            mise en route, secrets, build APK, recette
+  FOODS_TODO.md       valeurs nutritionnelles à faire vérifier (FAO)
 ```
 
-Points à faire confirmer par le restaurant — ils viennent du document source,
-pas de la saisie :
+## Limites connues
 
-- **Grillades** : le PDF donne deux valeurs selon la photo
-  (demi poulet 5000 F ou 6000 F ; poulet entier 9000 F ou 10 000 F). Les deux
-  sont affichées avec un badge « à confirmer ».
-- **Manakish saj** : rubrique reconstituée à partir de deux photos
-  partiellement différentes du menu.
-- Le PDF ne contient **aucun horaire d'ouverture ni zone de livraison** ;
-  ils ne figurent donc pas sur le site.
-- Le PDF accole « (WhatsApp) » au numéro **MOOV**, mais c'est la ligne
-  **MTN** qui porte le compte WhatsApp (information du restaurant, non
-  déductible du document).
+- **Valeurs nutritionnelles non vérifiées** : les 69 plats ont des valeurs approximatives (`verified = false`),
+  à contrôler avec la table FAO de l'Afrique de l'Ouest (`docs/FOODS_TODO.md`).
+- **Journée** : le journal suit l'heure du téléphone, le quota l'heure du Bénin (identiques si le téléphone
+  est à l'heure du Bénin).
+- **E-mails** : le serveur par défaut de Supabase ne sert qu'aux tests ; SMTP à configurer avant diffusion.
+- **CAPTCHA** des invités non branché dans l'app.
+- **Interface** : français seulement (les textes sont prêts pour d'autres langues dans `src/i18n`).
 
-Quatre photos du PDF (Double Cheese Burger, Le Titan, et les bandeaux
-Grillades et Kneffe) mesurent moins de 40 px de côté et ont été écartées :
-trop petites pour être affichées proprement. Ces articles utilisent la
-vignette neutre. Les remplacer par de vraies photos ne demande que de déposer
-un fichier dans `assets/img/` et de renseigner `image` dans le JSON.
+Hors périmètre de ce MVP : paiement mobile money, coach IA, suivi d'entraînement, code-barres, iOS, web.
