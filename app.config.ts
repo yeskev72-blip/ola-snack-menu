@@ -3,15 +3,19 @@ import type { ExpoConfig } from 'expo/config';
 import brand from './src/brand.json';
 
 /** Identifiant Android définitif : ne plus le changer une fois l'app publiée. */
-const ANDROID_PACKAGE = 'com.calebasse.app';
+const ANDROID_PACKAGE = 'com.calbasse.app';
 
 /** Rempli après `eas init` (identifiant du projet sur expo.dev). */
-const EAS_PROJECT_ID = '';
+const EAS_PROJECT_ID = 'ac897088-9f91-4f54-9932-d2a7ff409e4a';
+
+/** Compte expo.dev propriétaire du projet (builds EAS). */
+const EAS_OWNER = 'dessoyess-team';
 
 const config: ExpoConfig = {
   name: brand.appName,
-  slug: 'calebasse',
-  scheme: 'calebasse',
+  owner: EAS_OWNER,
+  slug: 'calbasse',
+  scheme: 'calbasse',
   version: '0.1.0',
   orientation: 'portrait',
   icon: './assets/images/icon.png',

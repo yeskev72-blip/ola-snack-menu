@@ -2,7 +2,7 @@
 # https://supabase.com/docs/guides/local-development/cli/config
 # A string used to distinguish different Supabase projects on the same host. Defaults to the
 # working directory name when running `supabase init`.
-project_id = "calebasse"
+project_id = "calbasse"
 
 [api]
 enabled = true
@@ -244,11 +244,11 @@ otp_expiry = 3600
 
 # Les e-mails envoient un code à 6 chiffres (saisi dans l'app) plutôt qu'un lien.
 [auth.email.template.confirmation]
-subject = "Ton code Calebasse"
+subject = "Ton code Calbasse"
 content_path = "./supabase/templates/confirmation.html"
 
 [auth.email.template.email_change]
-subject = "Ton code Calebasse"
+subject = "Ton code Calbasse"
 content_path = "./supabase/templates/email_change.html"
 
 # [auth.email.template.invite]

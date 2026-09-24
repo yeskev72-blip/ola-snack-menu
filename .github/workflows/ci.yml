@@ -35,6 +35,8 @@ jobs:
       - run: deno check --no-config supabase/functions/analyze-meal/index.ts supabase/functions/delete-account/index.ts
       - run: deno lint --no-config supabase/functions
       - run: deno test --no-config supabase/functions
+      - name: Fichiers du tableau de bord Supabase à jour
+        run: bash scripts/build-dashboard-files.sh --check
 
   database:
     name: Base (migrations, RLS, quota)
@@ -53,3 +55,12 @@ jobs:
       - run: bash scripts/test-db.sh
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      - name: Fichier d'installation du tableau de bord (base vierge)
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+        run: |
+          psql "$DATABASE_URL" -qc "create database dashboard"
+          URL="postgresql://postgres:postgres@localhost:5432/dashboard"
+          psql "$URL" -v ON_ERROR_STOP=1 -q -f supabase/tests/supabase-stub.sql
+          psql "$URL" -v ON_ERROR_STOP=1 -q -f supabase/dashboard/01_installation.sql
+          psql "$URL" -v ON_ERROR_STOP=1 -q -f supabase/tests/rls_test.sql | grep -q "Tous les tests RLS sont passés"

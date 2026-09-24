@@ -1,4 +1,4 @@
-# Calebasse
+# Calbasse
 
 Application **Android** de suivi calorique par photo, pensée pour l'Afrique francophone
 (marché de départ : Bénin / Cotonou). On prend son plat en photo, on peut dire ce qu'il contient,
@@ -12,7 +12,8 @@ par le modèle.
 - **Build** : EAS Build, profils produisant un **APK** à distribuer directement
 
 > **Mise en route, secrets et build de l'APK : [`docs/SETUP.md`](docs/SETUP.md)** (liste de contrôle
-> de tout ce qui demande tes identifiants, puis pas à pas).
+> de tout ce qui demande tes identifiants, puis pas à pas). Configuration de Supabase **sans terminal**,
+> uniquement dans le navigateur : [`docs/SUPABASE_TABLEAU_DE_BORD.md`](docs/SUPABASE_TABLEAU_DE_BORD.md).
 
 ## Fonctionnalités
 
@@ -87,11 +88,12 @@ npm start                # serveur Expo (Expo Go ou build de développement)
 | `npm run check:secrets` | vérifie qu'aucune clé secrète n'est dans le bundle de l'app |
 | `scripts/test-db.sh` | migrations + seed + tests RLS sur un PostgreSQL vide (`DATABASE_URL`) |
 | `scripts/test-analyze-meal.sh photo.jpg "indice"` | appelle la fonction d'analyse déployée avec `curl` |
+| `scripts/build-dashboard-files.sh` | régénère `supabase/dashboard/` (SQL unique + fonctions en un fichier, pour le tableau de bord) |
 
 Edge Functions (Deno 2) : `deno check`, `deno lint` et `deno test` dans `supabase/functions`.
 La CI GitHub (`.github/workflows/ci.yml`) lance tout cela à chaque push.
 
-Le nom de l'app se change uniquement dans `src/brand.json`. L'identifiant Android `com.calebasse.app`
+Le nom de l'app se change uniquement dans `src/brand.json`. L'identifiant Android `com.calbasse.app`
 (`app.config.ts`) ne doit plus changer une fois l'app publiée.
 
 ## Build de l'APK (résumé)
@@ -104,7 +106,7 @@ npx eas-cli@latest env:set --environment preview --visibility plaintext --name E
 npx eas-cli@latest build -p android --profile preview
 ```
 
-Le lien de téléchargement de l'APK s'affiche à la fin du build et reste sur expo.dev (*Projects > calebasse > Builds*).
+Le lien de téléchargement de l'APK s'affiche à la fin du build et reste sur expo.dev (*Projects > calbasse > Builds*).
 Détails, profil `production`, versions et recette : [`docs/SETUP.md`](docs/SETUP.md), étapes 6 et 7.
 
 Permissions Android demandées : **caméra** uniquement (plus le stockage, limité à Android 12 et moins,
@@ -134,6 +136,7 @@ supabase/
   tests/              tests RLS/quota + imitation Supabase pour PostgreSQL nu
 docs/
   SETUP.md            mise en route, secrets, build APK, recette
+  SUPABASE_TABLEAU_DE_BORD.md  configuration de Supabase depuis le navigateur
   FOODS_TODO.md       valeurs nutritionnelles à faire vérifier (FAO)
 ```
 

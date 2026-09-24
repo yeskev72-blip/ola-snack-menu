@@ -15,16 +15,19 @@ Les libellés des tableaux de bord Supabase et Expo peuvent légèrement varier 
 - [ ] Installer l'APK et dérouler la recette — étape 7
 - [ ] Avant d'ouvrir l'app à d'autres personnes : SMTP, CAPTCHA, vérification des valeurs nutritionnelles — étape 9
 
+> **Sans terminal ?** Les étapes 1 à 4 (Supabase) peuvent se faire entièrement dans le navigateur :
+> suis [`docs/SUPABASE_TABLEAU_DE_BORD.md`](SUPABASE_TABLEAU_DE_BORD.md), puis reviens ici à l'étape 6.
+
 Prérequis sur ton ordinateur : **Node.js 22** ou plus récent, et **Git**.
 
 ```bash
-git clone <url-du-dépôt> calebasse && cd calebasse
+git clone <url-du-dépôt> calbasse && cd calbasse
 npm install
 ```
 
 ## 1. Créer le projet Supabase
 
-1. Sur [supabase.com](https://supabase.com), crée un projet nommé `calebasse`.
+1. Sur [supabase.com](https://supabase.com), crée un projet nommé `calbasse`.
    Région : **Europe (Paris `eu-west-3` ou Francfort `eu-central-1`)**, la plus proche de Cotonou.
 2. Note le **mot de passe de la base** choisi à la création.
 3. Dans *Project Settings > API*, relève :
@@ -59,8 +62,9 @@ Dans *Authentication* :
    - **Confirm signup** par `supabase/templates/confirmation.html` ;
    - **Change email address** par `supabase/templates/email_change.html`.
    (Les deux contiennent `{{ .Token }}` : c'est ce qui affiche le code.)
-3. **Emails > SMTP Settings** : le serveur d'e-mails par défaut n'envoie qu'aux membres de ton équipe Supabase,
-   et seulement quelques e-mails par heure. Suffisant pour tes tests avec ta propre adresse ; voir l'étape 9 avant diffusion.
+3. **Emails > SMTP Settings** : **obligatoire avant l'étape 2 ci-dessus** — sur l'offre gratuite, Supabase ne permet de
+   modifier les modèles d'e-mail qu'avec un SMTP personnel (son serveur par défaut n'envoie de toute façon qu'aux membres
+   de ton organisation). Pas à pas avec Brevo (gratuit) : `docs/SUPABASE_TABLEAU_DE_BORD.md`, étape 3.
 
 ## 4. Analyse des photos (Gemini) et fonctions serveur
 
@@ -106,7 +110,7 @@ EAS Build compile l'APK dans le cloud d'Expo : pas besoin d'Android Studio.
    npx eas-cli@latest login
    npx eas-cli@latest init
    ```
-   `init` crée le projet `calebasse` sur expo.dev et affiche son **projectId**. Comme la configuration est
+   `init` crée le projet `calbasse` sur expo.dev et affiche son **projectId**. Comme la configuration est
    dynamique (`app.config.ts`), colle-le dans la constante `EAS_PROJECT_ID` de `app.config.ts`, puis commite.
 2. **Variables publiques du build** (une seule fois par environnement)
    ```bash
@@ -124,7 +128,7 @@ EAS Build compile l'APK dans le cloud d'Expo : pas besoin d'Android Studio.
    Garde ce même projet Expo pour toutes les versions : un APK signé avec une autre clé ne pourra pas
    mettre à jour l'app déjà installée.
 5. **Récupérer l'APK** : à la fin (10 à 20 minutes), la commande affiche un **lien et un QR code**.
-   Le lien reste disponible sur [expo.dev](https://expo.dev), dans *Projects > calebasse > Builds* :
+   Le lien reste disponible sur [expo.dev](https://expo.dev), dans *Projects > calbasse > Builds* :
    bouton **Download** pour le fichier `.apk`, ou **Share** pour envoyer le lien.
 
 Profils (`eas.json`) :

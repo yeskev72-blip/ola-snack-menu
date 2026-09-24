@@ -87,7 +87,7 @@ let database: SQLiteDatabase | null = null;
 /** Base locale ouverte à la première utilisation, migrée jusqu'à la dernière version. */
 function db(): SQLiteDatabase {
   if (database) return database;
-  const opened = openDatabaseSync('calebasse.db');
+  const opened = openDatabaseSync('calbasse.db');
   opened.execSync('PRAGMA journal_mode = WAL;');
   const version = opened.getFirstSync<{ user_version: number }>('PRAGMA user_version')?.user_version ?? 0;
   // Les installations de la phase 4 ont déjà la table sans user_version : v1 est idempotente.
