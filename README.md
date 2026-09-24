@@ -12,7 +12,8 @@ par le modèle.
 - **Build** : EAS Build, profils produisant un **APK** à distribuer directement
 
 > **Mise en route, secrets et build de l'APK : [`docs/SETUP.md`](docs/SETUP.md)** (liste de contrôle
-> de tout ce qui demande tes identifiants, puis pas à pas).
+> de tout ce qui demande tes identifiants, puis pas à pas). Configuration de Supabase **sans terminal**,
+> uniquement dans le navigateur : [`docs/SUPABASE_TABLEAU_DE_BORD.md`](docs/SUPABASE_TABLEAU_DE_BORD.md).
 
 ## Fonctionnalités
 
@@ -87,6 +88,7 @@ npm start                # serveur Expo (Expo Go ou build de développement)
 | `npm run check:secrets` | vérifie qu'aucune clé secrète n'est dans le bundle de l'app |
 | `scripts/test-db.sh` | migrations + seed + tests RLS sur un PostgreSQL vide (`DATABASE_URL`) |
 | `scripts/test-analyze-meal.sh photo.jpg "indice"` | appelle la fonction d'analyse déployée avec `curl` |
+| `scripts/build-dashboard-files.sh` | régénère `supabase/dashboard/` (SQL unique + fonctions en un fichier, pour le tableau de bord) |
 
 Edge Functions (Deno 2) : `deno check`, `deno lint` et `deno test` dans `supabase/functions`.
 La CI GitHub (`.github/workflows/ci.yml`) lance tout cela à chaque push.
@@ -134,6 +136,7 @@ supabase/
   tests/              tests RLS/quota + imitation Supabase pour PostgreSQL nu
 docs/
   SETUP.md            mise en route, secrets, build APK, recette
+  SUPABASE_TABLEAU_DE_BORD.md  configuration de Supabase depuis le navigateur
   FOODS_TODO.md       valeurs nutritionnelles à faire vérifier (FAO)
 ```
 

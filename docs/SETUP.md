@@ -15,6 +15,9 @@ Les libellés des tableaux de bord Supabase et Expo peuvent légèrement varier 
 - [ ] Installer l'APK et dérouler la recette — étape 7
 - [ ] Avant d'ouvrir l'app à d'autres personnes : SMTP, CAPTCHA, vérification des valeurs nutritionnelles — étape 9
 
+> **Sans terminal ?** Les étapes 1 à 4 (Supabase) peuvent se faire entièrement dans le navigateur :
+> suis [`docs/SUPABASE_TABLEAU_DE_BORD.md`](SUPABASE_TABLEAU_DE_BORD.md), puis reviens ici à l'étape 6.
+
 Prérequis sur ton ordinateur : **Node.js 22** ou plus récent, et **Git**.
 
 ```bash
