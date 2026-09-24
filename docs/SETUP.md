@@ -62,8 +62,9 @@ Dans *Authentication* :
    - **Confirm signup** par `supabase/templates/confirmation.html` ;
    - **Change email address** par `supabase/templates/email_change.html`.
    (Les deux contiennent `{{ .Token }}` : c'est ce qui affiche le code.)
-3. **Emails > SMTP Settings** : le serveur d'e-mails par défaut n'envoie qu'aux membres de ton équipe Supabase,
-   et seulement quelques e-mails par heure. Suffisant pour tes tests avec ta propre adresse ; voir l'étape 9 avant diffusion.
+3. **Emails > SMTP Settings** : **obligatoire avant l'étape 2 ci-dessus** — sur l'offre gratuite, Supabase ne permet de
+   modifier les modèles d'e-mail qu'avec un SMTP personnel (son serveur par défaut n'envoie de toute façon qu'aux membres
+   de ton organisation). Pas à pas avec Brevo (gratuit) : `docs/SUPABASE_TABLEAU_DE_BORD.md`, étape 3.
 
 ## 4. Analyse des photos (Gemini) et fonctions serveur
 

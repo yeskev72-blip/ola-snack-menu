@@ -39,16 +39,27 @@ Menu de gauche : **Authentication**.
    - active **Allow anonymous sign-ins** (mode invité) → **Save** ;
    - fournisseur **Email** : actif, **Confirm email** activé ;
    - **Minimum password length** : `8` → **Save**.
-2. **Emails** → **Templates** : l'app demande un **code à 6 chiffres**.
+2. **Serveur d'e-mails (SMTP)** — obligatoire : sur l'offre gratuite, Supabase ne permet de modifier
+   les modèles d'e-mail qu'avec ton propre SMTP (et son serveur par défaut n'envoie qu'aux membres de ton organisation).
+   Exemple avec **Brevo** (gratuit, 300 e-mails par jour) :
+   1. Crée un compte sur [brevo.com](https://www.brevo.com).
+   2. **Senders, Domains & Dedicated IPs** → **Senders** → **Add a sender** : ton adresse d'envoi → valide le lien reçu.
+   3. **SMTP & API** → onglet **SMTP** : note le **SMTP server** (`smtp-relay.brevo.com`), le **Port** (`587`)
+      et le **Login** ; clique sur **Generate a new SMTP key** et copie la clé (elle n'est affichée qu'une fois).
+   4. Dans Supabase : **Authentication** → **Emails** → **SMTP Settings** → **Enable custom SMTP** :
+      - **Sender email** : l'adresse validée à l'étape 2 ; **Sender name** : `Calbasse`
+      - **Host** : `smtp-relay.brevo.com` ; **Port** : `587`
+      - **Username** : le *Login* Brevo ; **Password** : la clé SMTP → **Save changes**.
+   5. La clé SMTP est un secret : elle ne va que dans Supabase, jamais dans l'app, un fichier ou une conversation.
+
+   > Avec une adresse Gmail/Yahoo comme expéditeur, les e-mails risquent d'arriver en spam chez les autres :
+   > avant la diffusion, utilise une adresse sur ton propre nom de domaine (vérifié dans Brevo).
+3. **Emails** → **Templates** (débloqué par le SMTP) : l'app demande un **code à 6 chiffres**.
    - **Confirm signup** : sujet `Ton code Calbasse`, corps = contenu de
      [`supabase/templates/confirmation.html`](../supabase/templates/confirmation.html) → **Save**.
    - **Change email address** : sujet `Ton code Calbasse`, corps = contenu de
      [`supabase/templates/email_change.html`](../supabase/templates/email_change.html) → **Save**.
    - Les deux corps contiennent `{{ .Token }}` : c'est ce qui affiche le code. Ne le retire pas.
-
-> Pour tes tests, le serveur d'e-mails par défaut n'envoie qu'aux **membres de ton organisation Supabase**
-> (donc à ton adresse), et seulement quelques e-mails par heure. Avant d'inviter d'autres personnes,
-> configure un SMTP (voir `docs/SETUP.md`, étape 9).
 
 ## Étape 4 — Clé Gemini et secrets (5 min)
 
@@ -103,7 +114,7 @@ dans l'app, dans un fichier du dépôt ou dans une conversation.
 
 - [ ] Projet `calbasse` créé en Europe, mot de passe de la base conservé
 - [ ] `01_installation.sql` exécuté : 69 plats chargés
-- [ ] Invités activés, confirmation par e-mail, mot de passe ≥ 8, deux modèles d'e-mail avec `{{ .Token }}`
+- [ ] Invités activés, confirmation par e-mail, mot de passe ≥ 8, SMTP (Brevo…) configuré, deux modèles d'e-mail avec `{{ .Token }}`
 - [ ] 5 secrets ajoutés (dont `GEMINI_API_KEY`)
 - [ ] `analyze-meal` et `delete-account` déployées, « Verify JWT » désactivé, test 401 OK
 - [ ] URL du projet et clé anon notées pour le build
