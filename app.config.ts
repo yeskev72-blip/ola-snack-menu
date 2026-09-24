@@ -5,6 +5,9 @@ import brand from './src/brand.json';
 /** Identifiant Android définitif : ne plus le changer une fois l'app publiée. */
 const ANDROID_PACKAGE = 'com.calebasse.app';
 
+/** Rempli après `eas init` (identifiant du projet sur expo.dev). */
+const EAS_PROJECT_ID = '';
+
 const config: ExpoConfig = {
   name: brand.appName,
   slug: 'calebasse',
@@ -38,6 +41,7 @@ const config: ExpoConfig = {
       },
     ],
   ],
+  extra: EAS_PROJECT_ID ? { eas: { projectId: EAS_PROJECT_ID } } : {},
   experiments: {
     typedRoutes: true,
     reactCompiler: true,

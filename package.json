@@ -7,14 +7,18 @@
     "start": "expo start",
     "android": "expo start --android",
     "lint": "expo lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --test src/lib/*.test.ts",
+    "db:seed": "node scripts/seed-foods.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.1",
     "expo": "~57.0.24",
     "expo-constants": "~57.0.19",
     "expo-linking": "~57.0.10",
     "expo-router": "~57.0.22",
     "expo-splash-screen": "~57.0.9",
+    "expo-sqlite": "~57.0.3",
     "expo-status-bar": "~57.0.1",
     "expo-system-ui": "~57.0.4",
     "react": "19.2.3",
@@ -25,6 +29,7 @@
     "react-native-svg": "^15.15.4"
   },
   "devDependencies": {
+    "@types/node": "^22.20.4",
     "@types/react": "~19.2.2",
     "eslint": "^9.39.5",
     "eslint-config-expo": "~57.0.2",

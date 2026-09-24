@@ -6,17 +6,21 @@ import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
 import { t } from '@/i18n';
+import { useSession } from '@/state/session';
 import { colors, spacing } from '@/theme';
 
 export default function Journal() {
+  const { profile } = useSession();
+  const target = profile?.calories_cible;
   return (
     <Screen edges={['top']} footer={<Button label={t('journal.scanCta')} onPress={() => router.navigate('/scan')} />}>
-      <AppText variant="title">{t('journal.title')}</AppText>
+      <AppText variant="title">{profile?.prenom ? t('journal.hello', { name: profile.prenom }) : t('journal.title')}</AppText>
       <Card style={styles.summary}>
-        <AppText variant="display">—</AppText>
+        <AppText variant="display">{target ?? '—'}</AppText>
         <AppText variant="muted">
           {t('common.kcal')} {t('journal.remaining')}
         </AppText>
+        {target ? <AppText variant="small">{t('journal.target', { kcal: target })}</AppText> : null}
         <View style={styles.macros}>
           <Macro label={t('journal.protein')} color={colors.protein} />
           <Macro label={t('journal.carbs')} color={colors.carbs} />
