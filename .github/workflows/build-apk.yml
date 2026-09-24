@@ -1,0 +1,59 @@
+# Lance un build EAS de l'APK Android depuis GitHub, sans terminal.
+# GitHub > onglet Actions > « Construire l'APK » > Run workflow.
+# Prérequis : secret de dépôt EXPO_TOKEN (jeton d'accès expo.dev) ; variables
+# EXPO_PUBLIC_SUPABASE_URL / EXPO_PUBLIC_SUPABASE_ANON_KEY déclarées sur expo.dev.
+name: Construire l'APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: Profil EAS (preview = APK de test, production = APK à diffuser)
+        type: choice
+        options:
+          - preview
+          - production
+        default: preview
+
+concurrency:
+  group: build-apk
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build EAS Android (${{ inputs.profile }})
+    runs-on: ubuntu-latest
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+    steps:
+      - name: Vérifier le secret EXPO_TOKEN
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "::error::Secret EXPO_TOKEN manquant : GitHub > Settings > Secrets and variables > Actions > New repository secret."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lancer le build sur les serveurs Expo
+        id: build
+        run: |
+          npx --yes eas-cli@latest build --platform android --profile "${{ inputs.profile }}" \
+            --non-interactive --no-wait --json > build.json
+          cat build.json
+          BUILD_ID=$(jq -r '.[0].id' build.json)
+          URL="https://expo.dev/accounts/dessoyess-team/projects/calbasse/builds/$BUILD_ID"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          {
+            echo "## Build lancé ✅"
+            echo
+            echo "Le build continue sur les serveurs d'Expo (15 à 30 minutes)."
+            echo "À la fin, l'APK se télécharge ici : $URL"
+          } >> "$GITHUB_STEP_SUMMARY"
