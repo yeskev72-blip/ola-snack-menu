@@ -11,9 +11,9 @@ Pour copier un fichier depuis GitHub : ouvre-le, clique sur **Raw** (ou l'icône
 ## Étape 1 — Créer le projet (5 min)
 
 1. Va sur [supabase.com](https://supabase.com) → **Start your project** → connecte-toi (GitHub ou e-mail).
-2. Si on te le demande, crée une **organisation** (ex. « Calebasse », offre **Free**).
+2. Si on te le demande, crée une **organisation** (ex. « Calbasse », offre **Free**).
 3. **New project** :
-   - **Name** : `calebasse`
+   - **Name** : `calbasse`
    - **Database password** : clique sur **Generate a password**, puis **garde-le dans un gestionnaire de mots de passe**
      (il ne sera plus affiché).
    - **Region** : **West EU (Paris)** ou **Central EU (Frankfurt)** — les plus proches de Cotonou.
@@ -26,7 +26,7 @@ Pour copier un fichier depuis GitHub : ouvre-le, clique sur **Raw** (ou l'icône
 2. Colle **tout** le contenu de [`supabase/dashboard/01_installation.sql`](../supabase/dashboard/01_installation.sql).
 3. **Run**. Si Supabase affiche un avertissement (opération « destructive » ou RLS), confirme : le script ne supprime rien,
    il crée les tables et active la protection des données partout.
-4. Le résultat doit afficher : **« Installation Calebasse terminée : 69 plats chargés »**.
+4. Le résultat doit afficher : **« Installation Calbasse terminée : 69 plats chargés »**.
    - Erreur `already exists` : le script a déjà été exécuté, rien à refaire.
 5. Vérification facultative : nouvelle requête avec le contenu de [`supabase/tests/rls_test.sql`](../supabase/tests/rls_test.sql)
    → **Run** → « Tous les tests RLS sont passés » (ce test annule tout ce qu'il crée).
@@ -40,9 +40,9 @@ Menu de gauche : **Authentication**.
    - fournisseur **Email** : actif, **Confirm email** activé ;
    - **Minimum password length** : `8` → **Save**.
 2. **Emails** → **Templates** : l'app demande un **code à 6 chiffres**.
-   - **Confirm signup** : sujet `Ton code Calebasse`, corps = contenu de
+   - **Confirm signup** : sujet `Ton code Calbasse`, corps = contenu de
      [`supabase/templates/confirmation.html`](../supabase/templates/confirmation.html) → **Save**.
-   - **Change email address** : sujet `Ton code Calebasse`, corps = contenu de
+   - **Change email address** : sujet `Ton code Calbasse`, corps = contenu de
      [`supabase/templates/email_change.html`](../supabase/templates/email_change.html) → **Save**.
    - Les deux corps contiennent `{{ .Token }}` : c'est ce qui affiche le code. Ne le retire pas.
 
@@ -101,7 +101,7 @@ dans l'app, dans un fichier du dépôt ou dans une conversation.
 
 ## Récapitulatif
 
-- [ ] Projet `calebasse` créé en Europe, mot de passe de la base conservé
+- [ ] Projet `calbasse` créé en Europe, mot de passe de la base conservé
 - [ ] `01_installation.sql` exécuté : 69 plats chargés
 - [ ] Invités activés, confirmation par e-mail, mot de passe ≥ 8, deux modèles d'e-mail avec `{{ .Token }}`
 - [ ] 5 secrets ajoutés (dont `GEMINI_API_KEY`)

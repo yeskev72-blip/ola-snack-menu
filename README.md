@@ -1,4 +1,4 @@
-# Calebasse
+# Calbasse
 
 Application **Android** de suivi calorique par photo, pensée pour l'Afrique francophone
 (marché de départ : Bénin / Cotonou). On prend son plat en photo, on peut dire ce qu'il contient,
@@ -93,7 +93,7 @@ npm start                # serveur Expo (Expo Go ou build de développement)
 Edge Functions (Deno 2) : `deno check`, `deno lint` et `deno test` dans `supabase/functions`.
 La CI GitHub (`.github/workflows/ci.yml`) lance tout cela à chaque push.
 
-Le nom de l'app se change uniquement dans `src/brand.json`. L'identifiant Android `com.calebasse.app`
+Le nom de l'app se change uniquement dans `src/brand.json`. L'identifiant Android `com.calbasse.app`
 (`app.config.ts`) ne doit plus changer une fois l'app publiée.
 
 ## Build de l'APK (résumé)
@@ -106,7 +106,7 @@ npx eas-cli@latest env:set --environment preview --visibility plaintext --name E
 npx eas-cli@latest build -p android --profile preview
 ```
 
-Le lien de téléchargement de l'APK s'affiche à la fin du build et reste sur expo.dev (*Projects > calebasse > Builds*).
+Le lien de téléchargement de l'APK s'affiche à la fin du build et reste sur expo.dev (*Projects > calbasse > Builds*).
 Détails, profil `production`, versions et recette : [`docs/SETUP.md`](docs/SETUP.md), étapes 6 et 7.
 
 Permissions Android demandées : **caméra** uniquement (plus le stockage, limité à Android 12 et moins,

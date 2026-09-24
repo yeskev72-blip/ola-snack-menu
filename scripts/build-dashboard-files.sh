@@ -13,7 +13,7 @@ mkdir -p "$TMP/analyze-meal" "$TMP/delete-account"
 
 # --- SQL ---------------------------------------------------------------------
 {
-  echo "-- Calebasse : installation complète de la base (tables, RLS, quota, suivi des scans, 69 plats)."
+  echo "-- Calbasse : installation complète de la base (tables, RLS, quota, suivi des scans, 69 plats)."
   echo "-- GÉNÉRÉ par scripts/build-dashboard-files.sh depuis supabase/migrations et supabase/seed.sql."
   echo "-- À coller tel quel dans Supabase > SQL Editor, puis « Run ». À n'exécuter qu'UNE fois sur un projet neuf."
   echo "-- Si tu utilises plus tard la CLI Supabase, marque d'abord ces migrations comme appliquées :"
@@ -37,7 +37,7 @@ mkdir -p "$TMP/analyze-meal" "$TMP/delete-account"
   echo
   echo "commit;"
   echo
-  echo "select 'Installation Calebasse terminée : ' || count(*) || ' plats chargés' as resultat from public.foods;"
+  echo "select 'Installation Calbasse terminée : ' || count(*) || ' plats chargés' as resultat from public.foods;"
 } > "$TMP/01_installation.sql"
 
 # --- Edge Functions ----------------------------------------------------------

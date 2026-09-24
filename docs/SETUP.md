@@ -21,13 +21,13 @@ Les libellés des tableaux de bord Supabase et Expo peuvent légèrement varier 
 Prérequis sur ton ordinateur : **Node.js 22** ou plus récent, et **Git**.
 
 ```bash
-git clone <url-du-dépôt> calebasse && cd calebasse
+git clone <url-du-dépôt> calbasse && cd calbasse
 npm install
 ```
 
 ## 1. Créer le projet Supabase
 
-1. Sur [supabase.com](https://supabase.com), crée un projet nommé `calebasse`.
+1. Sur [supabase.com](https://supabase.com), crée un projet nommé `calbasse`.
    Région : **Europe (Paris `eu-west-3` ou Francfort `eu-central-1`)**, la plus proche de Cotonou.
 2. Note le **mot de passe de la base** choisi à la création.
 3. Dans *Project Settings > API*, relève :
@@ -109,7 +109,7 @@ EAS Build compile l'APK dans le cloud d'Expo : pas besoin d'Android Studio.
    npx eas-cli@latest login
    npx eas-cli@latest init
    ```
-   `init` crée le projet `calebasse` sur expo.dev et affiche son **projectId**. Comme la configuration est
+   `init` crée le projet `calbasse` sur expo.dev et affiche son **projectId**. Comme la configuration est
    dynamique (`app.config.ts`), colle-le dans la constante `EAS_PROJECT_ID` de `app.config.ts`, puis commite.
 2. **Variables publiques du build** (une seule fois par environnement)
    ```bash
@@ -127,7 +127,7 @@ EAS Build compile l'APK dans le cloud d'Expo : pas besoin d'Android Studio.
    Garde ce même projet Expo pour toutes les versions : un APK signé avec une autre clé ne pourra pas
    mettre à jour l'app déjà installée.
 5. **Récupérer l'APK** : à la fin (10 à 20 minutes), la commande affiche un **lien et un QR code**.
-   Le lien reste disponible sur [expo.dev](https://expo.dev), dans *Projects > calebasse > Builds* :
+   Le lien reste disponible sur [expo.dev](https://expo.dev), dans *Projects > calbasse > Builds* :
    bouton **Download** pour le fichier `.apk`, ou **Share** pour envoyer le lien.
 
 Profils (`eas.json`) :

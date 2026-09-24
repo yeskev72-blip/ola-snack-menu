@@ -1,4 +1,4 @@
--- Calebasse : installation complète de la base (tables, RLS, quota, suivi des scans, 69 plats).
+-- Calbasse : installation complète de la base (tables, RLS, quota, suivi des scans, 69 plats).
 -- GÉNÉRÉ par scripts/build-dashboard-files.sh depuis supabase/migrations et supabase/seed.sql.
 -- À coller tel quel dans Supabase > SQL Editor, puis « Run ». À n'exécuter qu'UNE fois sur un projet neuf.
 -- Si tu utilises plus tard la CLI Supabase, marque d'abord ces migrations comme appliquées :
@@ -11,7 +11,7 @@ begin;
 -- ============================================================================
 -- 20260924080000_schema.sql
 -- ============================================================================
--- Calebasse : schéma initial.
+-- Calbasse : schéma initial.
 -- Règle générale : RLS activée partout, un utilisateur ne voit et ne modifie que ses lignes.
 -- Les écritures sensibles (plan, quota, table des plats) passent par le service role uniquement.
 
@@ -562,4 +562,4 @@ on conflict (food_key) do update set
 
 commit;
 
-select 'Installation Calebasse terminée : ' || count(*) || ' plats chargés' as resultat from public.foods;
+select 'Installation Calbasse terminée : ' || count(*) || ' plats chargés' as resultat from public.foods;

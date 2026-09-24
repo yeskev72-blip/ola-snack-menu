@@ -1,4 +1,4 @@
--- Calebasse : schéma initial.
+-- Calbasse : schéma initial.
 -- Règle générale : RLS activée partout, un utilisateur ne voit et ne modifie que ses lignes.
 -- Les écritures sensibles (plan, quota, table des plats) passent par le service role uniquement.
 
