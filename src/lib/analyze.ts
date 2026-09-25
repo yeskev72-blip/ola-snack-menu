@@ -17,9 +17,6 @@ export type AnalyzedItem = {
 };
 export type Question = { id: string; text: string; options: string[] };
 export type QuotaInfo = { used: number; quota: number; remaining: number };
-
-/** Plafond serveur à partir duquel les scans sont présentés comme illimités (migration unlimited_scans). */
-export const UNLIMITED_SCANS = 100_000;
 export type AnalysisResponse = {
   not_food: boolean;
   items: AnalyzedItem[];

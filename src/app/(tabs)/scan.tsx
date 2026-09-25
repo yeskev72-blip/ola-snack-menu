@@ -9,7 +9,7 @@ import { Notice } from '@/components/Notice';
 import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
 import { t } from '@/i18n';
-import { analyzeMeal, fetchScanStatus, preparePhoto, type QuotaInfo, UNLIMITED_SCANS } from '@/lib/analyze';
+import { analyzeMeal, fetchScanStatus, preparePhoto, type QuotaInfo } from '@/lib/analyze';
 import { loadFoods } from '@/lib/foods';
 import { useScanDraft } from '@/state/scanDraft';
 import { colors, radius, spacing } from '@/theme';
@@ -97,11 +97,7 @@ export default function Scan() {
     router.push('/result');
   };
 
-  const quotaText = !quota
-    ? t('scan.quotaUnknown')
-    : quota.quota >= UNLIMITED_SCANS
-      ? t('scan.quotaUnlimited')
-      : t('scan.quota', { count: quota.remaining });
+  const quotaText = quota ? t('scan.quota', { count: quota.remaining }) : t('scan.quotaUnknown');
 
   return (
     <Screen

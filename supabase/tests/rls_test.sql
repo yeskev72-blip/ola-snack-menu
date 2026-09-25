@@ -108,25 +108,21 @@ do $$
 declare r record;
 begin
   assert (select count(*) from public.meals where total_kcal = 650) = 1, 'le repas de A est intact';
-  -- Scans illimités (plafond 100000) : le compteur avance, rien n'est refusé.
-  for i in 1..4 loop
+  for i in 1..3 loop
     select * into r from public.consume_scan('00000000-0000-0000-0000-00000000000a');
-    assert r.allowed and r.used = i and r.quota = 100000, format('scan gratuit %s autorisé', i);
+    assert r.allowed and r.used = i and r.quota = 3, format('scan gratuit %s autorisé', i);
   end loop;
+  select * into r from public.consume_scan('00000000-0000-0000-0000-00000000000a');
+  assert not r.allowed and r.used = 3, '4e scan gratuit refusé';
 
   select * into r from public.consume_scan('00000000-0000-0000-0000-00000000000c');
-  assert r.allowed and r.quota = 100000, '1er scan invité autorisé';
+  assert r.allowed and r.quota = 1, '1er scan invité autorisé';
   select * into r from public.consume_scan('00000000-0000-0000-0000-00000000000c');
-  assert r.allowed, '2e scan invité autorisé';
+  assert not r.allowed, '2e scan invité refusé';
 
   perform public.release_scan('00000000-0000-0000-0000-00000000000a');
   select * into r from public.consume_scan('00000000-0000-0000-0000-00000000000a');
-  assert r.allowed and r.used = 4, 'un scan rendu après échec est recompté';
-
-  -- Le plafond reste appliqué de façon atomique.
-  update public.scan_usage set count = 100000 where user_id = '00000000-0000-0000-0000-00000000000c';
-  select * into r from public.consume_scan('00000000-0000-0000-0000-00000000000c');
-  assert not r.allowed and r.used = 100000, 'plafond anti-abus appliqué';
+  assert r.allowed and r.used = 3, 'un scan rendu après échec peut être réutilisé';
 end $$;
 
 -- Relance après questions : une seule par scan, uniquement par son propriétaire.
@@ -153,7 +149,7 @@ do $$
 declare r record;
 begin
   select * into r from public.get_scan_status();
-  assert r.used = 4 and r.quota = 100000 and r.remaining = 99996, 'get_scan_status pour A';
+  assert r.used = 3 and r.quota = 3 and r.remaining = 0, 'get_scan_status pour A';
   assert (select count(*) from public.scan_usage) = 1, 'A ne voit que son compteur';
 end $$;
 
