@@ -9,7 +9,7 @@ import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
 import { t } from '@/i18n';
 import { useAction } from '@/lib/useAction';
-import { isValidCode, isValidEmail, MIN_PASSWORD_LENGTH } from '@/lib/validation';
+import { CODE_LENGTH, isValidCode, isValidEmail, MIN_PASSWORD_LENGTH, normalizeCode } from '@/lib/validation';
 import { useSession } from '@/state/session';
 
 /** Invité → compte e-mail. Même identifiant Supabase : journal et profil sont conservés. */
@@ -48,10 +48,10 @@ export default function LinkAccount() {
         <TextField
           label={t('auth.codeLabel')}
           value={code}
-          onChangeText={(text) => setCode(text.replace(/\D/g, '').slice(0, 6))}
+          onChangeText={(text) => setCode(normalizeCode(text))}
           keyboardType="number-pad"
           autoComplete="one-time-code"
-          maxLength={6}
+          maxLength={CODE_LENGTH.max}
         />
         <Notice message={confirm.error ?? send.error} />
       </Screen>

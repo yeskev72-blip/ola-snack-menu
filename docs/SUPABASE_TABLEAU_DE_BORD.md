@@ -54,7 +54,7 @@ Menu de gauche : **Authentication**.
 
    > Avec une adresse Gmail/Yahoo comme expéditeur, les e-mails risquent d'arriver en spam chez les autres :
    > avant la diffusion, utilise une adresse sur ton propre nom de domaine (vérifié dans Brevo).
-3. **Emails** → **Templates** (débloqué par le SMTP) : l'app demande un **code à 6 chiffres**.
+3. **Emails** → **Templates** (débloqué par le SMTP) : l'app demande un **code** (6 à 10 chiffres ; Supabase en envoie 6 ou 8 selon le réglage *Email OTP Length* du fournisseur Email).
    - **Confirm signup** : sujet `Ton code Calbasse`, corps = contenu de
      [`supabase/templates/confirmation.html`](../supabase/templates/confirmation.html) → **Save**.
    - **Change email address** : sujet `Ton code Calbasse`, corps = contenu de
