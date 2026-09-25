@@ -5,9 +5,11 @@
  *   GEMINI_API_KEY          obligatoire, ne quitte jamais le serveur
  *   GEMINI_MODEL            défaut « gemini-flash-lite-latest » (modèle léger, offre gratuite)
  *   GEMINI_FALLBACK_MODELS  modèles de secours si le principal est saturé, séparés par des virgules ;
- *                           défaut « gemini-flash-latest » ; « none » pour désactiver
- *   GEMINI_TEMPERATURE      défaut 0.3 ; « default » = valeur du modèle
- *   GEMINI_THINKING_LEVEL   défaut « low »
+ *                           défaut « gemini-flash-lite-latest,gemini-flash-latest » ; « none » pour désactiver
+ *   GEMINI_STRUCTURED       « true » pour imposer le schéma JSON, la température et le niveau de réflexion
+ *                           (refusés en 400 par les modèles actuels) ; défaut : requête simplifiée
+ *   GEMINI_TEMPERATURE      avec GEMINI_STRUCTURED seulement ; défaut 0.3 ; « default » = valeur du modèle
+ *   GEMINI_THINKING_LEVEL   avec GEMINI_STRUCTURED seulement ; défaut « low »
  *   STORE_PHOTOS            « true » pour conserver les photos (si l'utilisateur a consenti)
  *   GEMINI_API_BASE         facultatif (tests, proxy) ; défaut : API publique de Google
  * Fournis automatiquement par Supabase : SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY.
@@ -44,9 +46,12 @@ const geminiConfig: GeminiConfig = {
   thinkingLevel,
   maxOutputTokens: 4096,
   timeoutMs: 45_000,
+  // Schéma, température et réflexion : refusés (HTTP 400) par les modèles actuels, d'où la requête
+  // simplifiée par défaut. La forme JSON est décrite dans le prompt ; la validation reste stricte.
+  simple: env('GEMINI_STRUCTURED', 'false') !== 'true',
 };
 // Secours : sans réglage de réflexion, que certains modèles refusent (chacun garde sa valeur par défaut).
-const fallbackConfigs: GeminiConfig[] = env('GEMINI_FALLBACK_MODELS', 'gemini-flash-latest')
+const fallbackConfigs: GeminiConfig[] = env('GEMINI_FALLBACK_MODELS', 'gemini-flash-lite-latest,gemini-flash-latest')
   .split(',')
   .map((m) => m.trim())
   .filter((m) => m !== '' && m !== 'none' && m !== geminiConfig.model)
@@ -111,11 +116,11 @@ const handler = createHandler({
     return data as FoodRef[];
   },
 
-  // Modèle saturé : 3 essais espacés (1 s puis 3 s), puis les modèles de secours ; réponse en moins de 50 s
+  // Modèle saturé (503) : un second essai 2 s plus tard, puis les modèles de secours ; réponse en moins de 50 s
   // pour rester sous le délai de l'app (60 s).
   gemini: (req) =>
     callGeminiResilient(modelChain, req, {
-      retryDelaysMs: [1_000, 3_000],
+      retryDelaysMs: [2_000],
       budgetMs: 50_000,
       onFailure: (r) => !r.ok && console.error(JSON.stringify({ message: 'essai Gemini en échec', model: r.model, error: r.error })),
     }),

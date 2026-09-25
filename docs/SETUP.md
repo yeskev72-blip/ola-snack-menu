@@ -91,12 +91,16 @@ La clé Gemini reste **uniquement** dans les secrets Supabase : elle n'est jamai
 
 Pour changer de modèle plus tard, sans republier l'app : `npx supabase@latest secrets set GEMINI_MODEL=<identifiant>`.
 
-**Modèle saturé** (`HTTP 503 : This model is currently experiencing high demand` dans `scan_calls.error`) : la fonction
-réessaie le modèle principal deux fois (après 1 s puis 3 s), puis essaie les modèles de `GEMINI_FALLBACK_MODELS`
-(défaut `gemini-flash-latest`, séparés par des virgules, `none` pour désactiver). Si tout est saturé, l'app affiche
-« Le service d'analyse est saturé » et le scan n'est pas décompté. Chaque essai a sa ligne dans `scan_calls` (colonne `model`) ; pour une erreur 400, la colonne `error`
-indique le champ refusé quand Google le précise. Un modèle qui refuse un réglage (400) est réessayé une fois
-avec une requête simplifiée (sans schéma imposé, réflexion ni température).
+**Modèle saturé ou quota dépassé** (`HTTP 503 : … high demand` ou `HTTP 429 : You exceeded your current quota` dans
+`scan_calls.error`) : un modèle saturé (503) est réessayé une fois après 2 s ; un quota dépassé (429) passe directement au
+suivant. Ordre : `GEMINI_MODEL`, puis `GEMINI_FALLBACK_MODELS` (défaut `gemini-flash-lite-latest,gemini-flash-latest`,
+séparés par des virgules, `none` pour désactiver). Si tout échoue ainsi, l'app affiche « Le service d'analyse est saturé »
+et le scan n'est pas décompté. Chaque essai a sa ligne dans `scan_calls` (colonne `model`).
+
+**Requête simplifiée** : les modèles actuels refusent (`HTTP 400 : Request contains an invalid argument`) la requête avec
+schéma JSON imposé, température et niveau de réflexion. Par défaut la fonction envoie donc une requête simplifiée : la forme
+JSON est décrite dans le prompt et la réponse est validée aussi strictement. `GEMINI_STRUCTURED=true` rétablit la requête
+complète (un refus 400 est alors réessayé une fois en requête simplifiée).
 
 ## 5. Relier l'app et tester avec Expo Go (conseillé)
 
@@ -184,10 +188,8 @@ from scan_calls where ok and created_at > now() - interval '7 days';
 
 Multiplie par le tarif en vigueur du modèle (la réflexion est facturée comme de la sortie).
 
-**Température** : le cahier des charges fixe 0,3 (`GEMINI_TEMPERATURE=0.3`), alors que Google recommande de garder
-la valeur par défaut sur les modèles Gemini 3 (la baisser peut dégrader les réponses ou les faire boucler).
-Si `scan_calls.error` montre des réponses invalides ou tronquées :
-`npx supabase@latest secrets set GEMINI_TEMPERATURE=default`.
+**Température** : elle n'est envoyée qu'avec `GEMINI_STRUCTURED=true` (défaut `GEMINI_TEMPERATURE=0.3`, cahier des charges ;
+Google recommande de garder la valeur par défaut des modèles Gemini 3 : `GEMINI_TEMPERATURE=default`).
 
 ## 9. Avant d'ouvrir l'app à d'autres personnes
 

@@ -70,9 +70,7 @@ Menu de gauche : **Authentication**.
    |---|---|
    | `GEMINI_API_KEY` | ta clé Gemini |
    | `GEMINI_MODEL` | `gemini-flash-lite-latest` |
-   | `GEMINI_FALLBACK_MODELS` | `gemini-flash-latest` (facultatif : c'est déjà la valeur par défaut) |
-   | `GEMINI_TEMPERATURE` | `0.3` |
-   | `GEMINI_THINKING_LEVEL` | `low` |
+   | `GEMINI_FALLBACK_MODELS` | `gemini-flash-lite-latest,gemini-flash-latest` (facultatif : c'est déjà la valeur par défaut) |
    | `STORE_PHOTOS` | `false` |
 
    → **Save**. La clé Gemini reste ici, jamais dans l'app. (`SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY`
