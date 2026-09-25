@@ -178,5 +178,60 @@ exception when insufficient_privilege then null;
 end $$;
 reset role;
 
+-- ---------------------------------------------------------------- Premium (Chariow)
+set local role service_role;
+do $$
+declare
+  r record;
+  v_first timestamptz;
+  b constant uuid := '00000000-0000-0000-0000-00000000000b';
+begin
+  select * into r from public.grant_premium(b, 'sale_1', 'monthly', 30, 1000, 'XOF');
+  assert r.granted and r.premium_until between now() + interval '29 days' and now() + interval '31 days', 'mensuel : 30 jours';
+  v_first := r.premium_until;
+  assert (select quota from public.consume_scan(b)) = 30, 'Premium : 30 scans';
+
+  select * into r from public.grant_premium(b, 'sale_1', 'monthly', 30);
+  assert not r.granted and r.premium_until = v_first, 'même vente rejouée : rien de plus';
+
+  select * into r from public.grant_premium(b, 'sale_2', 'yearly', 365);
+  assert r.granted and r.premium_until = v_first + interval '365 days', 'annuel : prolonge la fin actuelle';
+
+  update public.profiles set premium_until = now() - interval '1 day' where id = b;
+  assert (select quota from public.consume_scan(b)) = 3, 'Premium expiré : retour à 3 scans';
+  select * into r from public.grant_premium(b, 'sale_3', 'monthly', 30);
+  assert r.premium_until > now() + interval '29 days', 'après expiration : 30 jours à partir de maintenant';
+
+  update public.profiles set plan = 'premium', premium_until = null where id = b;
+  select * into r from public.grant_premium(b, 'sale_4', 'monthly', 30);
+  assert r.granted and r.premium_until is null, 'Premium permanent : reste permanent';
+  assert (select quota from public.consume_scan(b)) = 30, 'Premium permanent : 30 scans';
+  assert (select count(*) from public.payments where user_id = b) = 4, 'quatre ventes enregistrées';
+end $$;
+reset role;
+
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000b","role":"authenticated"}', true);
+do $$ begin
+  assert (select count(*) from public.payments) = 4, 'B voit ses paiements';
+  assert (select quota from public.get_scan_status()) = 30, 'get_scan_status : Premium';
+end $$;
+do $$ begin
+  update public.profiles set premium_until = now() + interval '10 years' where id = auth.uid();
+  raise exception 'DEVAIT ÉCHOUER : B prolonge lui-même son Premium';
+exception when insufficient_privilege then null;
+end $$;
+do $$ begin
+  insert into public.payments (user_id, sale_id, offer, days) values (auth.uid(), 'faux', 'yearly', 365);
+  raise exception 'DEVAIT ÉCHOUER : B crée un paiement';
+exception when insufficient_privilege then null;
+end $$;
+do $$ begin
+  perform public.grant_premium(auth.uid(), 'faux', 'yearly', 365);
+  raise exception 'DEVAIT ÉCHOUER : grant_premium appelé par un client';
+exception when insufficient_privilege then null;
+end $$;
+reset role;
+
 select 'Tous les tests RLS sont passés' as resultat;
 rollback;

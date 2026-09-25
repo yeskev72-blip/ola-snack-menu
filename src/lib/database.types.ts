@@ -35,6 +35,8 @@ type ProfileRow = {
   objectif: Objectif | null;
   calories_cible: number | null;
   plan: Plan;
+  /** Fin du Premium payé ; null avec plan premium = permanent. */
+  premium_until: Timestamp | null;
   partage_photos: boolean;
   created_at: Timestamp;
   updated_at: Timestamp;

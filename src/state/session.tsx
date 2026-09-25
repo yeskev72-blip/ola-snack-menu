@@ -32,6 +32,8 @@ type Session = {
   /** Invité → compte : valide le code puis fixe le mot de passe. Même identifiant, données conservées. */
   finishLinkEmail: (email: string, code: string, password: string) => Promise<void>;
   updateProfile: (patch: ProfileUpdate) => Promise<void>;
+  /** Relit le profil sur le serveur (ex. après un paiement). */
+  refreshProfile: () => Promise<void>;
   /** Déconnexion : efface aussi le journal et le profil gardés sur le téléphone. */
   signOut: () => Promise<void>;
   /** Supprime définitivement le compte et toutes ses données (serveur puis téléphone). */
@@ -140,6 +142,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
           await Storage.setItem(profileCacheKey(user.id), JSON.stringify(data));
         }
       },
+      refreshProfile: async () => {
+        if (user) await loadProfile(user.id);
+      },
       signOut: async () => {
         if (user) {
           await clearLocalData(user.id);
@@ -157,7 +162,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         await supabase.auth.signOut({ scope: 'local' });
       },
     }),
-    [status, user, profile],
+    [status, user, profile, loadProfile],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

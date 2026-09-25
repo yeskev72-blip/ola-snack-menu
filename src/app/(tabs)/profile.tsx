@@ -11,6 +11,7 @@ import { Screen } from '@/components/Screen';
 import { t } from '@/i18n';
 import { isOnline } from '@/lib/analyze';
 import { pendingCount, syncMeals } from '@/lib/meals';
+import { formatDate, planStatus } from '@/lib/plan';
 import { GOALS } from '@/lib/profileOptions';
 import { useAction } from '@/lib/useAction';
 import { useSession } from '@/state/session';
@@ -60,6 +61,13 @@ export default function Profile() {
   };
 
   const goal = GOALS.find((g) => g.value === profile?.objectif);
+  const plan = planStatus(profile?.plan, profile?.premium_until);
+  const planText =
+    plan.kind === 'free'
+      ? t('premium.free')
+      : plan.until
+        ? t('premium.activeUntil', { date: formatDate(plan.until) })
+        : t('premium.permanent');
 
   return (
     <Screen edges={['top']}>
@@ -91,6 +99,18 @@ export default function Profile() {
           </AppText>
         ) : null}
         <Button label={t('profile.editProfile')} variant="secondary" onPress={() => router.push('/profile-edit')} />
+      </Card>
+
+      <Card>
+        <AppText variant="large">{t('premium.cardTitle')}</AppText>
+        <AppText>{planText}</AppText>
+        {plan.kind === 'premium' && !plan.until ? null : (
+          <Button
+            label={plan.kind === 'premium' ? t('premium.extend') : t('premium.upgrade')}
+            variant={plan.kind === 'premium' ? 'secondary' : 'primary'}
+            onPress={() => router.push('/premium')}
+          />
+        )}
       </Card>
 
       {!isGuest ? (

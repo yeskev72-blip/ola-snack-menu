@@ -14,6 +14,9 @@ import { loadFoods } from '@/lib/foods';
 import { useScanDraft } from '@/state/scanDraft';
 import { colors, radius, spacing } from '@/theme';
 
+/** Quota Premium (scan_quota côté serveur) : au-dessous, on propose de passer Premium. */
+const PREMIUM_DAILY_SCANS = 30;
+
 const PICKER_OPTIONS: ImagePicker.ImagePickerOptions = { mediaTypes: 'images', quality: 0.9, exif: false };
 
 export default function Scan() {
@@ -144,6 +147,12 @@ export default function Scan() {
       )}
 
       <Notice message={error} />
+      {quotaExhausted && (quota?.quota ?? 0) < PREMIUM_DAILY_SCANS ? (
+        <>
+          <Notice tone="info" message={t('premium.fromQuota')} />
+          <Button label={t('premium.upgrade')} onPress={() => router.push('/premium')} />
+        </>
+      ) : null}
       {draft.photo && (quotaExhausted || error) ? <Button label={t('scan.manual')} variant="secondary" onPress={manual} /> : null}
     </Screen>
   );

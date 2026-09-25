@@ -9,7 +9,7 @@ set -euo pipefail
 OUT=supabase/dashboard
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
-mkdir -p "$TMP/analyze-meal" "$TMP/delete-account"
+mkdir -p "$TMP/analyze-meal" "$TMP/delete-account" "$TMP/create-checkout" "$TMP/chariow-webhook"
 
 # --- SQL ---------------------------------------------------------------------
 {
@@ -41,7 +41,7 @@ mkdir -p "$TMP/analyze-meal" "$TMP/delete-account"
 } > "$TMP/01_installation.sql"
 
 # --- Edge Functions ----------------------------------------------------------
-for fn in analyze-meal delete-account; do
+for fn in analyze-meal delete-account create-checkout chariow-webhook; do
   deno bundle --quiet --no-config --platform=deno --external 'npm:@supabase/supabase-js@2' \
     -o "$TMP/$fn/bundle.js" "supabase/functions/$fn/index.ts"
   {
