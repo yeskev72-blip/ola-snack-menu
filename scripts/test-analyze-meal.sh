@@ -7,7 +7,7 @@
 # Variables (lues aussi depuis .env à la racine) :
 #   EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY   obligatoires
 #   TEST_EMAIL, TEST_PASSWORD   compte de test ; sans eux, un invité est créé (1 scan/jour)
-#   REPEAT=4                    envoie N scans d'affilée (vérifie le refus du 4e scan gratuit)
+#   REPEAT=3                    envoie N scans d'affilée (vérifie le refus du 3e scan gratuit)
 #   SCAN_ID=… ANSWER="…"        relance d'un scan en répondant à sa première question
 #   QUESTION="…"                texte de la question (facultatif, pour le contexte)
 #

@@ -28,7 +28,9 @@ par le modèle.
 - **Historique** : calories par jour sur 7 et 30 jours avec la cible, moyenne, détail par journée.
 - **Hors ligne** : journal consultable et enregistrable sans réseau (saisie sans photo), synchronisé au retour
   du réseau ; le scan IA, lui, exige internet et le dit clairement.
-- **Quota** : invité 1, gratuit 3, premium 30 scans par jour (heure du Bénin), vérifié côté serveur.
+- **Quota** : invité 1, gratuit 2, premium 30 scans par jour (heure du Bénin), vérifié côté serveur.
+- **Premium** : mensuel (30 jours) ou annuel (365 jours), payé par mobile money ou carte via Chariow, sans
+  renouvellement automatique ; crédité par le serveur après vérification de la vente (`docs/PAIEMENTS_CHARIOW.md`).
 - **Corrections** : chaque écart entre la prédiction de l'IA et la saisie finale est enregistré pour améliorer la table.
 
 ## Architecture
@@ -73,6 +75,7 @@ Téléphone (APK)                                   Supabase
 | | `GEMINI_TEMPERATURE` | avec `GEMINI_STRUCTURED=true` : défaut `0.3` ; `default` = valeur du modèle |
 | | `GEMINI_THINKING_LEVEL` | avec `GEMINI_STRUCTURED=true` : défaut `low` (coût et latence) |
 | | `STORE_PHOTOS` | `false` par défaut ; `true` conserve les photos des utilisateurs consentants |
+| | `CHARIOW_API_KEY`, `CHARIOW_PRODUCT_MONTHLY`, `CHARIOW_PRODUCT_YEARLY`, `CHARIOW_LABEL_*`, `CHARIOW_WEBHOOK_TOKEN` | paiements Premium (`docs/PAIEMENTS_CHARIOW.md`) — **jamais dans l'app** |
 | Fournies par Supabase | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | utilisées par les Edge Functions seulement |
 
 ## Développement

@@ -432,3 +432,13 @@ verify_jwt = false
 [functions.delete-account]
 enabled = true
 verify_jwt = false
+
+# Paiement Premium (Chariow) : jeton vérifié dans la fonction (auth.getUser).
+[functions.create-checkout]
+enabled = true
+verify_jwt = false
+
+# Notifications de vente Chariow : pas de jeton Supabase, authentifiées par ?token= ou signature.
+[functions.chariow-webhook]
+enabled = true
+verify_jwt = false

@@ -13,6 +13,7 @@ Les libellés des tableaux de bord Supabase et Expo peuvent légèrement varier 
 - [ ] Remplir `.env` et tester avec Expo Go (facultatif mais conseillé) — étape 5
 - [ ] Créer un compte **Expo**, relier le projet, déclarer les 2 variables publiques, lancer le build — étape 6
 - [ ] Installer l'APK et dérouler la recette — étape 7
+- [ ] Paiements Premium (Chariow) et ton compte en Premium permanent — [`docs/PAIEMENTS_CHARIOW.md`](PAIEMENTS_CHARIOW.md)
 - [ ] Avant d'ouvrir l'app à d'autres personnes : SMTP, CAPTCHA, vérification des valeurs nutritionnelles — étape 9
 
 > **Sans terminal ?** Les étapes 1 à 4 (Supabase) peuvent se faire entièrement dans le navigateur :
@@ -87,7 +88,7 @@ La clé Gemini reste **uniquement** dans les secrets Supabase : elle n'est jamai
    ```
    (Si `.env` est déjà rempli — étape 5 — le script le lit tout seul.)
    Sans `TEST_EMAIL` / `TEST_PASSWORD`, il crée un invité (1 scan par jour). Avec ton compte de test,
-   `REPEAT=4` envoie 4 scans : les 3 premiers répondent `HTTP 200`, le 4e `HTTP 429` (`quota_exceeded`).
+   `REPEAT=3` envoie 3 scans : les 2 premiers répondent `HTTP 200`, le 3e `HTTP 429` (`quota_exceeded`).
 
 Pour changer de modèle plus tard, sans republier l'app : `npx supabase@latest secrets set GEMINI_MODEL=<identifiant>`.
 
@@ -170,7 +171,7 @@ Recette (critères d'acceptation) :
 4. **Mode avion** : « Saisir sans photo » → le repas s'enregistre et reste consultable ; au retour du réseau
    il est synchronisé (le message « en attente » disparaît).
 5. Profil > **Créer mon compte** : code reçu par e-mail, journal conservé.
-6. Avec un compte gratuit, le **4e scan** du jour est refusé avec un message clair.
+6. Avec un compte gratuit, le **3e scan** du jour est refusé avec un message clair qui propose Premium.
 7. Profil > **Supprimer mon compte** : retour à l'accueil ; dans Supabase, l'utilisateur et ses repas ont disparu.
 
 ## 8. Suivre le coût réel de Gemini

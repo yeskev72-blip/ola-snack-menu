@@ -52,6 +52,7 @@ function RootNavigator() {
         <Stack.Screen name="food-picker" options={{ headerShown: true, title: t('picker.title'), presentation: 'modal' }} />
         <Stack.Screen name="link-account" options={{ headerShown: true, title: t('auth.linkTitle') }} />
         <Stack.Screen name="profile-edit" options={{ headerShown: true, title: t('profileEdit.title') }} />
+        <Stack.Screen name="premium" options={{ headerShown: true, title: t('premium.title') }} />
         <Stack.Screen name="meal/[id]" options={{ headerShown: true, title: '' }} />
         <Stack.Screen name="day/[day]" options={{ headerShown: true, title: '' }} />
       </Stack.Protected>

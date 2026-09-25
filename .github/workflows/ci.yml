@@ -32,7 +32,7 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-      - run: deno check --no-config supabase/functions/analyze-meal/index.ts supabase/functions/delete-account/index.ts
+      - run: deno check --no-config supabase/functions/analyze-meal/index.ts supabase/functions/delete-account/index.ts supabase/functions/create-checkout/index.ts supabase/functions/chariow-webhook/index.ts
       - run: deno lint --no-config supabase/functions
       - run: deno test --no-config supabase/functions
       - name: Fichiers du tableau de bord Supabase à jour
