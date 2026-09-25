@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { t } from '@/i18n';
+import { formatNumber } from '@/lib/format';
 import type { Nutrients } from '@/lib/nutrition';
 import { colors, spacing } from '@/theme';
 
@@ -20,7 +21,7 @@ export function Macros({ values }: { values: Nutrients }) {
           <View style={[styles.dot, { backgroundColor: m.color }]} />
           <AppText variant="small">{t(m.label)}</AppText>
           <AppText variant="large">
-            {Math.round(values[m.key])} {t('common.grams')}
+            {formatNumber(values[m.key])} {t('common.grams')}
           </AppText>
         </View>
       ))}

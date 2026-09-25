@@ -19,9 +19,9 @@ test('totaux par jour, journées vides à zéro', () => {
   ];
   const days = totalsByDay(meals, ['2026-01-01', '2026-01-02']);
   assert.deepEqual(days[0], { day: '2026-01-01', kcal: 0, proteines: 0, glucides: 0, lipides: 0, meals: 0 });
-  assert.equal(days[1]!.kcal, 1100);
+  assert.equal(days[1]!.kcal, 1100.4, 'une décimale conservée');
   assert.equal(days[1]!.meals, 2);
-  assert.equal(averageKcal(days), 1100, 'la journée vide ne compte pas');
+  assert.equal(averageKcal(days), 1100.4, 'la journée vide ne compte pas');
   assert.equal(averageKcal([days[0]!]), null);
 });
 

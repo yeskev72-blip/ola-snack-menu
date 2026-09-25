@@ -11,6 +11,7 @@ import { Macros } from '@/components/Macros';
 import { Notice } from '@/components/Notice';
 import { Screen } from '@/components/Screen';
 import { t } from '@/i18n';
+import { formatNumber } from '@/lib/format';
 import { analyzeMeal, isOnline } from '@/lib/analyze';
 import { buildCorrection } from '@/lib/corrections';
 import { useFoods } from '@/lib/foods';
@@ -83,7 +84,7 @@ export default function Result() {
 
   const kcalText = nutrition.range
     ? t('result.rangeValue', { low: nutrition.range.low, high: nutrition.range.high })
-    : String(nutrition.total.kcal);
+    : formatNumber(nutrition.total.kcal);
 
   return (
     <Screen
@@ -142,12 +143,12 @@ export default function Result() {
             <View style={styles.itemText}>
               <AppText style={styles.itemLabel}>{item.label}</AppText>
               <AppText variant="small">
-                {Math.round(item.grams)} {t('common.grams')}
+                {formatNumber(item.grams)} {t('common.grams')}
                 {hint ? ` · ${hint}` : ''}
               </AppText>
             </View>
             <View style={styles.itemKcal}>
-              <AppText variant="large">{Math.round(n.kcal)}</AppText>
+              <AppText variant="large">{formatNumber(n.kcal)}</AppText>
               <AppText variant="small">
                 {t('common.kcal')}
                 {n.estimated ? ` · ${t('result.estimated')}` : ''}

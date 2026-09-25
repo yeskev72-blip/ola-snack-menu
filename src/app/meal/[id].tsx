@@ -7,6 +7,7 @@ import { Card } from '@/components/Card';
 import { Macros } from '@/components/Macros';
 import { Screen } from '@/components/Screen';
 import { t } from '@/i18n';
+import { formatNumber } from '@/lib/format';
 import { deleteMeal, useMeal } from '@/lib/meals';
 import { mealTypeLabel } from '@/lib/mealTypes';
 import { useSession } from '@/state/session';
@@ -52,7 +53,7 @@ export default function MealDetail() {
 
       <Card style={styles.summary}>
         <AppText variant="display" style={styles.kcal}>
-          {Math.round(meal.total.kcal)}
+          {formatNumber(meal.total.kcal)}
         </AppText>
         <AppText variant="muted">{t('common.kcal')}</AppText>
         <Macros values={meal.total} />
@@ -64,11 +65,11 @@ export default function MealDetail() {
           <View style={styles.flex}>
             <AppText style={styles.label}>{item.label}</AppText>
             <AppText variant="small">
-              {Math.round(item.grams)} {t('common.grams')}
+              {formatNumber(item.grams)} {t('common.grams')}
             </AppText>
           </View>
           <AppText>
-            {Math.round(item.kcal)} {t('common.kcal')}
+            {formatNumber(item.kcal)} {t('common.kcal')}
             {item.estimated ? ` · ${t('result.estimated')}` : ''}
           </AppText>
         </View>

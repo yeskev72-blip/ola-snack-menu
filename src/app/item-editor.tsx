@@ -10,6 +10,7 @@ import { Notice } from '@/components/Notice';
 import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
 import { t } from '@/i18n';
+import { formatNumber, round1 } from '@/lib/format';
 import { useFoods } from '@/lib/foods';
 import { itemNutrition } from '@/lib/nutrition';
 import { gramsHint, unitLabel } from '@/lib/portionLabels';
@@ -33,7 +34,7 @@ export default function ItemEditor() {
   const [labelEdit, setLabelEdit] = useState({ foodKey: item?.food_key ?? null, value: item?.label ?? '' });
   const [unit, setUnit] = useState<string>(GRAMS);
   const [count, setCount] = useState(1);
-  const [gramsText, setGramsText] = useState(item ? String(Math.round(item.grams)) : '');
+  const [gramsText, setGramsText] = useState(item ? formatNumber(item.grams) : '');
   const [error, setError] = useState<string | null>(null);
 
   if (!item) return null;
@@ -42,13 +43,13 @@ export default function ItemEditor() {
   const setLabel = (value: string) => setLabelEdit({ foodKey: item.food_key, value });
 
   const unitGrams = units.find((u) => u.name === unit)?.grams;
-  const grams = unit === GRAMS || !unitGrams ? parseNumber(gramsText) : Math.round(count * unitGrams);
+  const grams = unit === GRAMS || !unitGrams ? parseNumber(gramsText) : round1(count * unitGrams);
   const preview = grams ? itemNutrition({ ...item, grams }, byKey) : null;
 
   const step = (delta: number) => {
     if (unit === GRAMS) {
       const current = parseNumber(gramsText) ?? 0;
-      setGramsText(String(Math.max(10, Math.round(current + delta * 10))));
+      setGramsText(formatNumber(Math.max(10, current + delta * 10)));
     } else {
       setCount((c) => Math.max(0.5, c + delta * 0.5));
     }
@@ -56,7 +57,7 @@ export default function ItemEditor() {
 
   const chooseUnit = (name: string) => {
     if (name !== GRAMS && unit === GRAMS) setCount(1);
-    if (name === GRAMS && grams) setGramsText(String(grams));
+    if (name === GRAMS && grams) setGramsText(formatNumber(grams));
     setUnit(name);
   };
 
@@ -118,7 +119,7 @@ export default function ItemEditor() {
         <AppText variant="muted" style={styles.center}>
           {grams} {t('common.grams')}
           {unit === GRAMS ? (gramsHint(grams, units) ? ` · ${gramsHint(grams, units)}` : '') : ''}
-          {preview ? ` · ${Math.round(preview.kcal)} ${t('common.kcal')}${preview.estimated ? ` (${t('result.estimated')})` : ''}` : ''}
+          {preview ? ` · ${formatNumber(preview.kcal)} ${t('common.kcal')}${preview.estimated ? ` (${t('result.estimated')})` : ''}` : ''}
         </AppText>
       ) : null}
 
