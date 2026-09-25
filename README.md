@@ -50,6 +50,7 @@ Téléphone (APK)                                   Supabase
 2. La fonction consomme un scan (atomique, en SQL), charge la table `foods` et appelle Gemini avec un
    **schéma JSON** qui limite `food_key` aux plats connus (ou `autre`).
 3. La réponse est validée strictement ; une seule relance si elle est invalide ; en cas d'échec, le scan est rendu.
+   Si Gemini est saturé (503), la fonction réessaie deux fois puis passe au modèle de secours (`GEMINI_FALLBACK_MODELS`).
 4. L'app calcule les calories avec la table `foods` (`src/lib/nutrition.ts`). Les valeurs de l'IA ne servent
    que pour un élément `autre`, affiché « estimé ».
 5. Si l'IA pose des questions, l'app relance **une fois**, gratuitement, avec la **même** photo
@@ -66,6 +67,7 @@ Téléphone (APK)                                   Supabase
 | | `EXPO_PUBLIC_SUPABASE_ANON_KEY` | clé `anon` / publishable (publique, sécurité assurée par la RLS) |
 | Secrets Supabase (`supabase/functions/.env`) | `GEMINI_API_KEY` | clé Gemini — **jamais dans l'app** |
 | | `GEMINI_MODEL` | défaut `gemini-3.8-flash`, modifiable sans republier l'app |
+| | `GEMINI_FALLBACK_MODELS` | défaut `gemini-flash-lite-latest` : secours si le modèle principal est saturé ; `none` pour désactiver |
 | | `GEMINI_TEMPERATURE` | défaut `0.3` ; `default` = valeur du modèle |
 | | `GEMINI_THINKING_LEVEL` | défaut `low` (coût et latence) |
 | | `STORE_PHOTOS` | `false` par défaut ; `true` conserve les photos des utilisateurs consentants |

@@ -70,6 +70,7 @@ Menu de gauche : **Authentication**.
    |---|---|
    | `GEMINI_API_KEY` | ta clé Gemini |
    | `GEMINI_MODEL` | `gemini-3.8-flash` |
+   | `GEMINI_FALLBACK_MODELS` | `gemini-flash-lite-latest` (facultatif : c'est déjà la valeur par défaut) |
    | `GEMINI_TEMPERATURE` | `0.3` |
    | `GEMINI_THINKING_LEVEL` | `low` |
    | `STORE_PHOTOS` | `false` |

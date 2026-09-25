@@ -4,6 +4,8 @@
  * Secrets (supabase secrets set …) :
  *   GEMINI_API_KEY          obligatoire, ne quitte jamais le serveur
  *   GEMINI_MODEL            défaut « gemini-3.8-flash »
+ *   GEMINI_FALLBACK_MODELS  modèles de secours si le principal est saturé, séparés par des virgules ;
+ *                           défaut « gemini-flash-lite-latest » ; « none » pour désactiver
  *   GEMINI_TEMPERATURE      défaut 0.3 ; « default » = valeur du modèle
  *   GEMINI_THINKING_LEVEL   défaut « low »
  *   STORE_PHOTOS            « true » pour conserver les photos (si l'utilisateur a consenti)
@@ -14,7 +16,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 import type { FoodRef } from '../_shared/analysis.ts';
-import { callGemini, GEMINI_API_BASE, type GeminiConfig } from '../_shared/gemini.ts';
+import { callGeminiResilient, GEMINI_API_BASE, type GeminiConfig } from '../_shared/gemini.ts';
 import { createHandler } from './handler.ts';
 
 function env(name: string, fallback?: string): string {
@@ -31,7 +33,7 @@ function parseTemperature(raw: string): number | null {
 }
 
 const THINKING_LEVELS = ['minimal', 'low', 'medium', 'high'] as const;
-const thinkingLevel = env('GEMINI_THINKING_LEVEL', 'low') as GeminiConfig['thinkingLevel'];
+const thinkingLevel = env('GEMINI_THINKING_LEVEL', 'low') as (typeof THINKING_LEVELS)[number];
 if (!THINKING_LEVELS.includes(thinkingLevel)) throw new Error('GEMINI_THINKING_LEVEL invalide');
 
 const geminiConfig: GeminiConfig = {
@@ -43,6 +45,14 @@ const geminiConfig: GeminiConfig = {
   maxOutputTokens: 4096,
   timeoutMs: 45_000,
 };
+// Secours : sans réglage de réflexion, que certains modèles refusent (chacun garde sa valeur par défaut).
+const fallbackConfigs: GeminiConfig[] = env('GEMINI_FALLBACK_MODELS', 'gemini-flash-lite-latest')
+  .split(',')
+  .map((m) => m.trim())
+  .filter((m) => m !== '' && m !== 'none' && m !== geminiConfig.model)
+  .map((model) => ({ ...geminiConfig, model, thinkingLevel: null }));
+const modelChain = [geminiConfig, ...fallbackConfigs];
+
 const storePhotos = env('STORE_PHOTOS', 'false') === 'true';
 
 // Client service role : contourne la RLS, n'est utilisé que côté serveur.
@@ -101,7 +111,14 @@ const handler = createHandler({
     return data as FoodRef[];
   },
 
-  gemini: (req) => callGemini(geminiConfig, req),
+  // Modèle saturé : 3 essais espacés (1 s puis 3 s), puis les modèles de secours ; réponse en moins de 50 s
+  // pour rester sous le délai de l'app (60 s).
+  gemini: (req) =>
+    callGeminiResilient(modelChain, req, {
+      retryDelaysMs: [1_000, 3_000],
+      budgetMs: 50_000,
+      onFailure: (r) => !r.ok && console.error(JSON.stringify({ message: 'essai Gemini en échec', model: r.model, error: r.error })),
+    }),
 
   async logCall({ scanId, userId, kind, attempt, model, result, error }) {
     const { error: dbError } = await admin.from('scan_calls').insert({

@@ -168,6 +168,19 @@ test('erreur Gemini non relançable (ex. clé invalide) : un seul appel', async 
   assert.equal(calls.release, 1);
 });
 
+test('modèles saturés : 503 « ai_busy », pas de relance, scan rendu, modèle réel journalisé', async () => {
+  const busy: GeminiResult = { ok: false, error: 'HTTP 503 : high demand', retryable: true, overloaded: true, usage, latencyMs: 1, model: 'secours' };
+  const { post, calls, used } = setup({ gemini: [busy, okText(VALID_OUTPUT)] });
+  const res = await post(scan);
+  assert.equal(res.status, 503);
+  const body = await res.json();
+  assert.equal(body.error, 'ai_busy');
+  assert.match(body.message, /saturé/);
+  assert.equal(calls.gemini, 1, 'deps.gemini a déjà réessayé : pas de second passage');
+  assert.equal(calls.logs[0]!.model, 'secours');
+  assert.equal(used(), 0);
+});
+
 test('relance après questions : gratuite, une seule fois, sans nouvelles questions', async () => {
   const { post, calls } = setup();
   const res = await post(followUp);
