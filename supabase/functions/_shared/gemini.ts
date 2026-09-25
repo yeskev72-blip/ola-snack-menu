@@ -188,8 +188,9 @@ export type ResilienceOptions = {
 const defaultSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 /**
- * Appelle les modèles dans l'ordre (principal puis secours). Un modèle saturé (429, 5xx) est
- * réessayé après une courte attente, puis on passe au suivant. Un modèle qui refuse un réglage
+ * Appelle les modèles dans l'ordre (principal puis secours). Un modèle saturé (5xx) est
+ * réessayé après une courte attente, puis on passe au suivant ; un quota dépassé (429) passe
+ * directement au suivant (attendre quelques secondes ne le libère pas et consomme la limite). Un modèle qui refuse un réglage
  * (400) est réessayé une fois avec la requête simplifiée. Une autre erreur définitive ou un délai
  * dépassé passe directement au suivant. Renvoie le premier succès, sinon le dernier échec.
  */
@@ -232,8 +233,8 @@ export async function callGeminiResilient(
       failures.push(result);
       if (result.overloaded) anyOverloaded = true;
       options.onFailure?.(result);
-      // Seul un modèle saturé qui a répondu vite mérite un nouvel essai ; sinon on change de modèle.
-      if (!result.overloaded || result.error === 'timeout') break;
+      // Seul un modèle saturé (5xx) qui a répondu vite mérite un nouvel essai ; sinon on change de modèle.
+      if (!result.overloaded || result.error === 'timeout' || result.error.startsWith('HTTP 429')) break;
     }
   }
   return failure();

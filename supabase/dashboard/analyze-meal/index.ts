@@ -189,7 +189,7 @@ async function callGeminiResilient(configs, req, options) {
       failures.push(result);
       if (result.overloaded) anyOverloaded = true;
       options.onFailure?.(result);
-      if (!result.overloaded || result.error === "timeout") break;
+      if (!result.overloaded || result.error === "timeout" || result.error.startsWith("HTTP 429")) break;
     }
   }
   return failure();
@@ -797,9 +797,12 @@ var geminiConfig = {
   temperature: parseTemperature(env("GEMINI_TEMPERATURE", "0.3")),
   thinkingLevel,
   maxOutputTokens: 4096,
-  timeoutMs: 45e3
+  timeoutMs: 45e3,
+  // Schéma, température et réflexion : refusés (HTTP 400) par les modèles actuels, d'où la requête
+  // simplifiée par défaut. La forme JSON est décrite dans le prompt ; la validation reste stricte.
+  simple: env("GEMINI_STRUCTURED", "false") !== "true"
 };
-var fallbackConfigs = env("GEMINI_FALLBACK_MODELS", "gemini-flash-latest").split(",").map((m) => m.trim()).filter((m) => m !== "" && m !== "none" && m !== geminiConfig.model).map((model) => ({
+var fallbackConfigs = env("GEMINI_FALLBACK_MODELS", "gemini-flash-lite-latest,gemini-flash-latest").split(",").map((m) => m.trim()).filter((m) => m !== "" && m !== "none" && m !== geminiConfig.model).map((model) => ({
   ...geminiConfig,
   model,
   thinkingLevel: null
@@ -873,12 +876,11 @@ var handler = createHandler({
     if (error) throw error;
     return data;
   },
-  // Modèle saturé : 3 essais espacés (1 s puis 3 s), puis les modèles de secours ; réponse en moins de 50 s
+  // Modèle saturé (503) : un second essai 2 s plus tard, puis les modèles de secours ; réponse en moins de 50 s
   // pour rester sous le délai de l'app (60 s).
   gemini: (req) => callGeminiResilient(modelChain, req, {
     retryDelaysMs: [
-      1e3,
-      3e3
+      2e3
     ],
     budgetMs: 5e4,
     onFailure: (r) => !r.ok && console.error(JSON.stringify({

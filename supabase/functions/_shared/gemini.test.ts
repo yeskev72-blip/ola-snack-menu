@@ -126,6 +126,13 @@ test('saturation persistante : 3 essais puis modèle de secours', async () => {
   assert.equal(failures.length, 3);
 });
 
+test('quota dépassé (429) : pas de nouvel essai du même modèle, passage au secours', async () => {
+  const { seen, fetchImpl } = byModel({ 'gemini-3.8-flash': [429], secours: [200] });
+  const r = await callGeminiResilient([config, secours], request, { ...noWait, fetchImpl });
+  assert.ok(r.ok);
+  assert.deepEqual(seen, ['gemini-3.8-flash', 'secours']);
+});
+
 test('tout est saturé : dernier échec renvoyé, marqué « overloaded »', async () => {
   const { seen, fetchImpl } = byModel({ 'gemini-3.8-flash': [], secours: [] });
   const r = await callGeminiResilient([config, secours], request, { ...noWait, fetchImpl });

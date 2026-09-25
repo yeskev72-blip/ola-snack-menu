@@ -47,10 +47,11 @@ Téléphone (APK)                                   Supabase
 ```
 
 1. L'app envoie la photo compressée et l'indice à `analyze-meal` avec le jeton de l'utilisateur.
-2. La fonction consomme un scan (atomique, en SQL), charge la table `foods` et appelle Gemini avec un
-   **schéma JSON** qui limite `food_key` aux plats connus (ou `autre`).
+2. La fonction consomme un scan (atomique, en SQL), charge la table `foods` et appelle Gemini en décrivant
+   la **forme JSON** attendue ; `food_key` doit être un plat connu (ou `autre`), sinon la réponse est rejetée.
 3. La réponse est validée strictement ; une seule relance si elle est invalide ; en cas d'échec, le scan est rendu.
-   Si Gemini est saturé (503), la fonction réessaie deux fois puis passe au modèle de secours (`GEMINI_FALLBACK_MODELS`).
+   Si Gemini est saturé (503), la fonction réessaie une fois ; saturé ou à court de quota (429), elle passe aux modèles
+   de secours (`GEMINI_FALLBACK_MODELS`).
 4. L'app calcule les calories avec la table `foods` (`src/lib/nutrition.ts`). Les valeurs de l'IA ne servent
    que pour un élément `autre`, affiché « estimé ».
 5. Si l'IA pose des questions, l'app relance **une fois**, gratuitement, avec la **même** photo
@@ -67,9 +68,10 @@ Téléphone (APK)                                   Supabase
 | | `EXPO_PUBLIC_SUPABASE_ANON_KEY` | clé `anon` / publishable (publique, sécurité assurée par la RLS) |
 | Secrets Supabase (`supabase/functions/.env`) | `GEMINI_API_KEY` | clé Gemini — **jamais dans l'app** |
 | | `GEMINI_MODEL` | défaut `gemini-flash-lite-latest`, modifiable sans republier l'app |
-| | `GEMINI_FALLBACK_MODELS` | défaut `gemini-flash-latest` : secours si le modèle principal est saturé ; `none` pour désactiver |
-| | `GEMINI_TEMPERATURE` | défaut `0.3` ; `default` = valeur du modèle |
-| | `GEMINI_THINKING_LEVEL` | défaut `low` (coût et latence) |
+| | `GEMINI_FALLBACK_MODELS` | défaut `gemini-flash-lite-latest,gemini-flash-latest` : secours si le modèle principal est saturé ou à court de quota ; `none` pour désactiver |
+| | `GEMINI_STRUCTURED` | `false` par défaut : requête simplifiée (forme JSON décrite dans le prompt) ; `true` impose schéma, température et réflexion |
+| | `GEMINI_TEMPERATURE` | avec `GEMINI_STRUCTURED=true` : défaut `0.3` ; `default` = valeur du modèle |
+| | `GEMINI_THINKING_LEVEL` | avec `GEMINI_STRUCTURED=true` : défaut `low` (coût et latence) |
 | | `STORE_PHOTOS` | `false` par défaut ; `true` conserve les photos des utilisateurs consentants |
 | Fournies par Supabase | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | utilisées par les Edge Functions seulement |
 
