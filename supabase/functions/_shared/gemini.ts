@@ -7,7 +7,7 @@ export type GeminiConfig = {
   apiKey: string;
   /** Racine de l'API ; modifiable pour les tests ou un proxy. */
   apiBase: string;
-  /** Ex. « gemini-3.8-flash » : lu depuis la variable GEMINI_MODEL. */
+  /** Ex. « gemini-flash-lite-latest » : lu depuis la variable GEMINI_MODEL. */
   model: string;
   /** null = valeur par défaut du modèle. */
   temperature: number | null;
@@ -16,6 +16,11 @@ export type GeminiConfig = {
   /** Borne commune à la réflexion et à la réponse. */
   maxOutputTokens: number;
   timeoutMs: number;
+  /**
+   * Requête simplifiée, acceptée par tous les modèles : JSON sans schéma imposé, sans réglage de
+   * réflexion ni température (la forme attendue est décrite dans le prompt, la validation reste stricte).
+   */
+  simple?: boolean;
 };
 
 export type GeminiUsage = {
@@ -97,13 +102,15 @@ export function buildGeminiBody(config: GeminiConfig, req: GeminiRequest) {
         parts: [{ inlineData: { mimeType: 'image/jpeg', data: req.imageBase64 } }, { text: req.userText }],
       },
     ],
-    generationConfig: {
-      responseMimeType: 'application/json',
-      responseSchema: req.responseSchema,
-      ...(config.temperature === null ? {} : { temperature: config.temperature }),
-      maxOutputTokens: config.maxOutputTokens,
-      ...(config.thinkingLevel === null ? {} : { thinkingConfig: { thinkingLevel: config.thinkingLevel } }),
-    },
+    generationConfig: config.simple
+      ? { responseMimeType: 'application/json', maxOutputTokens: config.maxOutputTokens }
+      : {
+        responseMimeType: 'application/json',
+        responseSchema: req.responseSchema,
+        ...(config.temperature === null ? {} : { temperature: config.temperature }),
+        maxOutputTokens: config.maxOutputTokens,
+        ...(config.thinkingLevel === null ? {} : { thinkingConfig: { thinkingLevel: config.thinkingLevel } }),
+      },
   };
 }
 
@@ -182,8 +189,9 @@ const defaultSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(r
 
 /**
  * Appelle les modèles dans l'ordre (principal puis secours). Un modèle saturé (429, 5xx) est
- * réessayé après une courte attente, puis on passe au suivant ; une erreur définitive (clé, requête)
- * ou un délai dépassé passe directement au suivant. Renvoie le premier succès, sinon le dernier échec.
+ * réessayé après une courte attente, puis on passe au suivant. Un modèle qui refuse un réglage
+ * (400) est réessayé une fois avec la requête simplifiée. Une autre erreur définitive ou un délai
+ * dépassé passe directement au suivant. Renvoie le premier succès, sinon le dernier échec.
  */
 export async function callGeminiResilient(
   configs: GeminiConfig[],
@@ -212,7 +220,13 @@ export async function callGeminiResilient(
         await sleep(delay);
       }
       if (last && remaining() < MIN_CALL_MS) return failure();
-      const result = await callGemini({ ...config, timeoutMs: Math.min(config.timeoutMs, Math.max(remaining(), MIN_CALL_MS)) }, req, options.fetchImpl);
+      const timeoutMs = () => Math.min(config.timeoutMs, Math.max(remaining(), MIN_CALL_MS));
+      let result = await callGemini({ ...config, timeoutMs: timeoutMs() }, req, options.fetchImpl);
+      if (!result.ok && !config.simple && result.error.startsWith('HTTP 400') && remaining() >= MIN_CALL_MS) {
+        failures.push(result);
+        options.onFailure?.(result);
+        result = await callGemini({ ...config, simple: true, timeoutMs: timeoutMs() }, req, options.fetchImpl);
+      }
       if (result.ok) return { ...result, earlierFailures: failures };
       last = result;
       failures.push(result);

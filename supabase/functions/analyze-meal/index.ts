@@ -3,9 +3,9 @@
  *
  * Secrets (supabase secrets set …) :
  *   GEMINI_API_KEY          obligatoire, ne quitte jamais le serveur
- *   GEMINI_MODEL            défaut « gemini-3.8-flash »
+ *   GEMINI_MODEL            défaut « gemini-flash-lite-latest » (modèle léger, offre gratuite)
  *   GEMINI_FALLBACK_MODELS  modèles de secours si le principal est saturé, séparés par des virgules ;
- *                           défaut « gemini-flash-lite-latest » ; « none » pour désactiver
+ *                           défaut « gemini-flash-latest » ; « none » pour désactiver
  *   GEMINI_TEMPERATURE      défaut 0.3 ; « default » = valeur du modèle
  *   GEMINI_THINKING_LEVEL   défaut « low »
  *   STORE_PHOTOS            « true » pour conserver les photos (si l'utilisateur a consenti)
@@ -39,14 +39,14 @@ if (!THINKING_LEVELS.includes(thinkingLevel)) throw new Error('GEMINI_THINKING_L
 const geminiConfig: GeminiConfig = {
   apiKey: env('GEMINI_API_KEY'),
   apiBase: env('GEMINI_API_BASE', GEMINI_API_BASE),
-  model: env('GEMINI_MODEL', 'gemini-3.8-flash'),
+  model: env('GEMINI_MODEL', 'gemini-flash-lite-latest'),
   temperature: parseTemperature(env('GEMINI_TEMPERATURE', '0.3')),
   thinkingLevel,
   maxOutputTokens: 4096,
   timeoutMs: 45_000,
 };
 // Secours : sans réglage de réflexion, que certains modèles refusent (chacun garde sa valeur par défaut).
-const fallbackConfigs: GeminiConfig[] = env('GEMINI_FALLBACK_MODELS', 'gemini-flash-lite-latest')
+const fallbackConfigs: GeminiConfig[] = env('GEMINI_FALLBACK_MODELS', 'gemini-flash-latest')
   .split(',')
   .map((m) => m.trim())
   .filter((m) => m !== '' && m !== 'none' && m !== geminiConfig.model)

@@ -57,7 +57,10 @@ function buildGeminiBody(config, req) {
         ]
       }
     ],
-    generationConfig: {
+    generationConfig: config.simple ? {
+      responseMimeType: "application/json",
+      maxOutputTokens: config.maxOutputTokens
+    } : {
       responseMimeType: "application/json",
       responseSchema: req.responseSchema,
       ...config.temperature === null ? {} : {
@@ -164,10 +167,20 @@ async function callGeminiResilient(configs, req, options) {
         await sleep(delay);
       }
       if (last && remaining() < MIN_CALL_MS) return failure();
-      const result = await callGemini({
+      const timeoutMs = () => Math.min(config.timeoutMs, Math.max(remaining(), MIN_CALL_MS));
+      let result = await callGemini({
         ...config,
-        timeoutMs: Math.min(config.timeoutMs, Math.max(remaining(), MIN_CALL_MS))
+        timeoutMs: timeoutMs()
       }, req, options.fetchImpl);
+      if (!result.ok && !config.simple && result.error.startsWith("HTTP 400") && remaining() >= MIN_CALL_MS) {
+        failures.push(result);
+        options.onFailure?.(result);
+        result = await callGemini({
+          ...config,
+          simple: true,
+          timeoutMs: timeoutMs()
+        }, req, options.fetchImpl);
+      }
       if (result.ok) return {
         ...result,
         earlierFailures: failures
@@ -294,7 +307,9 @@ R\xC8GLES
 
 7. Si la photo ne montre pas de nourriture, renvoie not_food = true, sans \xE9l\xE9ments ni questions.
 
-8. R\xE9ponds uniquement avec du JSON conforme au sch\xE9ma fourni. Libell\xE9s et questions en fran\xE7ais simple.
+8. R\xE9ponds uniquement avec un objet JSON de cette forme exacte, sans texte autour. Libell\xE9s et questions en fran\xE7ais simple.
+{"not_food": false, "items": [{"food_key": "<cl\xE9 de la liste ou ${OTHER_FOOD_KEY}>", "label": "<libell\xE9>", "grams": <nombre>, "confidence": <0 \xE0 1>, "estimate_100g": null ou {"kcal": <nombre>, "proteines": <nombre>, "glucides": <nombre>, "lipides": <nombre>}}], "questions": [{"id": "<identifiant court>", "text": "<question>", "options": ["<r\xE9ponse>", "<r\xE9ponse>"]}], "confidence_globale": <0 \xE0 1>}
+Au plus ${LIMITS.maxItems} \xE9l\xE9ments.
 
 LISTE DE R\xC9F\xC9RENCE
 ${foods.map(foodLine).join("\n")}`;
@@ -778,13 +793,13 @@ if (!THINKING_LEVELS.includes(thinkingLevel)) throw new Error("GEMINI_THINKING_L
 var geminiConfig = {
   apiKey: env("GEMINI_API_KEY"),
   apiBase: env("GEMINI_API_BASE", GEMINI_API_BASE),
-  model: env("GEMINI_MODEL", "gemini-3.8-flash"),
+  model: env("GEMINI_MODEL", "gemini-flash-lite-latest"),
   temperature: parseTemperature(env("GEMINI_TEMPERATURE", "0.3")),
   thinkingLevel,
   maxOutputTokens: 4096,
   timeoutMs: 45e3
 };
-var fallbackConfigs = env("GEMINI_FALLBACK_MODELS", "gemini-flash-lite-latest").split(",").map((m) => m.trim()).filter((m) => m !== "" && m !== "none" && m !== geminiConfig.model).map((model) => ({
+var fallbackConfigs = env("GEMINI_FALLBACK_MODELS", "gemini-flash-latest").split(",").map((m) => m.trim()).filter((m) => m !== "" && m !== "none" && m !== geminiConfig.model).map((model) => ({
   ...geminiConfig,
   model,
   thinkingLevel: null

@@ -21,11 +21,12 @@ const reply = (status: number, body: unknown): typeof fetch =>
 
 test('corps de requête : image, schéma, réflexion basse, température', () => {
   const body = buildGeminiBody(config, request);
+  const generationConfig = body.generationConfig as Record<string, unknown>;
   assert.deepEqual(body.contents[0]!.parts[0], { inlineData: { mimeType: 'image/jpeg', data: '/9j/AAAA' } });
-  assert.equal(body.generationConfig.responseMimeType, 'application/json');
-  assert.deepEqual(body.generationConfig.responseSchema, { type: 'OBJECT' });
-  assert.deepEqual(body.generationConfig.thinkingConfig, { thinkingLevel: 'low' });
-  assert.equal(body.generationConfig.temperature, 0.3);
+  assert.equal(generationConfig.responseMimeType, 'application/json');
+  assert.deepEqual(generationConfig.responseSchema, { type: 'OBJECT' });
+  assert.deepEqual(generationConfig.thinkingConfig, { thinkingLevel: 'low' });
+  assert.equal(generationConfig.temperature, 0.3);
   assert.equal('temperature' in buildGeminiBody({ ...config, temperature: null }, request).generationConfig, false);
   assert.equal('thinkingConfig' in buildGeminiBody({ ...config, thinkingLevel: null }, request).generationConfig, false);
 });
@@ -132,11 +133,28 @@ test('tout est saturé : dernier échec renvoyé, marqué « overloaded »', asy
   assert.equal(seen.length, 6);
 });
 
-test('erreur définitive (400) : pas de nouvel essai, passage direct au secours', async () => {
-  const { seen, fetchImpl } = byModel({ 'gemini-3.8-flash': [400], secours: [200] });
+test('réglage refusé (400) : un essai en requête simplifiée, qui réussit', async () => {
+  const bodies: Record<string, unknown>[] = [];
+  const fetchImpl = (async (_url: string, init: RequestInit) => {
+    const body = JSON.parse(String(init.body));
+    bodies.push(body.generationConfig);
+    return bodies.length === 1
+      ? new Response(JSON.stringify({ error: { message: 'Request contains an invalid argument.' } }), { status: 400 })
+      : new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: '{}' }] } }] }), { status: 200 });
+  }) as unknown as typeof fetch;
   const r = await callGeminiResilient([config, secours], request, { ...noWait, fetchImpl });
   assert.ok(r.ok);
-  assert.deepEqual(seen, ['gemini-3.8-flash', 'secours']);
+  assert.equal(r.model, 'gemini-3.8-flash');
+  assert.equal(r.earlierFailures!.length, 1);
+  assert.ok('responseSchema' in bodies[0]! && 'thinkingConfig' in bodies[0]!);
+  assert.deepEqual(bodies[1], { responseMimeType: 'application/json', maxOutputTokens: 4096 });
+});
+
+test('400 aussi en requête simplifiée : passage au secours, sans relance d’attente', async () => {
+  const { seen, fetchImpl } = byModel({ 'gemini-3.8-flash': [400, 400], secours: [200] });
+  const r = await callGeminiResilient([config, secours], request, { ...noWait, fetchImpl });
+  assert.ok(r.ok);
+  assert.deepEqual(seen, ['gemini-3.8-flash', 'gemini-3.8-flash', 'secours']);
 });
 
 test('budget épuisé : pas d’attente qui dépasserait le délai de l’app', async () => {
@@ -147,13 +165,13 @@ test('budget épuisé : pas d’attente qui dépasserait le délai de l’app', 
 });
 
 test('principal saturé puis secours en erreur 400 : échec marqué « saturé », erreur du secours conservée', async () => {
-  const { seen, fetchImpl } = byModel({ 'gemini-3.8-flash': [503, 503, 503], secours: [400] });
+  const { seen, fetchImpl } = byModel({ 'gemini-3.8-flash': [503, 503, 503], secours: [400, 400] });
   const r = await callGeminiResilient([config, secours], request, { ...noWait, fetchImpl });
   assert.ok(!r.ok && r.overloaded);
   assert.equal(r.model, 'secours');
   assert.match(r.error, /HTTP 400/);
-  assert.equal(seen.length, 4);
-  assert.deepEqual(r.earlierFailures!.map((f) => f.model), ['gemini-3.8-flash', 'gemini-3.8-flash', 'gemini-3.8-flash']);
+  assert.equal(seen.length, 5);
+  assert.deepEqual(r.earlierFailures!.map((f) => f.model), ['gemini-3.8-flash', 'gemini-3.8-flash', 'gemini-3.8-flash', 'secours']);
 });
 
 test('erreur 400 : le champ fautif signalé par Google est conservé', async () => {

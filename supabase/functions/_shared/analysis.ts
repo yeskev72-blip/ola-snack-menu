@@ -141,7 +141,9 @@ RÈGLES
 
 7. Si la photo ne montre pas de nourriture, renvoie not_food = true, sans éléments ni questions.
 
-8. Réponds uniquement avec du JSON conforme au schéma fourni. Libellés et questions en français simple.
+8. Réponds uniquement avec un objet JSON de cette forme exacte, sans texte autour. Libellés et questions en français simple.
+{"not_food": false, "items": [{"food_key": "<clé de la liste ou ${OTHER_FOOD_KEY}>", "label": "<libellé>", "grams": <nombre>, "confidence": <0 à 1>, "estimate_100g": null ou {"kcal": <nombre>, "proteines": <nombre>, "glucides": <nombre>, "lipides": <nombre>}}], "questions": [{"id": "<identifiant court>", "text": "<question>", "options": ["<réponse>", "<réponse>"]}], "confidence_globale": <0 à 1>}
+Au plus ${LIMITS.maxItems} éléments.
 
 LISTE DE RÉFÉRENCE
 ${foods.map(foodLine).join('\n')}`;

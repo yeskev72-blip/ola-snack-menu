@@ -8,7 +8,7 @@ par le modèle.
 
 - **App** : Expo SDK 57 (React Native, TypeScript strict, Expo Router), interface en français
 - **Backend** : Supabase (Auth, Postgres avec RLS, Edge Functions, Storage facultatif)
-- **IA** : Gemini (`gemini-3.8-flash` par défaut), appelé **uniquement** depuis une Edge Function
+- **IA** : Gemini (`gemini-flash-lite-latest` par défaut, modèle léger de l'offre gratuite), appelé **uniquement** depuis une Edge Function
 - **Build** : EAS Build, profils produisant un **APK** à distribuer directement
 
 > **Mise en route, secrets et build de l'APK : [`docs/SETUP.md`](docs/SETUP.md)** (liste de contrôle
@@ -66,8 +66,8 @@ Téléphone (APK)                                   Supabase
 | App (`.env` en local, EAS en build) | `EXPO_PUBLIC_SUPABASE_URL` | URL du projet Supabase (publique) |
 | | `EXPO_PUBLIC_SUPABASE_ANON_KEY` | clé `anon` / publishable (publique, sécurité assurée par la RLS) |
 | Secrets Supabase (`supabase/functions/.env`) | `GEMINI_API_KEY` | clé Gemini — **jamais dans l'app** |
-| | `GEMINI_MODEL` | défaut `gemini-3.8-flash`, modifiable sans republier l'app |
-| | `GEMINI_FALLBACK_MODELS` | défaut `gemini-flash-lite-latest` : secours si le modèle principal est saturé ; `none` pour désactiver |
+| | `GEMINI_MODEL` | défaut `gemini-flash-lite-latest`, modifiable sans republier l'app |
+| | `GEMINI_FALLBACK_MODELS` | défaut `gemini-flash-latest` : secours si le modèle principal est saturé ; `none` pour désactiver |
 | | `GEMINI_TEMPERATURE` | défaut `0.3` ; `default` = valeur du modèle |
 | | `GEMINI_THINKING_LEVEL` | défaut `low` (coût et latence) |
 | | `STORE_PHOTOS` | `false` par défaut ; `true` conserve les photos des utilisateurs consentants |
