@@ -55,8 +55,10 @@ function buildGeminiBody(config, req) {
         temperature: config.temperature
       },
       maxOutputTokens: config.maxOutputTokens,
-      thinkingConfig: {
-        thinkingLevel: config.thinkingLevel
+      ...config.thinkingLevel === null ? {} : {
+        thinkingConfig: {
+          thinkingLevel: config.thinkingLevel
+        }
       }
     }
   };
@@ -81,8 +83,10 @@ async function callGemini(config, req, fetchImpl = fetch) {
       ok: false,
       error: timeout ? "timeout" : `r\xE9seau : ${String(e)}`,
       retryable: true,
+      overloaded: true,
       usage: emptyUsage,
-      latencyMs: elapsed()
+      latencyMs: elapsed(),
+      model: config.model
     };
   }
   let body = null;
@@ -97,8 +101,10 @@ async function callGemini(config, req, fetchImpl = fetch) {
       ok: false,
       error: `HTTP ${response.status} : ${message}`.slice(0, 500),
       retryable: response.status === 429 || response.status >= 500,
+      overloaded: response.status === 429 || response.status >= 500,
       usage,
-      latencyMs: elapsed()
+      latencyMs: elapsed(),
+      model: config.model
     };
   }
   const candidate = body?.candidates?.[0];
@@ -110,15 +116,44 @@ async function callGemini(config, req, fetchImpl = fetch) {
       error: `r\xE9ponse vide (${reason ?? "inconnu"})`,
       retryable: true,
       usage,
-      latencyMs: elapsed()
+      latencyMs: elapsed(),
+      model: config.model
     };
   }
   return {
     ok: true,
     text,
     usage,
-    latencyMs: elapsed()
+    latencyMs: elapsed(),
+    model: config.model
   };
+}
+var defaultSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+async function callGeminiResilient(configs, req, options) {
+  const sleep = options.sleep ?? defaultSleep;
+  const started = Date.now();
+  const remaining = () => options.budgetMs - (Date.now() - started);
+  const MIN_CALL_MS = 5e3;
+  let last = null;
+  for (const config of configs) {
+    for (let attempt = 0; attempt <= options.retryDelaysMs.length; attempt++) {
+      if (attempt > 0) {
+        const delay = options.retryDelaysMs[attempt - 1];
+        if (remaining() - delay < MIN_CALL_MS) break;
+        await sleep(delay);
+      }
+      if (last && remaining() < MIN_CALL_MS) return last;
+      const result = await callGemini({
+        ...config,
+        timeoutMs: Math.min(config.timeoutMs, Math.max(remaining(), MIN_CALL_MS))
+      }, req, options.fetchImpl);
+      if (result.ok) return result;
+      last = result;
+      options.onFailure?.(result);
+      if (!result.overloaded || result.error === "timeout") break;
+    }
+  }
+  return last;
 }
 
 // supabase/functions/_shared/analysis.ts
@@ -613,8 +648,10 @@ function createHandler(deps) {
         ])
       };
       let analysis = null;
+      let overloaded = false;
       for (let attempt = 1; attempt <= deps.maxAttempts && !analysis; attempt++) {
         const result = await deps.gemini(geminiRequest);
+        overloaded = !result.ok && result.overloaded === true;
         let error = null;
         let retryable = false;
         if (result.ok) {
@@ -635,7 +672,7 @@ function createHandler(deps) {
           userId: user.id,
           kind: isFollowUp ? "follow_up" : "initial",
           attempt,
-          model: deps.model,
+          model: result.model ?? deps.model,
           result,
           error
         }).catch((e) => deps.log("journalisation des tokens impossible", {
@@ -646,10 +683,13 @@ function createHandler(deps) {
           attempt,
           error
         });
-        if (!analysis && !retryable) break;
+        if (!analysis && (!retryable || overloaded)) break;
       }
       if (!analysis) {
         await refund();
+        if (overloaded) {
+          return fail(503, "ai_busy", "Le service d'analyse est satur\xE9 en ce moment. Ton scan n'a pas \xE9t\xE9 d\xE9compt\xE9 : r\xE9essaie dans une minute.");
+        }
         return fail(502, "analysis_failed", "L'analyse n'a pas abouti. Ton scan n'a pas \xE9t\xE9 d\xE9compt\xE9, r\xE9essaie.");
       }
       const photoPath = isFollowUp ? null : await deps.storePhoto(user, scanId, request.imageBase64).catch(() => null);
@@ -705,6 +745,15 @@ var geminiConfig = {
   maxOutputTokens: 4096,
   timeoutMs: 45e3
 };
+var fallbackConfigs = env("GEMINI_FALLBACK_MODELS", "gemini-flash-lite-latest").split(",").map((m) => m.trim()).filter((m) => m !== "" && m !== "none" && m !== geminiConfig.model).map((model) => ({
+  ...geminiConfig,
+  model,
+  thinkingLevel: null
+}));
+var modelChain = [
+  geminiConfig,
+  ...fallbackConfigs
+];
 var storePhotos = env("STORE_PHOTOS", "false") === "true";
 var admin = createClient(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"), {
   auth: {
@@ -770,7 +819,20 @@ var handler = createHandler({
     if (error) throw error;
     return data;
   },
-  gemini: (req) => callGemini(geminiConfig, req),
+  // Modèle saturé : 3 essais espacés (1 s puis 3 s), puis les modèles de secours ; réponse en moins de 50 s
+  // pour rester sous le délai de l'app (60 s).
+  gemini: (req) => callGeminiResilient(modelChain, req, {
+    retryDelaysMs: [
+      1e3,
+      3e3
+    ],
+    budgetMs: 5e4,
+    onFailure: (r) => !r.ok && console.error(JSON.stringify({
+      message: "essai Gemini en \xE9chec",
+      model: r.model,
+      error: r.error
+    }))
+  }),
   async logCall({ scanId, userId, kind, attempt, model, result, error }) {
     const { error: dbError } = await admin.from("scan_calls").insert({
       scan_id: scanId,

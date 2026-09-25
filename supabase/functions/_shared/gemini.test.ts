@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { buildGeminiBody, callGemini, GEMINI_API_BASE, type GeminiConfig, type GeminiRequest } from './gemini.ts';
+import { buildGeminiBody, callGemini, callGeminiResilient, GEMINI_API_BASE, type GeminiConfig, type GeminiRequest } from './gemini.ts';
 
 const config: GeminiConfig = {
   apiKey: 'cle-de-test',
@@ -27,6 +27,7 @@ test('corps de requête : image, schéma, réflexion basse, température', () =>
   assert.deepEqual(body.generationConfig.thinkingConfig, { thinkingLevel: 'low' });
   assert.equal(body.generationConfig.temperature, 0.3);
   assert.equal('temperature' in buildGeminiBody({ ...config, temperature: null }, request).generationConfig, false);
+  assert.equal('thinkingConfig' in buildGeminiBody({ ...config, thinkingLevel: null }, request).generationConfig, false);
 });
 
 test('appel : clé en en-tête (jamais dans l’URL), modèle dans le chemin', async () => {
@@ -89,4 +90,58 @@ test('coupure réseau et délai dépassé', async () => {
   clearTimeout(keepAlive);
   assert.ok(!t.ok);
   assert.equal(t.error, 'timeout');
+});
+
+/** Répond selon le modèle demandé : une file de statuts par modèle, et la liste des modèles appelés. */
+function byModel(statuses: Record<string, number[]>) {
+  const seen: string[] = [];
+  const fetchImpl = (async (url: string) => {
+    const model = /models\/([^:]+):/.exec(url)![1]!;
+    seen.push(model);
+    const status = statuses[model]!.shift() ?? 503;
+    const body = status === 200 ? { candidates: [{ content: { parts: [{ text: '{}' }] } }] } : { error: { message: 'high demand' } };
+    return new Response(JSON.stringify(body), { status });
+  }) as unknown as typeof fetch;
+  return { seen, fetchImpl };
+}
+const secours: GeminiConfig = { ...config, model: 'secours', thinkingLevel: null };
+const noWait = { retryDelaysMs: [1000, 3000], budgetMs: 50_000, sleep: async () => undefined };
+
+test('saturation : même modèle réessayé, succès au 2e essai', async () => {
+  const { seen, fetchImpl } = byModel({ 'gemini-3.8-flash': [503, 200] });
+  const r = await callGeminiResilient([config, secours], request, { ...noWait, fetchImpl });
+  assert.ok(r.ok);
+  assert.equal(r.model, 'gemini-3.8-flash');
+  assert.deepEqual(seen, ['gemini-3.8-flash', 'gemini-3.8-flash']);
+});
+
+test('saturation persistante : 3 essais puis modèle de secours', async () => {
+  const { seen, fetchImpl } = byModel({ 'gemini-3.8-flash': [503, 503, 503], secours: [200] });
+  const failures: string[] = [];
+  const r = await callGeminiResilient([config, secours], request, { ...noWait, fetchImpl, onFailure: (f) => failures.push(f.model!) });
+  assert.ok(r.ok);
+  assert.equal(r.model, 'secours');
+  assert.deepEqual(seen, ['gemini-3.8-flash', 'gemini-3.8-flash', 'gemini-3.8-flash', 'secours']);
+  assert.equal(failures.length, 3);
+});
+
+test('tout est saturé : dernier échec renvoyé, marqué « overloaded »', async () => {
+  const { seen, fetchImpl } = byModel({ 'gemini-3.8-flash': [], secours: [] });
+  const r = await callGeminiResilient([config, secours], request, { ...noWait, fetchImpl });
+  assert.ok(!r.ok && r.overloaded);
+  assert.equal(seen.length, 6);
+});
+
+test('erreur définitive (400) : pas de nouvel essai, passage direct au secours', async () => {
+  const { seen, fetchImpl } = byModel({ 'gemini-3.8-flash': [400], secours: [200] });
+  const r = await callGeminiResilient([config, secours], request, { ...noWait, fetchImpl });
+  assert.ok(r.ok);
+  assert.deepEqual(seen, ['gemini-3.8-flash', 'secours']);
+});
+
+test('budget épuisé : pas d’attente qui dépasserait le délai de l’app', async () => {
+  const { seen, fetchImpl } = byModel({ 'gemini-3.8-flash': [], secours: [] });
+  const r = await callGeminiResilient([config, secours], request, { ...noWait, budgetMs: 4_000, fetchImpl });
+  assert.ok(!r.ok);
+  assert.deepEqual(seen, ['gemini-3.8-flash']);
 });

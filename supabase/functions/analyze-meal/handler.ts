@@ -148,8 +148,10 @@ export function createHandler(deps: Deps) {
 
       // 5. Appel Gemini + validation stricte, avec une seule relance si la réponse est invalide.
       let analysis: Analysis | null = null;
+      let overloaded = false;
       for (let attempt = 1; attempt <= deps.maxAttempts && !analysis; attempt++) {
         const result = await deps.gemini(geminiRequest);
+        overloaded = !result.ok && result.overloaded === true;
         let error: string | null = null;
         let retryable = false;
         if (result.ok) {
@@ -164,14 +166,18 @@ export function createHandler(deps: Deps) {
           retryable = result.retryable;
         }
         await deps
-          .logCall({ scanId, userId: user.id, kind: isFollowUp ? 'follow_up' : 'initial', attempt, model: deps.model, result, error })
+          .logCall({ scanId, userId: user.id, kind: isFollowUp ? 'follow_up' : 'initial', attempt, model: result.model ?? deps.model, result, error })
           .catch((e) => deps.log('journalisation des tokens impossible', { error: String(e) }));
         if (error) deps.log('échec Gemini', { scanId, attempt, error });
-        if (!analysis && !retryable) break;
+        // Modèles saturés : deps.gemini a déjà réessayé, une relance ici dépasserait le délai de l'app.
+        if (!analysis && (!retryable || overloaded)) break;
       }
 
       if (!analysis) {
         await refund();
+        if (overloaded) {
+          return fail(503, 'ai_busy', "Le service d'analyse est saturé en ce moment. Ton scan n'a pas été décompté : réessaie dans une minute.");
+        }
         return fail(502, 'analysis_failed', "L'analyse n'a pas abouti. Ton scan n'a pas été décompté, réessaie.");
       }
 
