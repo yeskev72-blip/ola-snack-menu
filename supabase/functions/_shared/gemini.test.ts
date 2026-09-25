@@ -145,3 +145,28 @@ test('budget épuisé : pas d’attente qui dépasserait le délai de l’app', 
   assert.ok(!r.ok);
   assert.deepEqual(seen, ['gemini-3.8-flash']);
 });
+
+test('principal saturé puis secours en erreur 400 : échec marqué « saturé », erreur du secours conservée', async () => {
+  const { seen, fetchImpl } = byModel({ 'gemini-3.8-flash': [503, 503, 503], secours: [400] });
+  const r = await callGeminiResilient([config, secours], request, { ...noWait, fetchImpl });
+  assert.ok(!r.ok && r.overloaded);
+  assert.equal(r.model, 'secours');
+  assert.match(r.error, /HTTP 400/);
+  assert.equal(seen.length, 4);
+  assert.deepEqual(r.earlierFailures!.map((f) => f.model), ['gemini-3.8-flash', 'gemini-3.8-flash', 'gemini-3.8-flash']);
+});
+
+test('erreur 400 : le champ fautif signalé par Google est conservé', async () => {
+  const r = await callGemini(
+    config,
+    request,
+    reply(400, {
+      error: {
+        message: 'Request contains an invalid argument.',
+        details: [{ fieldViolations: [{ field: 'generation_config.response_schema', description: 'enum trop long' }] }],
+      },
+    }),
+  );
+  assert.ok(!r.ok);
+  assert.equal(r.error, 'HTTP 400 : Request contains an invalid argument. (generation_config.response_schema : enum trop long)');
+});

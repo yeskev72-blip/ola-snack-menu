@@ -94,7 +94,8 @@ Pour changer de modèle plus tard, sans republier l'app : `npx supabase@latest s
 **Modèle saturé** (`HTTP 503 : This model is currently experiencing high demand` dans `scan_calls.error`) : la fonction
 réessaie le modèle principal deux fois (après 1 s puis 3 s), puis essaie les modèles de `GEMINI_FALLBACK_MODELS`
 (défaut `gemini-flash-lite-latest`, séparés par des virgules, `none` pour désactiver). Si tout est saturé, l'app affiche
-« Le service d'analyse est saturé » et le scan n'est pas décompté. La colonne `model` de `scan_calls` indique le modèle qui a répondu.
+« Le service d'analyse est saturé » et le scan n'est pas décompté. Chaque essai a sa ligne dans `scan_calls` (colonne `model`) ; pour une erreur 400, la colonne `error`
+indique le champ refusé quand Google le précise.
 
 ## 5. Relier l'app et tester avec Expo Go (conseillé)
 

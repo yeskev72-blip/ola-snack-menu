@@ -168,8 +168,18 @@ test('erreur Gemini non relançable (ex. clé invalide) : un seul appel', async 
   assert.equal(calls.release, 1);
 });
 
-test('modèles saturés : 503 « ai_busy », pas de relance, scan rendu, modèle réel journalisé', async () => {
-  const busy: GeminiResult = { ok: false, error: 'HTTP 503 : high demand', retryable: true, overloaded: true, usage, latencyMs: 1, model: 'secours' };
+test('modèles saturés : 503 « ai_busy », pas de relance, scan rendu, chaque essai journalisé', async () => {
+  const earlier: GeminiResult = { ok: false, error: 'HTTP 503 : high demand', retryable: true, overloaded: true, usage, latencyMs: 1, model: 'principal' };
+  const busy: GeminiResult = {
+    ok: false,
+    error: 'HTTP 400 : invalid argument',
+    retryable: false,
+    overloaded: true,
+    usage,
+    latencyMs: 1,
+    model: 'secours',
+    earlierFailures: [earlier, earlier],
+  };
   const { post, calls, used } = setup({ gemini: [busy, okText(VALID_OUTPUT)] });
   const res = await post(scan);
   assert.equal(res.status, 503);
@@ -177,7 +187,11 @@ test('modèles saturés : 503 « ai_busy », pas de relance, scan rendu, modèle
   assert.equal(body.error, 'ai_busy');
   assert.match(body.message, /saturé/);
   assert.equal(calls.gemini, 1, 'deps.gemini a déjà réessayé : pas de second passage');
-  assert.equal(calls.logs[0]!.model, 'secours');
+  assert.deepEqual(calls.logs.map((l) => [l.model, l.error]), [
+    ['principal', 'HTTP 503 : high demand'],
+    ['principal', 'HTTP 503 : high demand'],
+    ['secours', 'HTTP 400 : invalid argument'],
+  ]);
   assert.equal(used(), 0);
 });
 

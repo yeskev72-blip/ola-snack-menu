@@ -26,7 +26,15 @@ export type GeminiUsage = {
 };
 
 export type GeminiResult =
-  | { ok: true; text: string; usage: GeminiUsage; latencyMs: number; model?: string }
+  | {
+    ok: true;
+    text: string;
+    usage: GeminiUsage;
+    latencyMs: number;
+    model?: string;
+    /** Essais ratés avant ce résultat (relances, modèles précédents), pour le journal. */
+    earlierFailures?: GeminiResult[];
+  }
   | {
     ok: false;
     error: string;
@@ -36,6 +44,7 @@ export type GeminiResult =
     usage: GeminiUsage;
     latencyMs: number;
     model?: string;
+    earlierFailures?: GeminiResult[];
   };
 
 export type GeminiRequest = {
@@ -59,6 +68,24 @@ function readUsage(body: unknown): GeminiUsage {
     thoughtsTokens: n(u.thoughtsTokenCount),
     totalTokens: n(u.totalTokenCount),
   };
+}
+
+type ApiError = {
+  error?: {
+    message?: string;
+    details?: { fieldViolations?: { field?: string; description?: string }[] }[];
+  };
+};
+
+/** Message d'erreur de l'API, avec le champ fautif quand Google le précise (400 « invalid argument »). */
+export function errorMessage(body: unknown): string | null {
+  const error = (body as ApiError | null)?.error;
+  if (!error?.message) return null;
+  const violations = (error.details ?? [])
+    .flatMap((d) => d.fieldViolations ?? [])
+    .map((v) => [v.field, v.description].filter(Boolean).join(' : '))
+    .filter((v) => v !== '');
+  return violations.length ? `${error.message} (${violations.join(' ; ')})` : error.message;
 }
 
 export function buildGeminiBody(config: GeminiConfig, req: GeminiRequest) {
@@ -114,7 +141,7 @@ export async function callGemini(config: GeminiConfig, req: GeminiRequest, fetch
   const usage = readUsage(body);
 
   if (!response.ok) {
-    const message = (body as { error?: { message?: string } } | null)?.error?.message ?? response.statusText;
+    const message = errorMessage(body) ?? response.statusText;
     return {
       ok: false,
       error: `HTTP ${response.status} : ${message}`.slice(0, 500),
@@ -169,6 +196,14 @@ export async function callGeminiResilient(
   const MIN_CALL_MS = 5_000;
 
   let last: GeminiResult | null = null;
+  let anyOverloaded = false;
+  // Dernier échec ; « saturé » si un modèle l'était : c'est la vraie cause pour l'utilisateur,
+  // même si un modèle de secours a ensuite échoué pour une autre raison.
+  const failures: GeminiResult[] = [];
+  const failure = (): GeminiResult => {
+    const final = failures.pop()!;
+    return { ...final, ...(anyOverloaded ? { overloaded: true } : {}), earlierFailures: failures };
+  };
   for (const config of configs) {
     for (let attempt = 0; attempt <= options.retryDelaysMs.length; attempt++) {
       if (attempt > 0) {
@@ -176,14 +211,16 @@ export async function callGeminiResilient(
         if (remaining() - delay < MIN_CALL_MS) break;
         await sleep(delay);
       }
-      if (last && remaining() < MIN_CALL_MS) return last;
+      if (last && remaining() < MIN_CALL_MS) return failure();
       const result = await callGemini({ ...config, timeoutMs: Math.min(config.timeoutMs, Math.max(remaining(), MIN_CALL_MS)) }, req, options.fetchImpl);
-      if (result.ok) return result;
+      if (result.ok) return { ...result, earlierFailures: failures };
       last = result;
+      failures.push(result);
+      if (result.overloaded) anyOverloaded = true;
       options.onFailure?.(result);
       // Seul un modèle saturé qui a répondu vite mérite un nouvel essai ; sinon on change de modèle.
       if (!result.overloaded || result.error === 'timeout') break;
     }
   }
-  return last!;
+  return failure();
 }

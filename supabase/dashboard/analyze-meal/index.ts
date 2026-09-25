@@ -23,6 +23,15 @@ function readUsage(body) {
     totalTokens: n(u.totalTokenCount)
   };
 }
+function errorMessage(body) {
+  const error = body?.error;
+  if (!error?.message) return null;
+  const violations = (error.details ?? []).flatMap((d) => d.fieldViolations ?? []).map((v) => [
+    v.field,
+    v.description
+  ].filter(Boolean).join(" : ")).filter((v) => v !== "");
+  return violations.length ? `${error.message} (${violations.join(" ; ")})` : error.message;
+}
 function buildGeminiBody(config, req) {
   return {
     systemInstruction: {
@@ -96,7 +105,7 @@ async function callGemini(config, req, fetchImpl = fetch) {
   }
   const usage = readUsage(body);
   if (!response.ok) {
-    const message = body?.error?.message ?? response.statusText;
+    const message = errorMessage(body) ?? response.statusText;
     return {
       ok: false,
       error: `HTTP ${response.status} : ${message}`.slice(0, 500),
@@ -135,6 +144,18 @@ async function callGeminiResilient(configs, req, options) {
   const remaining = () => options.budgetMs - (Date.now() - started);
   const MIN_CALL_MS = 5e3;
   let last = null;
+  let anyOverloaded = false;
+  const failures = [];
+  const failure = () => {
+    const final = failures.pop();
+    return {
+      ...final,
+      ...anyOverloaded ? {
+        overloaded: true
+      } : {},
+      earlierFailures: failures
+    };
+  };
   for (const config of configs) {
     for (let attempt = 0; attempt <= options.retryDelaysMs.length; attempt++) {
       if (attempt > 0) {
@@ -142,18 +163,23 @@ async function callGeminiResilient(configs, req, options) {
         if (remaining() - delay < MIN_CALL_MS) break;
         await sleep(delay);
       }
-      if (last && remaining() < MIN_CALL_MS) return last;
+      if (last && remaining() < MIN_CALL_MS) return failure();
       const result = await callGemini({
         ...config,
         timeoutMs: Math.min(config.timeoutMs, Math.max(remaining(), MIN_CALL_MS))
       }, req, options.fetchImpl);
-      if (result.ok) return result;
+      if (result.ok) return {
+        ...result,
+        earlierFailures: failures
+      };
       last = result;
+      failures.push(result);
+      if (result.overloaded) anyOverloaded = true;
       options.onFailure?.(result);
       if (!result.overloaded || result.error === "timeout") break;
     }
   }
-  return last;
+  return failure();
 }
 
 // supabase/functions/_shared/analysis.ts
@@ -667,17 +693,30 @@ function createHandler(deps) {
           error = result.error;
           retryable = result.retryable;
         }
-        await deps.logCall({
+        const kind = isFollowUp ? "follow_up" : "initial";
+        const logs = (result.earlierFailures ?? []).map((f) => ({
           scanId,
           userId: user.id,
-          kind: isFollowUp ? "follow_up" : "initial",
+          kind,
+          attempt,
+          model: f.model ?? deps.model,
+          result: f,
+          error: f.ok ? null : f.error
+        }));
+        logs.push({
+          scanId,
+          userId: user.id,
+          kind,
           attempt,
           model: result.model ?? deps.model,
           result,
           error
-        }).catch((e) => deps.log("journalisation des tokens impossible", {
-          error: String(e)
-        }));
+        });
+        for (const log of logs) {
+          await deps.logCall(log).catch((e) => deps.log("journalisation des tokens impossible", {
+            error: String(e)
+          }));
+        }
         if (error) deps.log("\xE9chec Gemini", {
           scanId,
           attempt,

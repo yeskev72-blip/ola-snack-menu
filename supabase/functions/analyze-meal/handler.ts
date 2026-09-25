@@ -165,9 +165,20 @@ export function createHandler(deps: Deps) {
           error = result.error;
           retryable = result.retryable;
         }
-        await deps
-          .logCall({ scanId, userId: user.id, kind: isFollowUp ? 'follow_up' : 'initial', attempt, model: result.model ?? deps.model, result, error })
-          .catch((e) => deps.log('journalisation des tokens impossible', { error: String(e) }));
+        const kind = isFollowUp ? 'follow_up' : 'initial';
+        const logs: CallLog[] = (result.earlierFailures ?? []).map((f) => ({
+          scanId,
+          userId: user.id,
+          kind,
+          attempt,
+          model: f.model ?? deps.model,
+          result: f,
+          error: f.ok ? null : f.error,
+        }));
+        logs.push({ scanId, userId: user.id, kind, attempt, model: result.model ?? deps.model, result, error });
+        for (const log of logs) {
+          await deps.logCall(log).catch((e) => deps.log('journalisation des tokens impossible', { error: String(e) }));
+        }
         if (error) deps.log('échec Gemini', { scanId, attempt, error });
         // Modèles saturés : deps.gemini a déjà réessayé, une relance ici dépasserait le délai de l'app.
         if (!analysis && (!retryable || overloaded)) break;
