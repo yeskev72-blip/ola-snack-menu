@@ -138,6 +138,11 @@ Profils (`eas.json`) :
 | `preview` | APK de test, distribution interne | géré par EAS |
 | `production` | APK à diffuser | incrémenté automatiquement à chaque build |
 
+**Taille de l'APK** (`expo-build-properties` dans `app.config.ts`) : seuls les processeurs des vrais téléphones
+sont inclus (`arm64-v8a`, `armeabi-v7a` ; pas les émulateurs x86), les bibliothèques natives sont compressées
+et R8 retire le code et les ressources inutilisés. Si un écran plante uniquement dans l'APK (pas dans Expo Go),
+essaie d'abord `enableMinifyInReleaseBuilds: false`.
+
 Pour une nouvelle version visible des utilisateurs, change `version` dans `app.config.ts` (ex. `0.2.0`),
 puis `npx eas-cli@latest build -p android --profile production`. Le numéro s'affiche en bas de l'écran Profil.
 

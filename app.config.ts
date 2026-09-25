@@ -23,7 +23,6 @@ const config: ExpoConfig = {
   platforms: ['android'],
   android: {
     package: ANDROID_PACKAGE,
-    versionCode: 1,
     adaptiveIcon: {
       backgroundColor: '#FBF6EE',
       foregroundImage: './assets/images/android-icon-foreground.png',
@@ -55,6 +54,21 @@ const config: ExpoConfig = {
         backgroundColor: '#FBF6EE',
         image: './assets/images/splash-icon.png',
         imageWidth: 160,
+      },
+    ],
+    [
+      'expo-build-properties',
+      {
+        android: {
+          // Téléphones réels uniquement (x86 / x86_64 ne servent qu'aux émulateurs).
+          // armeabi-v7a garde les téléphones d'entrée de gamme 32 bits.
+          buildArchs: ['arm64-v8a', 'armeabi-v7a'],
+          // Bibliothèques natives compressées dans l'APK : téléchargement bien plus léger.
+          useLegacyPackaging: true,
+          // R8 : retire le code Java inutilisé et les ressources non référencées.
+          enableMinifyInReleaseBuilds: true,
+          enableShrinkResourcesInReleaseBuilds: true,
+        },
       },
     ],
   ],
