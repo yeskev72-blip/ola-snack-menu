@@ -5,6 +5,7 @@
 --   npx supabase@latest migration repair --status applied 20260924080000
 --   npx supabase@latest migration repair --status applied 20260924080100
 --   npx supabase@latest migration repair --status applied 20260924090000
+--   npx supabase@latest migration repair --status applied 20260925090000
 
 begin;
 
@@ -469,6 +470,24 @@ from public.scan_calls
 group by 1, 2;
 
 revoke all on public.scan_costs_daily from anon, authenticated;
+
+-- ============================================================================
+-- 20260925090000_unlimited_scans.sql
+-- ============================================================================
+-- Scans illimités pendant la phase de test : même plafond très haut pour tous
+-- (invité, gratuit, premium). Le compteur scan_usage continue de mesurer l'usage.
+-- La vraie limite reste celle de la clé Gemini (quota gratuit de Google).
+-- Pour rétablir des limites : redéfinir cette fonction, par exemple
+--   case when p_is_anonymous then 1 when p_plan = 'premium' then 30 else 3 end
+-- 100000 est aussi le seuil à partir duquel l'app affiche « Scans illimités ».
+create or replace function public.scan_quota(p_plan text, p_is_anonymous boolean)
+returns integer
+language sql
+immutable
+set search_path = ''
+as $$
+  select 100000;
+$$;
 
 -- ============================================================================
 -- Table des plats (valeurs approximatives à vérifier, voir docs/FOODS_TODO.md)

@@ -20,7 +20,7 @@ par le modèle.
 - **Comptes** : mode invité (sans e-mail), inscription par e-mail avec code de confirmation, conversion
   invité → compte sans perte de données, suppression du compte et de toutes les données.
 - **Onboarding** : objectif, informations corporelles, activité ; cible calculée avec Mifflin-St Jeor, ajustable.
-- **Scan** : photo (caméra ou galerie) compressée à 1024 px / JPEG 0,7, indice facultatif, quota restant affiché.
+- **Scan** : photo (caméra ou galerie) compressée à 1024 px / JPEG 0,7, indice facultatif, quota affiché (« Scans illimités »).
 - **Résultat modifiable** : éléments détectés, questions de clarification (une relance gratuite), quantités en
   grammes ou en repères locaux (louche, boule, bol…), ajout depuis la table, fourchette de calories si
   l'estimation est incertaine, éléments hors table marqués « estimé ».
@@ -28,7 +28,8 @@ par le modèle.
 - **Historique** : calories par jour sur 7 et 30 jours avec la cible, moyenne, détail par journée.
 - **Hors ligne** : journal consultable et enregistrable sans réseau (saisie sans photo), synchronisé au retour
   du réseau ; le scan IA, lui, exige internet et le dit clairement.
-- **Quota** : invité 1, gratuit 3, premium 30 scans par jour (heure du Bénin), vérifié côté serveur.
+- **Quota** : scans illimités pendant les tests (plafond anti-abus de 100 000 par jour, migration
+  `20260925090000_unlimited_scans.sql`) ; compteur par jour (heure du Bénin) côté serveur, limites rétablissables en SQL.
 - **Corrections** : chaque écart entre la prédiction de l'IA et la saisie finale est enregistré pour améliorer la table.
 
 ## Architecture

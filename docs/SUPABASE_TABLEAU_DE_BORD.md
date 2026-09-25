@@ -31,6 +31,9 @@ Pour copier un fichier depuis GitHub : ouvre-le, clique sur **Raw** (ou l'icône
 5. Vérification facultative : nouvelle requête avec le contenu de [`supabase/tests/rls_test.sql`](../supabase/tests/rls_test.sql)
    → **Run** → « Tous les tests RLS sont passés » (ce test annule tout ce qu'il crée).
 
+   - **Projet déjà installé** : quand une nouvelle migration arrive dans `supabase/migrations/` (par exemple
+     `20260925090000_unlimited_scans.sql`, scans illimités), colle **seulement ce fichier** dans une nouvelle requête → **Run**.
+
 ## Étape 3 — Connexion des utilisateurs (5 min)
 
 Menu de gauche : **Authentication**.

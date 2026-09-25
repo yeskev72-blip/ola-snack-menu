@@ -122,6 +122,7 @@ export const fr = {
     analyzing: 'Analyse en cours… (10 à 30 secondes)',
     quota: "Scans restants aujourd'hui : {count}",
     quotaUnknown: 'Scans restants : inconnu (hors ligne)',
+    quotaUnlimited: 'Scans illimités',
     quotaExceeded: "Tu as utilisé tous tes scans d'aujourd'hui. Tu peux saisir ton repas sans photo.",
     offline: 'Pas de connexion : le scan a besoin d’internet. Tu peux saisir ton repas sans photo, il sera enregistré.',
     networkError: 'Connexion trop lente ou coupée. Réessaie, ou saisis ton repas sans photo.',
