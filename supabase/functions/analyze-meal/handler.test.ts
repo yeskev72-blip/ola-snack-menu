@@ -34,7 +34,7 @@ function setup(opts: SetupOptions = {}) {
     fingerprints: [] as string[],
   };
   let used = opts.used ?? 0;
-  const quota = opts.quota ?? 3;
+  const quota = opts.quota ?? 2;
   const replies = [...(opts.gemini ?? [okText(VALID_OUTPUT)])];
   let followUp = opts.followUpAvailable ?? true;
 
@@ -116,20 +116,21 @@ test('scan réussi : analyse, scan_id, quota restant, questions', async () => {
   assert.equal(body.scan_id, SCAN_ID);
   assert.equal(body.items.length, 2);
   assert.equal(body.follow_up_allowed, true);
-  assert.deepEqual(body.quota, { used: 1, quota: 3, remaining: 2 });
+  assert.deepEqual(body.quota, { used: 1, quota: 2, remaining: 1 });
   assert.equal(calls.gemini, 1);
   assert.equal(calls.logs.length, 1);
   assert.equal(calls.logs[0]!.result.usage.totalTokens, 1230, 'tokens journalisés');
   assert.match(calls.prompts[0]!, /riz sauce arachide/);
 });
 
-test('4e scan gratuit refusé côté serveur, sans appel Gemini', async () => {
-  const { post, calls } = setup({ used: 3 });
+test('3e scan gratuit refusé côté serveur, sans appel Gemini, Premium proposé', async () => {
+  const { post, calls } = setup({ quota: 2, used: 2 });
   const res = await post(scan);
   assert.equal(res.status, 429);
   const body = await res.json();
   assert.equal(body.error, 'quota_exceeded');
-  assert.match(body.message, /3 scans/);
+  assert.match(body.message, /2 scans/);
+  assert.match(body.message, /Passe Premium pour en avoir 30/);
   assert.equal(calls.gemini, 0);
 });
 

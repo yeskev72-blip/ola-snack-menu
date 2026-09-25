@@ -108,12 +108,12 @@ do $$
 declare r record;
 begin
   assert (select count(*) from public.meals where total_kcal = 650) = 1, 'le repas de A est intact';
-  for i in 1..3 loop
+  for i in 1..2 loop
     select * into r from public.consume_scan('00000000-0000-0000-0000-00000000000a');
-    assert r.allowed and r.used = i and r.quota = 3, format('scan gratuit %s autorisé', i);
+    assert r.allowed and r.used = i and r.quota = 2, format('scan gratuit %s autorisé', i);
   end loop;
   select * into r from public.consume_scan('00000000-0000-0000-0000-00000000000a');
-  assert not r.allowed and r.used = 3, '4e scan gratuit refusé';
+  assert not r.allowed and r.used = 2, '3e scan gratuit refusé';
 
   select * into r from public.consume_scan('00000000-0000-0000-0000-00000000000c');
   assert r.allowed and r.quota = 1, '1er scan invité autorisé';
@@ -122,7 +122,7 @@ begin
 
   perform public.release_scan('00000000-0000-0000-0000-00000000000a');
   select * into r from public.consume_scan('00000000-0000-0000-0000-00000000000a');
-  assert r.allowed and r.used = 3, 'un scan rendu après échec peut être réutilisé';
+  assert r.allowed and r.used = 2, 'un scan rendu après échec peut être réutilisé';
 end $$;
 
 -- Relance après questions : une seule par scan, uniquement par son propriétaire.
@@ -149,7 +149,7 @@ do $$
 declare r record;
 begin
   select * into r from public.get_scan_status();
-  assert r.used = 3 and r.quota = 3 and r.remaining = 0, 'get_scan_status pour A';
+  assert r.used = 2 and r.quota = 2 and r.remaining = 0, 'get_scan_status pour A';
   assert (select count(*) from public.scan_usage) = 1, 'A ne voit que son compteur';
 end $$;
 
@@ -198,7 +198,7 @@ begin
   assert r.granted and r.premium_until = v_first + interval '365 days', 'annuel : prolonge la fin actuelle';
 
   update public.profiles set premium_until = now() - interval '1 day' where id = b;
-  assert (select quota from public.consume_scan(b)) = 3, 'Premium expiré : retour à 3 scans';
+  assert (select quota from public.consume_scan(b)) = 2, 'Premium expiré : retour à 2 scans';
   select * into r from public.grant_premium(b, 'sale_3', 'monthly', 30);
   assert r.premium_until > now() + interval '29 days', 'après expiration : 30 jours à partir de maintenant';
 

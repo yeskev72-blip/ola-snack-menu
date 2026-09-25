@@ -597,6 +597,7 @@ var CORS_HEADERS = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS"
 };
+var PREMIUM_DAILY_SCANS = 30;
 function json(status, body) {
   return new Response(JSON.stringify(body), {
     status,
@@ -658,7 +659,7 @@ function createHandler(deps) {
       } else {
         quota = await deps.consumeScan(user.id);
         if (!quota.allowed) {
-          const message = user.isAnonymous ? "Tu as utilis\xE9 ton scan gratuit du jour. Cr\xE9e un compte pour en avoir 3 par jour." : `Tu as utilis\xE9 tes ${quota.quota} scans d'aujourd'hui. Reviens demain !`;
+          const message = user.isAnonymous ? "Tu as utilis\xE9 ton scan gratuit du jour. Cr\xE9e un compte pour en avoir 2 par jour." : quota.quota < PREMIUM_DAILY_SCANS ? `Tu as utilis\xE9 tes ${quota.quota} scans d'aujourd'hui. Passe Premium pour en avoir ${PREMIUM_DAILY_SCANS} par jour, ou reviens demain !` : `Tu as utilis\xE9 tes ${quota.quota} scans d'aujourd'hui. Reviens demain !`;
           return fail(429, "quota_exceeded", message, {
             quota: {
               used: quota.used,

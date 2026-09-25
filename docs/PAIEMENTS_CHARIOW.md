@@ -1,6 +1,6 @@
 # Paiements Premium avec Chariow
 
-Premium = **30 scans par jour** au lieu de 3 (invité : 1). Deux offres, payées par mobile money ou carte sur la
+Premium = **30 scans par jour** au lieu de 2 (invité : 1). Deux offres, payées par mobile money ou carte sur la
 page de paiement Chariow, **sans renouvellement automatique** : chaque paiement ajoute 30 jours (mensuel) ou
 365 jours (annuel) à la date de fin actuelle.
 

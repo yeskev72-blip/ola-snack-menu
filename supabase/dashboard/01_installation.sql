@@ -553,7 +553,7 @@ as $$
   where auth.uid() is not null;
 $$;
 
--- Limites choisies : invité 1, gratuit 3, Premium 30 scans par jour.
+-- Limites choisies : invité 1, gratuit 2, Premium 30 scans par jour.
 -- (Redéfinie ici au cas où une version « illimitée » aurait été appliquée à la main.)
 create or replace function public.scan_quota(p_plan text, p_is_anonymous boolean)
 returns integer
@@ -564,7 +564,7 @@ as $$
   select case
     when p_is_anonymous then 1
     when p_plan = 'premium' then 30
-    else 3
+    else 2
   end;
 $$;
 

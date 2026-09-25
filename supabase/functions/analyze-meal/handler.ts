@@ -60,6 +60,9 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+/** Quota Premium (scan_quota côté base) : en dessous, le message de refus propose Premium. */
+const PREMIUM_DAILY_SCANS = 30;
+
 function json(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -122,8 +125,10 @@ export function createHandler(deps: Deps) {
         quota = await deps.consumeScan(user.id);
         if (!quota.allowed) {
           const message = user.isAnonymous
-            ? 'Tu as utilisé ton scan gratuit du jour. Crée un compte pour en avoir 3 par jour.'
-            : `Tu as utilisé tes ${quota.quota} scans d'aujourd'hui. Reviens demain !`;
+            ? 'Tu as utilisé ton scan gratuit du jour. Crée un compte pour en avoir 2 par jour.'
+            : quota.quota < PREMIUM_DAILY_SCANS
+              ? `Tu as utilisé tes ${quota.quota} scans d'aujourd'hui. Passe Premium pour en avoir ${PREMIUM_DAILY_SCANS} par jour, ou reviens demain !`
+              : `Tu as utilisé tes ${quota.quota} scans d'aujourd'hui. Reviens demain !`;
           return fail(429, 'quota_exceeded', message, { quota: { used: quota.used, quota: quota.quota, remaining: 0 } });
         }
         charged = true;
