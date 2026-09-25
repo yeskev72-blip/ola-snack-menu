@@ -9,7 +9,7 @@ import { TextField } from '@/components/TextField';
 import { t } from '@/i18n';
 import { useAction } from '@/lib/useAction';
 import { useCooldown } from '@/lib/useCooldown';
-import { isValidCode } from '@/lib/validation';
+import { CODE_LENGTH, isValidCode, normalizeCode } from '@/lib/validation';
 import { useSession } from '@/state/session';
 
 export default function Verify() {
@@ -51,11 +51,11 @@ export default function Verify() {
       <TextField
         label={t('auth.codeLabel')}
         value={code}
-        onChangeText={(text) => setCode(text.replace(/\D/g, '').slice(0, 6))}
+        onChangeText={(text) => setCode(normalizeCode(text))}
         keyboardType="number-pad"
         autoComplete="one-time-code"
         textContentType="oneTimeCode"
-        maxLength={6}
+        maxLength={CODE_LENGTH.max}
         onSubmitEditing={submit}
       />
       <Notice message={verify.error ?? resend.error} />

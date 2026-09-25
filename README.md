@@ -17,7 +17,7 @@ par le modèle.
 
 ## Fonctionnalités
 
-- **Comptes** : mode invité (sans e-mail), inscription par e-mail avec code à 6 chiffres, conversion
+- **Comptes** : mode invité (sans e-mail), inscription par e-mail avec code de confirmation, conversion
   invité → compte sans perte de données, suppression du compte et de toutes les données.
 - **Onboarding** : objectif, informations corporelles, activité ; cible calculée avec Mifflin-St Jeor, ajustable.
 - **Scan** : photo (caméra ou galerie) compressée à 1024 px / JPEG 0,7, indice facultatif, quota restant affiché.
@@ -132,7 +132,7 @@ supabase/
   migrations/         schéma SQL versionné (RLS partout)
   seed/foods.json     table des plats (source) · seed.sql (généré)
   functions/          analyze-meal, delete-account, logique partagée (_shared)
-  templates/          e-mails avec code à 6 chiffres
+  templates/          e-mails avec code de confirmation
   tests/              tests RLS/quota + imitation Supabase pour PostgreSQL nu
 docs/
   SETUP.md            mise en route, secrets, build APK, recette

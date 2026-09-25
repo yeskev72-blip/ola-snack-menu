@@ -23,7 +23,7 @@ type Session = {
   hasProfile: boolean;
   signInAsGuest: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
-  /** Crée le compte ; un code à 6 chiffres est envoyé par e-mail. */
+  /** Crée le compte ; un code de confirmation est envoyé par e-mail. */
   signUp: (email: string, password: string) => Promise<void>;
   verifySignupCode: (email: string, code: string) => Promise<void>;
   resendSignupCode: (email: string) => Promise<void>;

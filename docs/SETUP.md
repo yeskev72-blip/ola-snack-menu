@@ -58,7 +58,7 @@ Dans *Authentication* :
    - Active **Allow anonymous sign-ins** (mode invité).
    - Fournisseur **Email** : actif, avec **Confirm email** activé.
    - Longueur minimale du mot de passe : **8**.
-2. **Emails > Templates** : l'app demande un **code à 6 chiffres**, pas un lien. Remplace le contenu de :
+2. **Emails > Templates** : l'app demande un **code** (6 à 10 chiffres ; Supabase en envoie 6 ou 8 selon le réglage *Email OTP Length* du fournisseur Email), pas un lien. Remplace le contenu de :
    - **Confirm signup** par `supabase/templates/confirmation.html` ;
    - **Change email address** par `supabase/templates/email_change.html`.
    (Les deux contiennent `{{ .Token }}` : c'est ce qui affiche le code.)
