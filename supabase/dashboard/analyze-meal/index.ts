@@ -23,6 +23,15 @@ function readUsage(body) {
     totalTokens: n(u.totalTokenCount)
   };
 }
+function errorMessage(body) {
+  const error = body?.error;
+  if (!error?.message) return null;
+  const violations = (error.details ?? []).flatMap((d) => d.fieldViolations ?? []).map((v) => [
+    v.field,
+    v.description
+  ].filter(Boolean).join(" : ")).filter((v) => v !== "");
+  return violations.length ? `${error.message} (${violations.join(" ; ")})` : error.message;
+}
 function buildGeminiBody(config, req) {
   return {
     systemInstruction: {
@@ -48,7 +57,10 @@ function buildGeminiBody(config, req) {
         ]
       }
     ],
-    generationConfig: {
+    generationConfig: config.simple ? {
+      responseMimeType: "application/json",
+      maxOutputTokens: config.maxOutputTokens
+    } : {
       responseMimeType: "application/json",
       responseSchema: req.responseSchema,
       ...config.temperature === null ? {} : {
@@ -96,7 +108,7 @@ async function callGemini(config, req, fetchImpl = fetch) {
   }
   const usage = readUsage(body);
   if (!response.ok) {
-    const message = body?.error?.message ?? response.statusText;
+    const message = errorMessage(body) ?? response.statusText;
     return {
       ok: false,
       error: `HTTP ${response.status} : ${message}`.slice(0, 500),
@@ -135,6 +147,18 @@ async function callGeminiResilient(configs, req, options) {
   const remaining = () => options.budgetMs - (Date.now() - started);
   const MIN_CALL_MS = 5e3;
   let last = null;
+  let anyOverloaded = false;
+  const failures = [];
+  const failure = () => {
+    const final = failures.pop();
+    return {
+      ...final,
+      ...anyOverloaded ? {
+        overloaded: true
+      } : {},
+      earlierFailures: failures
+    };
+  };
   for (const config of configs) {
     for (let attempt = 0; attempt <= options.retryDelaysMs.length; attempt++) {
       if (attempt > 0) {
@@ -142,18 +166,33 @@ async function callGeminiResilient(configs, req, options) {
         if (remaining() - delay < MIN_CALL_MS) break;
         await sleep(delay);
       }
-      if (last && remaining() < MIN_CALL_MS) return last;
-      const result = await callGemini({
+      if (last && remaining() < MIN_CALL_MS) return failure();
+      const timeoutMs = () => Math.min(config.timeoutMs, Math.max(remaining(), MIN_CALL_MS));
+      let result = await callGemini({
         ...config,
-        timeoutMs: Math.min(config.timeoutMs, Math.max(remaining(), MIN_CALL_MS))
+        timeoutMs: timeoutMs()
       }, req, options.fetchImpl);
-      if (result.ok) return result;
+      if (!result.ok && !config.simple && result.error.startsWith("HTTP 400") && remaining() >= MIN_CALL_MS) {
+        failures.push(result);
+        options.onFailure?.(result);
+        result = await callGemini({
+          ...config,
+          simple: true,
+          timeoutMs: timeoutMs()
+        }, req, options.fetchImpl);
+      }
+      if (result.ok) return {
+        ...result,
+        earlierFailures: failures
+      };
       last = result;
+      failures.push(result);
+      if (result.overloaded) anyOverloaded = true;
       options.onFailure?.(result);
       if (!result.overloaded || result.error === "timeout") break;
     }
   }
-  return last;
+  return failure();
 }
 
 // supabase/functions/_shared/analysis.ts
@@ -268,7 +307,9 @@ R\xC8GLES
 
 7. Si la photo ne montre pas de nourriture, renvoie not_food = true, sans \xE9l\xE9ments ni questions.
 
-8. R\xE9ponds uniquement avec du JSON conforme au sch\xE9ma fourni. Libell\xE9s et questions en fran\xE7ais simple.
+8. R\xE9ponds uniquement avec un objet JSON de cette forme exacte, sans texte autour. Libell\xE9s et questions en fran\xE7ais simple.
+{"not_food": false, "items": [{"food_key": "<cl\xE9 de la liste ou ${OTHER_FOOD_KEY}>", "label": "<libell\xE9>", "grams": <nombre>, "confidence": <0 \xE0 1>, "estimate_100g": null ou {"kcal": <nombre>, "proteines": <nombre>, "glucides": <nombre>, "lipides": <nombre>}}], "questions": [{"id": "<identifiant court>", "text": "<question>", "options": ["<r\xE9ponse>", "<r\xE9ponse>"]}], "confidence_globale": <0 \xE0 1>}
+Au plus ${LIMITS.maxItems} \xE9l\xE9ments.
 
 LISTE DE R\xC9F\xC9RENCE
 ${foods.map(foodLine).join("\n")}`;
@@ -667,17 +708,30 @@ function createHandler(deps) {
           error = result.error;
           retryable = result.retryable;
         }
-        await deps.logCall({
+        const kind = isFollowUp ? "follow_up" : "initial";
+        const logs = (result.earlierFailures ?? []).map((f) => ({
           scanId,
           userId: user.id,
-          kind: isFollowUp ? "follow_up" : "initial",
+          kind,
+          attempt,
+          model: f.model ?? deps.model,
+          result: f,
+          error: f.ok ? null : f.error
+        }));
+        logs.push({
+          scanId,
+          userId: user.id,
+          kind,
           attempt,
           model: result.model ?? deps.model,
           result,
           error
-        }).catch((e) => deps.log("journalisation des tokens impossible", {
-          error: String(e)
-        }));
+        });
+        for (const log of logs) {
+          await deps.logCall(log).catch((e) => deps.log("journalisation des tokens impossible", {
+            error: String(e)
+          }));
+        }
         if (error) deps.log("\xE9chec Gemini", {
           scanId,
           attempt,
@@ -739,13 +793,13 @@ if (!THINKING_LEVELS.includes(thinkingLevel)) throw new Error("GEMINI_THINKING_L
 var geminiConfig = {
   apiKey: env("GEMINI_API_KEY"),
   apiBase: env("GEMINI_API_BASE", GEMINI_API_BASE),
-  model: env("GEMINI_MODEL", "gemini-3.8-flash"),
+  model: env("GEMINI_MODEL", "gemini-flash-lite-latest"),
   temperature: parseTemperature(env("GEMINI_TEMPERATURE", "0.3")),
   thinkingLevel,
   maxOutputTokens: 4096,
   timeoutMs: 45e3
 };
-var fallbackConfigs = env("GEMINI_FALLBACK_MODELS", "gemini-flash-lite-latest").split(",").map((m) => m.trim()).filter((m) => m !== "" && m !== "none" && m !== geminiConfig.model).map((model) => ({
+var fallbackConfigs = env("GEMINI_FALLBACK_MODELS", "gemini-flash-latest").split(",").map((m) => m.trim()).filter((m) => m !== "" && m !== "none" && m !== geminiConfig.model).map((model) => ({
   ...geminiConfig,
   model,
   thinkingLevel: null
