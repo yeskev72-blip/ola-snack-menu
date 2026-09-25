@@ -3,6 +3,7 @@ import Svg, { Circle } from 'react-native-svg';
 
 import { AppText } from '@/components/AppText';
 import { t } from '@/i18n';
+import { formatNumber } from '@/lib/format';
 import { colors } from '@/theme';
 
 type Props = { eaten: number; target: number; size?: number };
@@ -14,7 +15,7 @@ export function CalorieRing({ eaten, target, size = 200 }: Props) {
   const circumference = 2 * Math.PI * radius;
   const ratio = target > 0 ? Math.min(eaten / target, 1) : 0;
   const over = eaten > target;
-  const remaining = Math.abs(Math.round(target - eaten));
+  const remaining = formatNumber(Math.abs(target - eaten));
 
   return (
     <View style={{ width: size, height: size }} accessible accessibilityLabel={`${remaining} ${t('common.kcal')} ${over ? t('journal.over') : t('journal.remaining')}`}>

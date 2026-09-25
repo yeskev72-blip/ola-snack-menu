@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/AppText';
 import { Card } from '@/components/Card';
 import { t } from '@/i18n';
+import { formatNumber } from '@/lib/format';
 import type { LocalMeal } from '@/lib/meals';
 import { MEAL_TYPES } from '@/lib/mealTypes';
 import { colors, radius, spacing } from '@/theme';
@@ -28,7 +29,7 @@ export function DayMeals({ meals }: { meals: LocalMeal[] }) {
                 {t(label)}
               </AppText>
               <AppText variant="large">
-                {Math.round(kcal)} {t('common.kcal')}
+                {formatNumber(kcal)} {t('common.kcal')}
               </AppText>
             </View>
             {ofType.map((meal) => (
@@ -41,7 +42,7 @@ export function DayMeals({ meals }: { meals: LocalMeal[] }) {
                 <AppText style={styles.flex} numberOfLines={2}>
                   {meal.items.map((it) => it.label).join(', ')}
                 </AppText>
-                <AppText variant="muted">{Math.round(meal.total.kcal)}</AppText>
+                <AppText variant="muted">{formatNumber(meal.total.kcal)}</AppText>
               </Pressable>
             ))}
           </Card>

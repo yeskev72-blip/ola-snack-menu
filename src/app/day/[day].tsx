@@ -6,6 +6,7 @@ import { Macros } from '@/components/Macros';
 import { Card } from '@/components/Card';
 import { Screen } from '@/components/Screen';
 import { t } from '@/i18n';
+import { formatNumber } from '@/lib/format';
 import { parseDayKey } from '@/lib/days';
 import { useMealsOfDay } from '@/lib/meals';
 import type { Nutrients } from '@/lib/nutrition';
@@ -31,7 +32,7 @@ export default function DayDetail() {
       <Stack.Screen options={{ title }} />
       <Card>
         <AppText variant="title">
-          {Math.round(total.kcal)} {t('common.kcal')}
+          {formatNumber(total.kcal)} {t('common.kcal')}
         </AppText>
         <Macros values={total} />
       </Card>

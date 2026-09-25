@@ -1,8 +1,10 @@
 /**
  * Calcul des calories et macros d'un repas à partir de la table foods (valeurs pour 100 g).
  * Les chiffres du modèle ne servent que pour les éléments hors table (« autre »), marqués estimés.
- * Module pur (sans import) : testé avec `node --test`.
+ * Module pur : testé avec `node --test`.
  */
+
+import { round1 } from './format.ts';
 
 export type Per100g = { kcal: number; proteines: number; glucides: number; lipides: number };
 
@@ -42,7 +44,6 @@ export type MealNutrition = {
 /** En dessous de ce seuil de confiance, on affiche une fourchette plutôt qu'un chiffre. */
 export const RANGE_THRESHOLD = 0.7;
 
-const round1 = (v: number) => Math.round(v * 10) / 10;
 
 export function foodPer100g(food: FoodValues): Per100g {
   return { kcal: food.kcal_100g, proteines: food.proteines_100g, glucides: food.glucides_100g, lipides: food.lipides_100g };
@@ -84,7 +85,7 @@ export function mealNutrition(items: NutritionItem[], foods: ReadonlyMap<string,
   const confidence =
     weight > 0 ? computed.reduce((sum, n, i) => sum + n.kcal * (items[i]!.confidence ?? 1), 0) / weight : 1;
 
-  const kcal = Math.round(total.kcal);
+  const kcal = round1(total.kcal);
   let range: MealNutrition['range'] = null;
   if (confidence < RANGE_THRESHOLD && kcal > 0) {
     const margin = rangeMargin(confidence);

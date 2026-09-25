@@ -11,6 +11,7 @@ import { Macros } from '@/components/Macros';
 import { Notice } from '@/components/Notice';
 import { Screen } from '@/components/Screen';
 import { t } from '@/i18n';
+import { formatNumber } from '@/lib/format';
 import { syncMeals, todayKey, useMealsOfDay, usePendingCount } from '@/lib/meals';
 import type { Nutrients } from '@/lib/nutrition';
 import { useSession } from '@/state/session';
@@ -49,7 +50,7 @@ export default function Journal() {
       <Card style={styles.summary}>
         <CalorieRing eaten={total.kcal} target={target} />
         <AppText variant="muted">
-          {t('journal.eaten', { kcal: Math.round(total.kcal) })} · {t('journal.target', { kcal: target })}
+          {t('journal.eaten', { kcal: formatNumber(total.kcal) })} · {t('journal.target', { kcal: target })}
         </AppText>
         <Macros values={total} />
       </Card>

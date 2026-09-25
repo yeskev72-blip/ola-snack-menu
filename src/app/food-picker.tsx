@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '@/components/AppText';
 import { TextField } from '@/components/TextField';
 import { t } from '@/i18n';
+import { formatNumber } from '@/lib/format';
 import { type LocalFood, searchFoods, useFoods } from '@/lib/foods';
 import { unitsFor } from '@/lib/portions';
 import { useScanDraft } from '@/state/scanDraft';
@@ -63,7 +64,7 @@ export default function FoodPicker() {
             onPress={() => choose(item)}
             style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}>
             <AppText style={styles.label}>{item.label_fr}</AppText>
-            <AppText variant="small">{t('picker.per100', { kcal: Math.round(item.kcal_100g) })}</AppText>
+            <AppText variant="small">{t('picker.per100', { kcal: formatNumber(item.kcal_100g) })}</AppText>
           </Pressable>
         )}
       />

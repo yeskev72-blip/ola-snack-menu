@@ -2,6 +2,8 @@
  * Journées locales et agrégats pour l'historique. Module pur : testé avec `node --test`.
  */
 
+import { round1 } from './format.ts';
+
 export type DayTotals = { day: string; kcal: number; proteines: number; glucides: number; lipides: number; meals: number };
 
 type MealLike = { eaten_at: string; total: { kcal: number; proteines: number; glucides: number; lipides: number } };
@@ -42,14 +44,14 @@ export function totalsByDay(meals: MealLike[], days: string[]): DayTotals[] {
   }
   return days.map((day) => {
     const e = byDay.get(day)!;
-    return { ...e, kcal: Math.round(e.kcal), proteines: Math.round(e.proteines), glucides: Math.round(e.glucides), lipides: Math.round(e.lipides) };
+    return { ...e, kcal: round1(e.kcal), proteines: round1(e.proteines), glucides: round1(e.glucides), lipides: round1(e.lipides) };
   });
 }
 
 /** Moyenne sur les journées renseignées uniquement (une journée vide n'est pas un jeûne). */
 export function averageKcal(days: DayTotals[]): number | null {
   const filled = days.filter((d) => d.meals > 0);
-  return filled.length ? Math.round(filled.reduce((s, d) => s + d.kcal, 0) / filled.length) : null;
+  return filled.length ? round1(filled.reduce((s, d) => s + d.kcal, 0) / filled.length) : null;
 }
 
 /** Graduations « rondes » de 0 au-dessus du maximum (500, 1000, 2000…). */
