@@ -12,9 +12,11 @@ export type Deps = {
   webhookToken: string | null;
   /** Secret de signature de la notification (whsec_…) ; null si non utilisé. */
   signingSecret: string | null;
-  /** Produit Chariow → offre, pour ne pas dépendre des seules métadonnées. */
+  /** Produit Chariow (identifiant prd_… ou nom court) → offre, pour ne pas dépendre des métadonnées. */
   productOffers: Record<string, Offer>;
   fetchSale: (saleId: string) => Promise<SaleInfo | null>;
+  /** Nom court d'un produit (quand les produits sont configurés par leur slug et la vente ne donne que l'identifiant). */
+  fetchProductSlug: (productId: string) => Promise<string | null>;
   grantPremium: (
     input: { userId: string; saleId: string; offer: Offer; days: number; amount: number | null; currency: string | null },
   ) => Promise<{ granted: boolean; premiumUntil: string | null }>;
@@ -74,9 +76,17 @@ export function createHandler(deps: Deps) {
 
     // Seul le produit vendu fait foi (jamais les métadonnées) : une vente d'un autre produit,
     // même moins cher, ne peut pas créditer de Premium.
-    const offer = sale.productId ? deps.productOffers[sale.productId] : undefined;
+    let offer = (sale.productId ? deps.productOffers[sale.productId] : undefined) ??
+      (sale.productSlug ? deps.productOffers[sale.productSlug] : undefined);
+    if (!offer && sale.productId && !sale.productSlug) {
+      const slug = await deps.fetchProductSlug(sale.productId).catch((e) => {
+        deps.log('lecture du produit impossible', { saleId, productId: sale.productId, error: String(e) });
+        return null;
+      });
+      if (slug) offer = deps.productOffers[slug];
+    }
     if (!offer) {
-      deps.log('vente d’un autre produit', { saleId, productId: sale.productId });
+      deps.log('vente d’un autre produit', { saleId, productId: sale.productId, productSlug: sale.productSlug });
       return json(200, { ignored: 'other_product' });
     }
     const userId = sale.metadata.user_id;

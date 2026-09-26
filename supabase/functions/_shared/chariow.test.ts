@@ -24,9 +24,10 @@ test('lecture d’une vente, enveloppe { data } et variantes', () => {
     { message: 'ok', data: { id: 'sal_1', status: 'Completed', product: { id: 'prd_m' }, custom_metadata: { user_id: 'u1', offer: 'monthly' }, amount: { value: 1000, currency: 'XOF' } } },
     'sal_1',
   );
-  assert.deepEqual(sale, { id: 'sal_1', status: 'completed', productId: 'prd_m', metadata: { user_id: 'u1', offer: 'monthly' }, amount: 1000, currency: 'XOF' });
+  assert.deepEqual(sale, { id: 'sal_1', status: 'completed', productId: 'prd_m', productSlug: null, metadata: { user_id: 'u1', offer: 'monthly' }, amount: 1000, currency: 'XOF' });
   const flat = readSale({ id: 'sal_2', status: 'settled', product_id: 'prd_y', metadata: { user_id: 'u2' }, amount: '10000', currency: 'XOF' }, 'sal_2');
   assert.equal(flat.productId, 'prd_y');
+  assert.equal(readSale({ data: { id: 's', product: { id: 'prd_z', slug: 'calbasse-1-mois' } } }, 's').productSlug, 'calbasse-1-mois');
   assert.equal(flat.amount, 10000);
   assert.equal(readSale(null, 'sal_x').status, null);
 });

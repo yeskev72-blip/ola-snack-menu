@@ -7,7 +7,7 @@ import type { SaleInfo } from '../_shared/chariow.ts';
 import { createHandler, type Deps } from './handler.ts';
 
 const USER = '6f1c2f4e-8b1a-4c43-9a51-3d2f0e6b7a10';
-const PAID: SaleInfo = { id: 'sal_1', status: 'completed', productId: 'prd_m', metadata: { user_id: USER, offer: 'monthly' }, amount: 1000, currency: 'XOF' };
+const PAID: SaleInfo = { id: 'sal_1', status: 'completed', productId: 'prd_m', productSlug: null, metadata: { user_id: USER, offer: 'monthly' }, amount: 1000, currency: 'XOF' };
 
 function setup(sale: SaleInfo | null = PAID, overrides: Partial<Deps> = {}) {
   const grants: Parameters<Deps['grantPremium']>[0][] = [];
@@ -17,6 +17,7 @@ function setup(sale: SaleInfo | null = PAID, overrides: Partial<Deps> = {}) {
     signingSecret: null,
     productOffers: { prd_m: 'monthly', prd_y: 'yearly' },
     fetchSale: async (id) => (sale && id === sale.id ? sale : null),
+    fetchProductSlug: async (id) => ({ prd_m_id: 'calbasse-1-mois' } as Record<string, string>)[id] ?? null,
     grantPremium: async (input) => {
       grants.push(input);
       const granted = !credited.has(input.saleId);
@@ -54,6 +55,23 @@ test('annuel : 365 jours', async () => {
   await notify(EVENT);
   assert.equal(grants[0]!.offer, 'yearly');
   assert.equal(grants[0]!.days, 365);
+});
+
+test('produit configuré par son nom court (slug) : reconnu par le slug de la vente', async () => {
+  const { notify, grants } = setup({ ...PAID, productId: 'prd_inconnu', productSlug: 'calbasse-1-an' }, {
+    productOffers: { 'calbasse-1-mois': 'monthly', 'calbasse-1-an': 'yearly' },
+  });
+  await notify(EVENT);
+  assert.equal(grants[0]!.offer, 'yearly');
+  assert.equal(grants[0]!.days, 365);
+});
+
+test('slug configuré, vente avec le seul identifiant : le slug est relu auprès de Chariow', async () => {
+  const { notify, grants } = setup({ ...PAID, productId: 'prd_m_id', productSlug: null }, {
+    productOffers: { 'calbasse-1-mois': 'monthly' },
+  });
+  await notify(EVENT);
+  assert.equal(grants[0]!.offer, 'monthly');
 });
 
 test('le produit fait foi : métadonnées « yearly » sur le produit mensuel → 30 jours', async () => {

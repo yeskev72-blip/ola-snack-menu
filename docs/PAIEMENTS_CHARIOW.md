@@ -60,8 +60,8 @@ La réponse doit indiquer `UPDATE 1`. Dans l'app : Profil → « Premium permane
 | Nom | Valeur |
 |---|---|
 | `CHARIOW_API_KEY` | la clé API Chariow |
-| `CHARIOW_PRODUCT_MONTHLY` | identifiant du produit 1 mois (`prd_…`) |
-| `CHARIOW_PRODUCT_YEARLY` | identifiant du produit 1 an (`prd_…`) |
+| `CHARIOW_PRODUCT_MONTHLY` | produit 1 mois : identifiant `prd_…` ou nom court, la fin du lien public (ex. `calbasse-1-mois` pour `https://calbasse.mychariow.store/calbasse-1-mois`) |
+| `CHARIOW_PRODUCT_YEARLY` | produit 1 an : identifiant `prd_…` ou nom court |
 | `CHARIOW_LABEL_MONTHLY` | prix affiché dans l'app, ex. `1 000 FCFA / mois` |
 | `CHARIOW_LABEL_YEARLY` | ex. `10 000 FCFA / an` |
 | `CHARIOW_WEBHOOK_TOKEN` | une longue suite aléatoire (voir ci-dessous) |

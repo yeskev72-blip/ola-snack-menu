@@ -4,8 +4,8 @@
  *
  * Secrets (Edge Functions > Secrets) :
  *   CHARIOW_API_KEY          obligatoire, pour relire chaque vente auprès de Chariow
- *   CHARIOW_PRODUCT_MONTHLY  identifiant du produit « Premium mensuel »
- *   CHARIOW_PRODUCT_YEARLY   identifiant du produit « Premium annuel »
+ *   CHARIOW_PRODUCT_MONTHLY  produit « Premium mensuel » : identifiant (prd_…) ou nom court (ex. calbasse-1-mois)
+ *   CHARIOW_PRODUCT_YEARLY   produit « Premium annuel » : identifiant ou nom court
  *   CHARIOW_WEBHOOK_TOKEN    jeton secret ajouté à l'URL du Pulse (…/chariow-webhook?token=…)
  *   CHARIOW_WEBHOOK_SECRET   facultatif, secret de signature du Pulse (whsec_…) si Chariow en fournit un
  * Fournis automatiquement par Supabase : SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY.
@@ -13,7 +13,7 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-import { fetchSale, type Offer } from '../_shared/chariow.ts';
+import { fetchProductSlug, fetchSale, type Offer } from '../_shared/chariow.ts';
 import { createHandler } from './handler.ts';
 
 const opt = (name: string) => Deno.env.get(name)?.trim() || null;
@@ -37,6 +37,7 @@ Deno.serve(
     signingSecret: opt('CHARIOW_WEBHOOK_SECRET'),
     productOffers,
     fetchSale: (saleId) => fetchSale({ apiKey }, saleId),
+    fetchProductSlug: (productId) => fetchProductSlug({ apiKey }, productId),
     async grantPremium({ userId, saleId, offer, days, amount, currency }) {
       const { data, error } = await admin
         .rpc('grant_premium', { p_user_id: userId, p_sale_id: saleId, p_offer: offer, p_days: days, p_amount: amount, p_currency: currency })
