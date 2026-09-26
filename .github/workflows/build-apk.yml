@@ -2,6 +2,8 @@
 # GitHub > onglet Actions > « Construire l'APK » > Run workflow.
 # Prérequis : secret de dépôt EXPO_TOKEN (jeton d'accès expo.dev) ; variables
 # EXPO_PUBLIC_SUPABASE_URL / EXPO_PUBLIC_SUPABASE_ANON_KEY déclarées sur expo.dev.
+# À la fin, l'APK est publié dans GitHub > Releases (lien direct, sans passer par expo.dev) :
+#   https://github.com/<dépôt>/releases/latest/download/calbasse.apk
 name: Construire l'APK
 
 on:
@@ -14,15 +16,26 @@ on:
           - preview
           - production
         default: preview
+      build_id:
+        description: Facultatif — identifiant d'un build Expo déjà terminé à publier sans reconstruire
+        type: string
+        required: false
+        default: ''
 
 concurrency:
   group: build-apk
   cancel-in-progress: false
 
+# Publication de l'APK dans les Releases du dépôt.
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build EAS Android (${{ inputs.profile }})
     runs-on: ubuntu-latest
+    # Le build Expo dure 15 à 30 minutes ; marge pour la file d'attente.
+    timeout-minutes: 90
     env:
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
     steps:
@@ -41,19 +54,77 @@ jobs:
           cache: npm
 
       - run: npm ci
+        if: inputs.build_id == ''
 
       - name: Lancer le build sur les serveurs Expo
         id: build
+        env:
+          # Passé par une variable (et vérifié) plutôt qu'inséré dans le script.
+          EXISTING_BUILD_ID: ${{ inputs.build_id }}
         run: |
+          if [ -n "$EXISTING_BUILD_ID" ]; then
+            if ! [[ "$EXISTING_BUILD_ID" =~ ^[0-9a-f-]{36}$ ]]; then
+              echo "::error::build_id invalide (attendu : identifiant Expo du type 748a430c-49b8-…)"; exit 1
+            fi
+            BUILD_ID="$EXISTING_BUILD_ID"
+            echo "id=$BUILD_ID" >> "$GITHUB_OUTPUT"
+            echo "url=https://expo.dev/accounts/dessoyess-team/projects/calbasse/builds/$BUILD_ID" >> "$GITHUB_OUTPUT"
+            echo "Publication du build existant $BUILD_ID (pas de nouveau build)."
+            exit 0
+          fi
           npx --yes eas-cli@latest build --platform android --profile "${{ inputs.profile }}" \
             --non-interactive --no-wait --json > build.json
           cat build.json
           BUILD_ID=$(jq -r '.[0].id' build.json)
           URL="https://expo.dev/accounts/dessoyess-team/projects/calbasse/builds/$BUILD_ID"
+          echo "id=$BUILD_ID" >> "$GITHUB_OUTPUT"
           echo "url=$URL" >> "$GITHUB_OUTPUT"
           {
             echo "## Build lancé ✅"
             echo
-            echo "Le build continue sur les serveurs d'Expo (15 à 30 minutes)."
-            echo "À la fin, l'APK se télécharge ici : $URL"
+            echo "Suivi sur Expo : $URL"
+            echo "L'APK sera publié dans les Releases du dépôt à la fin du build (15 à 30 minutes)."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Attendre la fin du build Expo
+        id: wait
+        run: |
+          for i in $(seq 1 160); do
+            npx --yes eas-cli@latest build:view "${{ steps.build.outputs.id }}" --json > view.json 2>/dev/null || true
+            STATUS=$(jq -r '.status // "UNKNOWN"' view.json 2>/dev/null || echo UNKNOWN)
+            echo "Statut : $STATUS"
+            case "$STATUS" in
+              FINISHED)
+                APK_URL=$(jq -r '.artifacts.buildUrl // .artifacts.applicationArchiveUrl // empty' view.json)
+                if [ -z "$APK_URL" ]; then echo "::error::Build terminé sans lien vers l'APK"; exit 1; fi
+                echo "apk_url=$APK_URL" >> "$GITHUB_OUTPUT"
+                exit 0 ;;
+              ERRORED|CANCELED)
+                echo "::error::Le build Expo a échoué ($STATUS) : ${{ steps.build.outputs.url }}"
+                exit 1 ;;
+            esac
+            sleep 30
+          done
+          echo "::error::Build toujours en cours après 80 minutes : ${{ steps.build.outputs.url }}"
+          exit 1
+
+      - name: Publier l'APK dans les Releases GitHub
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl -fsSL "${{ steps.wait.outputs.apk_url }}" -o calbasse.apk
+          SHORT=$(git rev-parse --short HEAD)
+          TAG="apk-${{ github.run_number }}-${{ inputs.profile }}"
+          gh release create "$TAG" calbasse.apk \
+            --target "$GITHUB_SHA" \
+            --title "Calbasse APK n°${{ github.run_number }} (${{ inputs.profile }}, $SHORT)" \
+            --notes "APK construit depuis le commit $SHORT. Télécharge **calbasse.apk** ci-dessous, puis ouvre-le sur le téléphone. Build Expo : ${{ steps.build.outputs.url }}" \
+            --latest
+          LINK="https://github.com/${{ github.repository }}/releases/latest/download/calbasse.apk"
+          {
+            echo
+            echo "## APK prêt ✅"
+            echo
+            echo "Téléchargement direct : $LINK"
+            echo "Page de la version : https://github.com/${{ github.repository }}/releases/tag/$TAG"
           } >> "$GITHUB_STEP_SUMMARY"
