@@ -69,10 +69,10 @@ export default function ProfileEdit() {
   };
 
   return (
-    <Screen edges={['bottom']} footer={<Button label={t('common.save')} loading={save.loading} onPress={submit} />}>
+    <Screen title={t('profileEdit.title')} back="back" footer={<Button label={t('common.save')} loading={save.loading} onPress={submit} />}>
       <TextField label={t('onboarding.firstName')} value={prenom} onChangeText={setPrenom} maxLength={60} />
 
-      <AppText style={styles.label}>{t('onboarding.sex')}</AppText>
+      <AppText variant="label">{t('onboarding.sex')}</AppText>
       <View style={styles.row}>
         <View style={styles.flex}>
           <Choice label={t('onboarding.female')} selected={sexe === 'femme'} onPress={() => setSexe('femme')} />
@@ -94,12 +94,16 @@ export default function ProfileEdit() {
         </View>
       </View>
 
-      <AppText style={styles.label}>{t('onboarding.goalTitle')}</AppText>
+      <AppText variant="label" style={styles.section}>
+        {t('profile.goal')}
+      </AppText>
       {GOALS.map((g) => (
         <Choice key={g.value} label={t(g.label)} selected={goal === g.value} onPress={() => setGoal(g.value)} />
       ))}
 
-      <AppText style={styles.label}>{t('onboarding.activity')}</AppText>
+      <AppText variant="label" style={styles.section}>
+        {t('onboarding.activity')}
+      </AppText>
       {ACTIVITIES.map((a) => (
         <Choice key={a.value} label={t(a.label)} selected={activity === a.value} onPress={() => setActivity(a.value)} />
       ))}
@@ -123,7 +127,7 @@ export default function ProfileEdit() {
 }
 
 const styles = StyleSheet.create({
-  label: { fontWeight: '600' },
+  section: { marginTop: spacing.sm },
   row: { flexDirection: 'row', gap: spacing.sm },
   flex: { flex: 1 },
 });

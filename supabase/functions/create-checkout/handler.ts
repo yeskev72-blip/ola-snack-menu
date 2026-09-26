@@ -1,20 +1,46 @@
 /**
- * Edge Function create-checkout : crée la page de paiement Chariow de l'offre Premium choisie.
- * Réservée aux comptes e-mail (un invité doit d'abord créer son compte). L'identifiant de
- * l'utilisateur part dans les métadonnées de la vente : c'est lui que la notification créditera.
- * Corps : { action: 'offers' } → offres affichables ;
- * { offer, first_name, last_name, phone, country_code, discount_code? } → { url }.
+ * Edge Function create-checkout : prépare le paiement CinetPay de l'offre Premium choisie.
+ * Réservée aux comptes e-mail (un invité doit d'abord créer son compte). Le montant, l'offre et
+ * l'utilisateur sont fixés ici et enregistrés (payment_intents) avant d'ouvrir la page CinetPay.
+ * Corps : { action: 'offers' } → pays et prix disponibles ;
+ * { offer, country_code, first_name, last_name, phone } → { url }.
  */
 
-import { type CheckoutInput, isOffer, type Offer, OFFERS } from '../_shared/chariow.ts';
+import {
+  COUNTRIES,
+  type Currency,
+  isOffer,
+  newMerchantTransactionId,
+  type Offer,
+  OFFERS,
+  type PaymentInit,
+  type PaymentInput,
+  priceLabel,
+  toE164,
+} from '../_shared/cinetpay.ts';
 
-export type OfferConfig = { productId: string | null; label: string | null };
+/** Prix par devise ; une devise sans prix rend ses pays indisponibles. */
+export type Prices = Partial<Record<Currency, Record<Offer, number>>>;
+
+export type Intent = {
+  merchantTransactionId: string;
+  userId: string;
+  offer: Offer;
+  amount: number;
+  currency: Currency;
+  country: string;
+};
 
 export type Deps = {
   getUser: (token: string) => Promise<{ id: string; email: string | null; isAnonymous: boolean } | null>;
-  offers: Record<Offer, OfferConfig>;
-  redirectUrl: string | null;
-  createCheckout: (input: CheckoutInput) => Promise<string>;
+  /** Pays dont le compte CinetPay est configuré (clé et mot de passe présents). */
+  enabledCountries: string[];
+  prices: Prices;
+  /** Adresse publique de la fonction cinetpay-webhook (notification et pages de retour). */
+  webhookUrl: string;
+  saveIntent: (intent: Intent) => Promise<void>;
+  attachIntent: (merchantTransactionId: string, init: PaymentInit) => Promise<void>;
+  createPayment: (country: string, input: PaymentInput) => Promise<PaymentInit>;
   log: (message: string, extra?: Record<string, unknown>) => void;
 };
 
@@ -29,6 +55,22 @@ const json = (status: number, body: unknown) => new Response(JSON.stringify(body
 const fail = (status: number, error: string, message: string) => json(status, { error, message });
 
 const clean = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().replace(/\s+/g, ' ').slice(0, max) : '');
+
+/** Pays proposés : compte configuré et prix défini pour sa devise, dans l'ordre de COUNTRIES. */
+export function availableCountries(deps: Pick<Deps, 'enabledCountries' | 'prices'>) {
+  return Object.entries(COUNTRIES)
+    .filter(([code, c]) => deps.enabledCountries.includes(code) && deps.prices[c.currency])
+    .map(([code, c]) => {
+      const price = deps.prices[c.currency]!;
+      return {
+        code,
+        name: c.name,
+        currency: c.currency,
+        calling_code: c.callingCode,
+        offers: OFFERS.map((offer) => ({ offer, amount: price[offer], label: priceLabel(price[offer], c.currency, offer) })),
+      };
+    });
+}
 
 export function createHandler(deps: Deps) {
   return async function handle(req: Request): Promise<Response> {
@@ -46,48 +88,54 @@ export function createHandler(deps: Deps) {
       return fail(400, 'bad_request', 'Corps JSON invalide.');
     }
 
-    if (body.action === 'offers') {
-      return json(200, {
-        offers: OFFERS.map((offer) => ({ offer, label: deps.offers[offer].label, available: deps.offers[offer].productId !== null })),
-      });
-    }
+    const countries = availableCountries(deps);
+    if (body.action === 'offers') return json(200, { countries });
 
     if (user.isAnonymous || !user.email) {
       return fail(403, 'account_required', 'Crée ton compte avec ton e-mail avant de passer Premium.');
     }
     if (!isOffer(body.offer)) return fail(400, 'bad_request', 'Offre inconnue.');
-    const productId = deps.offers[body.offer].productId;
-    if (!productId) return fail(503, 'offer_unavailable', "Cette offre n'est pas encore disponible.");
+    const offer = body.offer;
+    const country = countries.find((c) => c.code === (typeof body.country_code === 'string' ? body.country_code.trim().toUpperCase() : ''));
+    if (!country) return fail(400, 'country_unavailable', "Le paiement n'est pas encore disponible dans ce pays.");
 
-    const firstName = clean(body.first_name, 50);
-    const lastName = clean(body.last_name, 50);
-    const phone = typeof body.phone === 'string' ? body.phone.replace(/\D/g, '') : '';
-    const countryCode = typeof body.country_code === 'string' ? body.country_code.trim().toUpperCase() : '';
-    if (!firstName || !lastName) return fail(400, 'bad_request', 'Indique ton prénom et ton nom.');
-    if (phone.length < 6 || phone.length > 15) return fail(400, 'bad_request', 'Numéro de téléphone invalide.');
-    if (!/^[A-Z]{2}$/.test(countryCode)) return fail(400, 'bad_request', 'Pays invalide.');
-    const discountCode = typeof body.discount_code === 'string' ? body.discount_code.trim().slice(0, 100) : '';
+    const firstName = clean(body.first_name, 60);
+    const lastName = clean(body.last_name, 60);
+    if (firstName.length < 2 || lastName.length < 2) return fail(400, 'bad_request', 'Indique ton prénom et ton nom (2 lettres au moins).');
+    const phone = typeof body.phone === 'string' ? toE164(body.phone, country.calling_code) : null;
+    if (!phone) return fail(400, 'bad_request', `Numéro de téléphone invalide pour ce pays (indicatif +${country.calling_code}).`);
+
+    const amount = country.offers.find((o) => o.offer === offer)!.amount;
+    const intent: Intent = {
+      merchantTransactionId: newMerchantTransactionId(),
+      userId: user.id,
+      offer,
+      amount,
+      currency: country.currency,
+      country: country.code,
+    };
 
     try {
-      const url = await deps.createCheckout({
-        productId,
-        email: user.email,
+      // Enregistré avant l'appel : la notification ne peut concerner qu'un paiement préparé ici.
+      await deps.saveIntent(intent);
+      const init = await deps.createPayment(country.code, {
+        currency: country.currency,
+        merchantTransactionId: intent.merchantTransactionId,
+        amount,
+        successUrl: `${deps.webhookUrl}?page=success`,
+        failedUrl: `${deps.webhookUrl}?page=failed`,
+        notifyUrl: deps.webhookUrl,
+        designation: offer === 'monthly' ? 'Calbasse Premium 1 mois' : 'Calbasse Premium 1 an',
         firstName,
         lastName,
-        phone,
-        countryCode,
-        metadata: { user_id: user.id, offer: body.offer },
-        redirectUrl: deps.redirectUrl,
-        discountCode: discountCode || null,
+        email: user.email,
+        phoneE164: phone,
       });
-      deps.log('paiement créé', { userId: user.id, offer: body.offer });
-      return json(200, { url });
+      await deps.attachIntent(intent.merchantTransactionId, init);
+      deps.log('paiement créé', { userId: user.id, offer, country: country.code, merchantTransactionId: intent.merchantTransactionId });
+      return json(200, { url: init.paymentUrl });
     } catch (e) {
-      deps.log('création du paiement impossible', { userId: user.id, offer: body.offer, error: String(e) });
-      // Code promo refusé par Chariow : message dédié plutôt qu'une panne générique.
-      if (discountCode && /discount|coupon|promo|code/i.test(String(e))) {
-        return fail(400, 'invalid_discount', 'Ce code promo n’est pas valable pour cette offre.');
-      }
+      deps.log('création du paiement impossible', { userId: user.id, offer, country: country.code, error: String(e) });
       return fail(502, 'checkout_failed', "Le paiement n'a pas pu être préparé. Réessaie dans un instant.");
     }
   };

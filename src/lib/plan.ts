@@ -19,14 +19,7 @@ export function formatDate(date: Date): string {
   return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
 }
 
-/** Pays proposés pour le paiement mobile money (code ISO → indicatif). */
-export const PAYMENT_COUNTRIES = [
-  { code: 'BJ', label: 'Bénin' },
-  { code: 'TG', label: 'Togo' },
-  { code: 'CI', label: "Côte d'Ivoire" },
-  { code: 'SN', label: 'Sénégal' },
-  { code: 'BF', label: 'Burkina Faso' },
-  { code: 'ML', label: 'Mali' },
-  { code: 'NE', label: 'Niger' },
-  { code: 'CM', label: 'Cameroun' },
-] as const;
+/** Jours de Premium restants (arrondis au jour supérieur, jamais négatifs). */
+export function daysLeft(until: Date, now = new Date()): number {
+  return Math.max(0, Math.ceil((until.getTime() - now.getTime()) / 86_400_000));
+}

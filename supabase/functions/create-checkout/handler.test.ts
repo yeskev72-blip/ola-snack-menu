@@ -3,113 +3,108 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import type { CheckoutInput } from '../_shared/chariow.ts';
-import { createHandler, type Deps } from './handler.ts';
+import type { PaymentInput } from '../_shared/cinetpay.ts';
+import { availableCountries, createHandler, type Deps, type Intent } from './handler.ts';
 
 const USERS: Record<string, { id: string; email: string | null; isAnonymous: boolean }> = {
   compte: { id: 'u1', email: 'awa@test.local', isAnonymous: false },
   invite: { id: 'g1', email: null, isAnonymous: true },
 };
-const FORM = { offer: 'monthly', first_name: ' Awa ', last_name: 'Dossou', phone: '+229 97 00 00 00', country_code: 'bj' };
+const FORM = { offer: 'monthly', country_code: 'bj', first_name: ' Awa ', last_name: 'Dossou', phone: '01 97 00 00 00' };
 
 function setup(overrides: Partial<Deps> = {}) {
-  const checkouts: CheckoutInput[] = [];
+  const intents: Intent[] = [];
+  const attached: string[] = [];
+  const payments: { country: string; input: PaymentInput }[] = [];
   const handle = createHandler({
     getUser: async (token) => USERS[token] ?? null,
-    offers: { monthly: { productId: 'prd_m', label: '1 000 FCFA / mois' }, yearly: { productId: null, label: null } },
-    redirectUrl: null,
-    createCheckout: async (input) => {
-      checkouts.push(input);
-      return 'https://pay.chariow.com/c/1';
+    enabledCountries: ['BJ', 'CM', 'GN'],
+    prices: { XOF: { monthly: 2000, yearly: 20000 }, XAF: { monthly: 2000, yearly: 20000 } },
+    webhookUrl: 'https://x.supabase.co/functions/v1/cinetpay-webhook',
+    saveIntent: async (intent) => {
+      intents.push(intent);
+    },
+    attachIntent: async (id) => {
+      attached.push(id);
+    },
+    createPayment: async (country, input) => {
+      payments.push({ country, input });
+      return { paymentUrl: 'https://pay.cinetpay.net/x', notifyToken: 'nt', transactionId: 'T1' };
     },
     log: () => undefined,
     ...overrides,
   });
   const post = (token: string | null, body: unknown) =>
-    handle(
-      new Request('http://localhost/create-checkout', {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        body: JSON.stringify(body),
-      }),
-    );
-  return { post, handle, checkouts };
+    handle(new Request('http://localhost/create-checkout', { method: 'POST', headers: token ? { Authorization: `Bearer ${token}` } : {}, body: JSON.stringify(body) }));
+  return { post, intents, attached, payments };
 }
 
 test('connexion requise', async () => {
   const { post } = setup();
   assert.equal((await post(null, FORM)).status, 401);
-  assert.equal((await post('faux', FORM)).status, 401);
 });
 
-test('offres : prix affichés, offre sans produit indisponible', async () => {
+test('offres : seulement les pays configurés dont la devise a un prix', async () => {
   const { post } = setup();
   const res = await post('invite', { action: 'offers' });
-  assert.equal(res.status, 200);
-  assert.deepEqual((await res.json()).offers, [
-    { offer: 'monthly', label: '1 000 FCFA / mois', available: true },
-    { offer: 'yearly', label: null, available: false },
-  ]);
+  const { countries } = await res.json();
+  assert.deepEqual(countries.map((c: { code: string }) => c.code), ['BJ', 'CM'], 'GN (GNF) sans prix : masqué');
+  assert.equal(countries[0].offers[0].label, '2 000 FCFA / mois');
+  assert.equal(countries[1].currency, 'XAF');
 });
 
 test('invité : compte e-mail exigé', async () => {
-  const { post, checkouts } = setup();
-  const res = await post('invite', FORM);
-  assert.equal(res.status, 403);
-  assert.equal((await res.json()).error, 'account_required');
-  assert.equal(checkouts.length, 0);
+  const { post, payments } = setup();
+  assert.equal((await post('invite', FORM)).status, 403);
+  assert.equal(payments.length, 0);
 });
 
-test('paiement créé : e-mail du compte, identifiant en métadonnées, champs nettoyés', async () => {
-  const { post, checkouts } = setup();
-  const res = await post('compte', FORM);
+test('paiement : intention enregistrée avant l’appel, montant fixé par le serveur, numéro E.164', async () => {
+  const { post, intents, attached, payments } = setup();
+  const res = await post('compte', { ...FORM, amount: 1 });
   assert.equal(res.status, 200);
-  assert.deepEqual(await res.json(), { url: 'https://pay.chariow.com/c/1' });
-  assert.deepEqual(checkouts[0], {
-    productId: 'prd_m',
-    email: 'awa@test.local',
-    firstName: 'Awa',
-    lastName: 'Dossou',
-    phone: '22997000000',
-    countryCode: 'BJ',
-    metadata: { user_id: 'u1', offer: 'monthly' },
-    redirectUrl: null,
-    discountCode: null,
-  });
+  assert.deepEqual(await res.json(), { url: 'https://pay.cinetpay.net/x' });
+  assert.equal(intents[0]!.amount, 2000, 'le montant envoyé par l’app est ignoré');
+  assert.equal(intents[0]!.userId, 'u1');
+  assert.equal(intents[0]!.currency, 'XOF');
+  assert.equal(payments[0]!.country, 'BJ');
+  assert.equal(payments[0]!.input.phoneE164, '+2290197000000');
+  assert.equal(payments[0]!.input.firstName, 'Awa');
+  assert.equal(payments[0]!.input.merchantTransactionId, intents[0]!.merchantTransactionId);
+  assert.equal(payments[0]!.input.notifyUrl, 'https://x.supabase.co/functions/v1/cinetpay-webhook');
+  assert.deepEqual(attached, [intents[0]!.merchantTransactionId]);
 });
 
-test('code promo transmis à Chariow ; code refusé → message dédié', async () => {
-  const { post, checkouts } = setup();
-  await post('compte', { ...FORM, discount_code: ' TEST100 ' });
-  assert.equal(checkouts[0]!.discountCode, 'TEST100');
-
-  const { post: refused } = setup({
-    createCheckout: async () => {
-      throw new Error('Chariow HTTP 422 : Invalid discount code');
-    },
-  });
-  const res = await refused('compte', { ...FORM, discount_code: 'FAUX' });
-  assert.equal(res.status, 400);
-  assert.equal((await res.json()).error, 'invalid_discount');
+test('annuel au Cameroun : 20000 XAF', async () => {
+  const { post, payments } = setup();
+  await post('compte', { ...FORM, offer: 'yearly', country_code: 'CM', phone: '6 70 00 00 00' });
+  assert.equal(payments[0]!.input.amount, 20000);
+  assert.equal(payments[0]!.input.currency, 'XAF');
+  assert.equal(payments[0]!.input.phoneE164, '+237670000000');
 });
 
-test('validation : offre, nom, téléphone, pays', async () => {
-  const { post, checkouts } = setup();
+test('validation : offre, pays indisponible, nom trop court, numéro d’un autre pays', async () => {
+  const { post, payments } = setup();
   assert.equal((await post('compte', { ...FORM, offer: 'a_vie' })).status, 400);
-  assert.equal((await post('compte', { ...FORM, last_name: '  ' })).status, 400);
-  assert.equal((await post('compte', { ...FORM, phone: '12' })).status, 400);
-  assert.equal((await post('compte', { ...FORM, country_code: 'BEN' })).status, 400);
-  assert.equal((await post('compte', { ...FORM, offer: 'yearly' })).status, 503, 'offre non configurée');
-  assert.equal(checkouts.length, 0);
+  assert.equal((await post('compte', { ...FORM, country_code: 'SN' })).status, 400, 'SN non configuré');
+  assert.equal((await post('compte', { ...FORM, country_code: 'GN' })).status, 400, 'GN sans prix');
+  assert.equal((await post('compte', { ...FORM, last_name: 'D' })).status, 400);
+  assert.equal((await post('compte', { ...FORM, phone: '+237 670000000' })).status, 400);
+  assert.equal(payments.length, 0);
 });
 
-test('échec chez Chariow : 502 avec un message clair', async () => {
+test('échec chez CinetPay : 502 avec un message clair', async () => {
   const { post } = setup({
-    createCheckout: async () => {
-      throw new Error('Chariow HTTP 500');
+    createPayment: async () => {
+      throw new Error('CinetPay HTTP 401');
     },
   });
   const res = await post('compte', FORM);
   assert.equal(res.status, 502);
   assert.equal((await res.json()).error, 'checkout_failed');
+});
+
+test('availableCountries : ordre stable, prix par offre', () => {
+  const list = availableCountries({ enabledCountries: ['CM', 'BJ'], prices: { XOF: { monthly: 1500, yearly: 15000 }, XAF: { monthly: 2000, yearly: 20000 } } });
+  assert.deepEqual(list.map((c) => [c.code, c.offers[0]!.amount]), [['BJ', 1500], ['CM', 2000]]);
 });

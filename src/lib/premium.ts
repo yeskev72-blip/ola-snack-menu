@@ -4,16 +4,17 @@ import { t } from '@/i18n';
 import { supabase } from '@/lib/supabase';
 
 export type Offer = 'monthly' | 'yearly';
-export type OfferInfo = { offer: Offer; label: string | null; available: boolean };
 
-export type CheckoutForm = {
-  offer: Offer;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  countryCode: string;
-  discountCode?: string;
+/** Pays où le paiement CinetPay est configuré, avec les prix dans sa devise (réglés côté serveur). */
+export type PaymentCountry = {
+  code: string;
+  name: string;
+  currency: string;
+  calling_code: string;
+  offers: { offer: Offer; amount: number; label: string }[];
 };
+
+export type CheckoutForm = { offer: Offer; countryCode: string; firstName: string; lastName: string; phone: string };
 
 /** Message français renvoyé par la fonction, sinon message générique. */
 async function functionError(error: unknown, fallback: string): Promise<Error> {
@@ -24,26 +25,25 @@ async function functionError(error: unknown, fallback: string): Promise<Error> {
   return new Error(fallback);
 }
 
-/** Offres Premium et prix affichés (réglés côté serveur, modifiables sans nouvel APK). */
-export async function fetchOffers(): Promise<OfferInfo[]> {
-  const { data, error } = await supabase.functions.invoke<{ offers: OfferInfo[] }>('create-checkout', {
+/** Pays et prix disponibles (modifiables sans nouvel APK). */
+export async function fetchPaymentCountries(): Promise<PaymentCountry[]> {
+  const { data, error } = await supabase.functions.invoke<{ countries: PaymentCountry[] }>('create-checkout', {
     body: { action: 'offers' },
     timeout: 20_000,
   });
   if (error || !data) throw await functionError(error, t('premium.offersError'));
-  return data.offers;
+  return data.countries;
 }
 
-/** Prépare le paiement Chariow et renvoie le lien de la page de paiement. */
+/** Prépare le paiement CinetPay et renvoie le lien de la page de paiement. */
 export async function startCheckout(form: CheckoutForm): Promise<string> {
   const { data, error } = await supabase.functions.invoke<{ url: string }>('create-checkout', {
     body: {
       offer: form.offer,
+      country_code: form.countryCode,
       first_name: form.firstName,
       last_name: form.lastName,
       phone: form.phone,
-      country_code: form.countryCode,
-      ...(form.discountCode?.trim() ? { discount_code: form.discountCode.trim() } : {}),
     },
     timeout: 30_000,
   });

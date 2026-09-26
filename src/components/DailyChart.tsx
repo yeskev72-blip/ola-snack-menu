@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import { View, type LayoutChangeEvent } from 'react-native';
 import Svg, { G, Line, Path, Rect, Text as SvgText } from 'react-native-svg';
 
-import { AppText } from '@/components/AppText';
 import { t } from '@/i18n';
+import { formatNumber } from '@/lib/format';
 import { niceTicks, parseDayKey, type DayTotals } from '@/lib/days';
-import { colors, font } from '@/theme';
+import { colors } from '@/theme';
 
 type Props = {
   days: DayTotals[];
@@ -23,7 +23,7 @@ const MAX_BAR = 24;
 
 const WEEKDAY = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
 /** Colonnes non sélectionnées : teinte pleine atténuée (pas de transparence qui laisserait voir la grille). */
-const MUTED_BAR = '#D9BBA8';
+const MUTED_BAR = '#E3C6B0';
 
 /** Colonne avec extrémité arrondie (4 px) et base carrée, posée sur la ligne de base. */
 function columnPath(x: number, y: number, width: number, height: number): string {
@@ -31,7 +31,7 @@ function columnPath(x: number, y: number, width: number, height: number): string
   return `M${x},${y + height} L${x},${y + r} Q${x},${y} ${x + r},${y} L${x + width - r},${y} Q${x + width},${y} ${x + width},${y + r} L${x + width},${y + height} Z`;
 }
 
-const formatKcal = (v: number) => v.toLocaleString('fr-FR');
+const formatKcal = (v: number) => formatNumber(v);
 
 /**
  * Calories par jour : une seule série (pas de légende, le titre la nomme),
@@ -53,14 +53,6 @@ export function DailyChart({ days, target, selected, onSelect }: Props) {
 
   return (
     <View onLayout={onLayout} accessible accessibilityLabel={t('history.chartLabel', { days: days.length })}>
-      {target ? (
-        <View style={styles.key}>
-          <View style={styles.keyLine} />
-          <AppText variant="small" style={styles.keyText}>
-            {t('history.targetLine', { kcal: formatKcal(target) })}
-          </AppText>
-        </View>
-      ) : null}
       {width > 0 ? (
         <Svg width={width} height={HEIGHT}>
           {/* Grille horizontale recessive et graduations rondes */}
@@ -83,7 +75,7 @@ export function DailyChart({ days, target, selected, onSelect }: Props) {
             return (
               <G key={d.day}>
                 {d.kcal > 0 ? (
-                  <Path d={columnPath(x, y(d.kcal), barWidth, h)} fill={selected && !isSelected ? MUTED_BAR : colors.primary} />
+                  <Path d={columnPath(x, y(d.kcal), barWidth, h)} fill={selected && !isSelected ? MUTED_BAR : colors.accent} />
                 ) : null}
                 {showLabel ? (
                   <SvgText
@@ -102,27 +94,12 @@ export function DailyChart({ days, target, selected, onSelect }: Props) {
             );
           })}
 
-          {/* Ligne de référence de la cible (étiquetée dans la clé au-dessus du graphique) */}
-          {target ? <Line x1={AXIS_WIDTH} x2={width} y1={y(target)} y2={y(target)} stroke={colors.text} strokeWidth={1} /> : null}
+          {/* Ligne de référence de la cible (étiquetée dans l'en-tête de la carte) */}
+          {target ? <Line x1={AXIS_WIDTH} x2={width} y1={y(target)} y2={y(target)} stroke={colors.accent} strokeWidth={2} strokeDasharray="6 4" /> : null}
         </Svg>
       ) : (
         <View style={{ height: HEIGHT }} />
       )}
-      <AppText variant="small" style={styles.caption}>
-        {selected
-          ? t('history.selected', {
-              day: parseDayKey(selected).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }),
-              kcal: formatKcal(days.find((d) => d.day === selected)?.kcal ?? 0),
-            })
-          : t('history.tapHint')}
-      </AppText>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  key: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 6, marginBottom: 2 },
-  keyLine: { width: 16, height: 2, backgroundColor: colors.text },
-  keyText: { color: colors.text },
-  caption: { textAlign: 'center', fontSize: font.small, marginTop: 4 },
-});

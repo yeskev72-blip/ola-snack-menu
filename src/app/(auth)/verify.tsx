@@ -1,16 +1,20 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
+import { CodeInput } from '@/components/CodeInput';
+import { Heading } from '@/components/Heading';
+import { Icon } from '@/components/Icon';
 import { Notice } from '@/components/Notice';
 import { Screen } from '@/components/Screen';
-import { TextField } from '@/components/TextField';
 import { t } from '@/i18n';
 import { useAction } from '@/lib/useAction';
 import { useCooldown } from '@/lib/useCooldown';
 import { CODE_LENGTH, isValidCode, normalizeCode } from '@/lib/validation';
 import { useSession } from '@/state/session';
+import { colors, spacing } from '@/theme';
 
 export default function Verify() {
   const { email = '' } = useLocalSearchParams<{ email: string }>();
@@ -34,9 +38,10 @@ export default function Verify() {
 
   return (
     <Screen
+      back="back"
       footer={
         <>
-          <Button label={t('common.confirm')} loading={verify.loading} onPress={submit} />
+          <Button label={t('auth.validate')} loading={verify.loading} onPress={submit} />
           <Button
             label={cooldown.remaining > 0 ? t('auth.resendIn', { seconds: cooldown.remaining }) : t('auth.resend')}
             variant="ghost"
@@ -46,20 +51,35 @@ export default function Verify() {
           />
         </>
       }>
-      <AppText variant="title">{t('auth.codeTitle')}</AppText>
-      <AppText>{t('auth.codeBody', { email })}</AppText>
-      <TextField
+      <Heading
+        title={t('auth.codeTitle')}
+        body={
+          <>
+            {t('auth.codeBody')} <AppText style={styles.email}>{email}</AppText>
+          </>
+        }
+        icon={
+          <View style={styles.icon}>
+            <Icon name="mail" size={28} color={colors.accent} />
+          </View>
+        }
+      />
+      <CodeInput
         label={t('auth.codeLabel')}
         value={code}
-        onChangeText={(text) => setCode(normalizeCode(text))}
-        keyboardType="number-pad"
-        autoComplete="one-time-code"
-        textContentType="oneTimeCode"
+        onChange={(text) => setCode(normalizeCode(text))}
+        onSubmit={submit}
+        minLength={CODE_LENGTH.min}
         maxLength={CODE_LENGTH.max}
-        onSubmitEditing={submit}
       />
+      <AppText variant="small">{t('auth.spamHint')}</AppText>
       <Notice message={verify.error ?? resend.error} />
       <Notice message={info} tone="info" />
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  email: { color: colors.text, fontWeight: '700' },
+  icon: { width: 56, height: 56, borderRadius: 18, backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center', marginBottom: spacing.sm },
+});

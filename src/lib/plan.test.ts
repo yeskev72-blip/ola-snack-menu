@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { formatDate, planStatus } from './plan.ts';
+import { daysLeft, formatDate, planStatus } from './plan.ts';
 
 const NOW = new Date('2026-09-25T12:00:00Z');
 
@@ -15,4 +15,11 @@ test('statut : gratuit, Premium daté, permanent, expiré', () => {
 
 test('date au format jj/mm/aaaa', () => {
   assert.equal(formatDate(new Date(2026, 9, 5)), '05/10/2026');
+});
+
+test('jours restants', () => {
+  const now = new Date('2026-09-26T10:00:00Z');
+  assert.equal(daysLeft(new Date('2026-10-26T10:00:00Z'), now), 30);
+  assert.equal(daysLeft(new Date('2026-09-26T11:00:00Z'), now), 1);
+  assert.equal(daysLeft(new Date('2026-09-20T10:00:00Z'), now), 0);
 });

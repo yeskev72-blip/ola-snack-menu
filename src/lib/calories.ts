@@ -47,3 +47,15 @@ export function dailyTarget(body: BodyInfo, activity: number, goal: Goal): numbe
 export function clampTarget(kcal: number): number {
   return Math.min(TARGET_BOUNDS.max, Math.max(TARGET_BOUNDS.min, Math.round(kcal)));
 }
+
+/** Répartition conseillée de la cible (part des kcal) : protéines 25 %, glucides 50 %, lipides 25 %. */
+export const MACRO_SPLIT = { proteines: 0.25, glucides: 0.5, lipides: 0.25 } as const;
+
+/** Grammes visés par macro pour une cible (4 kcal/g protéines et glucides, 9 kcal/g lipides). */
+export function macroTargets(kcal: number): { proteines: number; glucides: number; lipides: number } {
+  return {
+    proteines: Math.round((kcal * MACRO_SPLIT.proteines) / 4),
+    glucides: Math.round((kcal * MACRO_SPLIT.glucides) / 4),
+    lipides: Math.round((kcal * MACRO_SPLIT.lipides) / 9),
+  };
+}

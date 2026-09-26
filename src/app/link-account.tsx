@@ -1,9 +1,11 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { ToastAndroid } from 'react-native';
+import { StyleSheet, ToastAndroid } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
+import { CodeInput } from '@/components/CodeInput';
+import { Heading } from '@/components/Heading';
 import { Notice } from '@/components/Notice';
 import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
@@ -11,6 +13,7 @@ import { t } from '@/i18n';
 import { useAction } from '@/lib/useAction';
 import { CODE_LENGTH, isValidCode, isValidEmail, MIN_PASSWORD_LENGTH, normalizeCode } from '@/lib/validation';
 import { useSession } from '@/state/session';
+import { colors } from '@/theme';
 
 /** Invité → compte e-mail. Même identifiant Supabase : journal et profil sont conservés. */
 export default function LinkAccount() {
@@ -33,26 +36,35 @@ export default function LinkAccount() {
   if (step === 'code') {
     return (
       <Screen
+        back="back"
+        onBack={() => setStep('form')}
         footer={
           <>
             <Button
-              label={t('common.confirm')}
+              label={t('auth.validate')}
               loading={confirm.loading}
               onPress={() => (isValidCode(code) ? confirm.run() : confirm.setError(t('auth.invalidCode')))}
             />
             <Button label={t('auth.resend')} variant="ghost" loading={send.loading} onPress={() => send.run()} />
           </>
         }>
-        <AppText variant="title">{t('auth.codeTitle')}</AppText>
-        <AppText>{t('auth.codeBody', { email: email.trim() })}</AppText>
-        <TextField
+        <Heading
+          title={t('auth.codeTitle')}
+          body={
+            <>
+              {t('auth.codeBody')} <AppText style={styles.email}>{email.trim()}</AppText>
+            </>
+          }
+        />
+        <CodeInput
           label={t('auth.codeLabel')}
           value={code}
-          onChangeText={(text) => setCode(normalizeCode(text))}
-          keyboardType="number-pad"
-          autoComplete="one-time-code"
+          onChange={(text) => setCode(normalizeCode(text))}
+          onSubmit={() => (isValidCode(code) ? void confirm.run() : confirm.setError(t('auth.invalidCode')))}
+          minLength={CODE_LENGTH.min}
           maxLength={CODE_LENGTH.max}
         />
+        <AppText variant="small">{t('auth.spamHint')}</AppText>
         <Notice message={confirm.error ?? send.error} />
       </Screen>
     );
@@ -65,8 +77,8 @@ export default function LinkAccount() {
   };
 
   return (
-    <Screen footer={<Button label={t('common.continue')} loading={send.loading} onPress={submit} />}>
-      <AppText>{t('auth.linkBody')}</AppText>
+    <Screen back="close" footer={<Button label={t('common.continue')} loading={send.loading} onPress={submit} />}>
+      <Heading title={t('auth.linkTitle')} body={t('auth.linkBody')} />
       <TextField
         label={t('auth.email')}
         value={email}
@@ -87,3 +99,7 @@ export default function LinkAccount() {
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  email: { color: colors.text, fontWeight: '700' },
+});

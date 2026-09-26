@@ -433,12 +433,12 @@ verify_jwt = false
 enabled = true
 verify_jwt = false
 
-# Paiement Premium (Chariow) : jeton vérifié dans la fonction (auth.getUser).
+# Paiement Premium (CinetPay) : jeton vérifié dans la fonction (auth.getUser).
 [functions.create-checkout]
 enabled = true
 verify_jwt = false
 
-# Notifications de vente Chariow : pas de jeton Supabase, authentifiées par ?token= ou signature.
-[functions.chariow-webhook]
+# Notifications CinetPay : pas de jeton Supabase, authentifiées par le notify_token de la transaction.
+[functions.cinetpay-webhook]
 enabled = true
 verify_jwt = false

@@ -4,94 +4,245 @@
 // supabase/functions/create-checkout/index.ts
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-// supabase/functions/_shared/chariow.ts
-var CHARIOW_API_BASE = "https://api.chariow.com/v1";
+// supabase/functions/_shared/cinetpay.ts
+var CINETPAY_BASE_URLS = {
+  sandbox: "https://api.cinetpay.net",
+  production: "https://api.cinetpay.co"
+};
 var OFFERS = [
   "monthly",
   "yearly"
 ];
 var isOffer = (v) => typeof v === "string" && OFFERS.includes(v);
+var COUNTRIES = {
+  BJ: {
+    name: "B\xE9nin",
+    currency: "XOF",
+    callingCode: "229"
+  },
+  BF: {
+    name: "Burkina Faso",
+    currency: "XOF",
+    callingCode: "226"
+  },
+  CI: {
+    name: "C\xF4te d'Ivoire",
+    currency: "XOF",
+    callingCode: "225"
+  },
+  ML: {
+    name: "Mali",
+    currency: "XOF",
+    callingCode: "223"
+  },
+  NE: {
+    name: "Niger",
+    currency: "XOF",
+    callingCode: "227"
+  },
+  SN: {
+    name: "S\xE9n\xE9gal",
+    currency: "XOF",
+    callingCode: "221"
+  },
+  TG: {
+    name: "Togo",
+    currency: "XOF",
+    callingCode: "228"
+  },
+  CM: {
+    name: "Cameroun",
+    currency: "XAF",
+    callingCode: "237"
+  },
+  CF: {
+    name: "Centrafrique",
+    currency: "XAF",
+    callingCode: "236"
+  },
+  CG: {
+    name: "Congo",
+    currency: "XAF",
+    callingCode: "242"
+  },
+  GA: {
+    name: "Gabon",
+    currency: "XAF",
+    callingCode: "241"
+  },
+  GQ: {
+    name: "Guin\xE9e \xE9quatoriale",
+    currency: "XAF",
+    callingCode: "240"
+  },
+  TD: {
+    name: "Tchad",
+    currency: "XAF",
+    callingCode: "235"
+  },
+  GN: {
+    name: "Guin\xE9e",
+    currency: "GNF",
+    callingCode: "224"
+  },
+  CD: {
+    name: "RD Congo",
+    currency: "CDF",
+    callingCode: "243"
+  }
+};
+var CURRENCY_LABEL = {
+  XOF: "FCFA",
+  XAF: "FCFA",
+  GNF: "GNF",
+  CDF: "CDF"
+};
+function priceLabel(amount, currency, offer) {
+  const digits = String(Math.round(amount)).replace(/\B(?=(\d{3})+(?!\d))/g, "\u202F");
+  return `${digits} ${CURRENCY_LABEL[currency]} / ${offer === "monthly" ? "mois" : "an"}`;
+}
+function toE164(input, callingCode) {
+  let digits = input.replace(/\D/g, "");
+  if (input.trim().startsWith("00")) digits = digits.slice(2);
+  else if (!input.trim().startsWith("+") && !digits.startsWith(callingCode)) digits = callingCode + digits;
+  if (!digits.startsWith(callingCode)) return null;
+  const e164 = `+${digits}`;
+  return /^\+[1-9]\d{7,14}$/.test(e164) ? e164 : null;
+}
+function newMerchantTransactionId() {
+  const random = crypto.getRandomValues(new Uint8Array(8));
+  return `CB${Date.now().toString(36).toUpperCase()}${Array.from(random, (b) => b.toString(16).padStart(2, "0")).join("").toUpperCase()}`.slice(0, 30);
+}
 var isObj = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
-function* walk(value, maxDepth = 5) {
-  let level = [
-    value
-  ];
-  for (let depth = 0; depth <= maxDepth && level.length; depth++) {
-    const next = [];
-    for (const v of level) {
-      if (Array.isArray(v)) next.push(...v);
-      else if (isObj(v)) {
-        yield v;
-        next.push(...Object.values(v));
-      }
-    }
-    level = next;
+var str = (o, k) => typeof o[k] === "string" ? o[k] : "";
+var CinetPayError = class extends Error {
+  httpStatus;
+  apiStatus;
+  constructor(message, httpStatus, apiStatus) {
+    super(message);
+    this.name = "CinetPayError";
+    this.httpStatus = httpStatus;
+    this.apiStatus = apiStatus;
   }
-}
-function findCheckoutUrl(response) {
-  const preferred = [
-    "checkout_url",
-    "payment_url",
-    "url",
-    "link",
-    "payment_link"
-  ];
-  const found = /* @__PURE__ */ new Map();
-  for (const obj of walk(response)) {
-    for (const [key, v] of Object.entries(obj)) {
-      if (typeof v !== "string" || !v.startsWith("https://") || key === "redirect_url") continue;
-      if (!found.has(key)) found.set(key, v);
-    }
-  }
-  for (const key of preferred) if (found.has(key)) return found.get(key);
-  for (const [key, v] of found) if (/url|link/i.test(key)) return v;
-  return null;
-}
-function chariowError(status, body) {
-  const message = isObj(body) && typeof body.message === "string" ? body.message : "";
-  const errors = isObj(body) && body.errors ? JSON.stringify(body.errors).slice(0, 300) : "";
-  return `Chariow HTTP ${status}${message ? ` : ${message}` : ""}${errors && errors !== "[]" && errors !== "{}" ? ` ${errors}` : ""}`;
-}
-async function request(config, method, path, body, fetchImpl) {
-  const response = await fetchImpl(`${config.apiBase ?? CHARIOW_API_BASE}${path}`, {
+};
+async function call(config, method, path, body, token, fetchImpl) {
+  const response = await fetchImpl(`${config.baseUrl}${path}`, {
     method,
     headers: {
-      Authorization: `Bearer ${config.apiKey}`,
-      "Content-Type": "application/json",
-      Accept: "application/json"
+      Accept: "application/json",
+      ...body === void 0 ? {} : {
+        "Content-Type": "application/json"
+      },
+      ...token ? {
+        Authorization: `Bearer ${token}`
+      } : {}
     },
     body: body === void 0 ? void 0 : JSON.stringify(body),
-    signal: AbortSignal.timeout(2e4)
+    signal: AbortSignal.timeout(config.timeoutMs ?? 15e3)
   });
   const json2 = await response.json().catch(() => null);
+  const data = isObj(json2) ? json2 : {};
+  const apiStatus = str(data, "status") || null;
+  if (!response.ok || apiStatus === "INVALID_CREDENTIALS" || apiStatus === "INVALID_TOKEN" || apiStatus === "EXPIRED_TOKEN") {
+    const detail = str(data, "description") || str(data, "message") || apiStatus || response.statusText;
+    throw new CinetPayError(`CinetPay HTTP ${response.status} : ${detail}`.slice(0, 500), response.status, apiStatus);
+  }
+  return data;
+}
+async function login(config, fetchImpl = fetch) {
+  const data = await call(config, "POST", "/v1/oauth/login", {
+    api_key: config.apiKey,
+    api_password: config.apiPassword
+  }, null, fetchImpl);
+  const nested = isObj(data.data) ? data.data : {};
+  const token = str(data, "access_token") || str(nested, "token") || str(nested, "access_token");
+  if (!token) throw new CinetPayError("CinetPay : jeton absent de la r\xE9ponse de connexion", 200, str(data, "status") || null);
+  return token;
+}
+async function createPayment(config, input, fetchImpl = fetch) {
+  const token = await login(config, fetchImpl);
+  const data = await call(config, "POST", "/v1/payment", {
+    currency: input.currency,
+    merchant_transaction_id: input.merchantTransactionId,
+    amount: input.amount,
+    success_url: input.successUrl,
+    failed_url: input.failedUrl,
+    notify_url: input.notifyUrl,
+    lang: "fr",
+    designation: input.designation,
+    client_first_name: input.firstName,
+    client_last_name: input.lastName,
+    client_email: input.email,
+    client_phone_number: input.phoneE164,
+    direct_pay: false
+  }, token, fetchImpl);
+  const paymentUrl = str(data, "payment_url");
+  const notifyToken = str(data, "notify_token");
+  if (!paymentUrl || !notifyToken) {
+    const details = isObj(data.details) ? str(data.details, "message") : "";
+    throw new CinetPayError(`CinetPay : paiement non cr\xE9\xE9 (${str(data, "status") || "statut inconnu"}${details ? ` : ${details}` : ""})`, 200, str(data, "status") || null);
+  }
   return {
-    status: response.status,
-    ok: response.ok,
-    json: json2
+    paymentUrl,
+    notifyToken,
+    transactionId: str(data, "transaction_id")
   };
 }
-async function createCheckout(config, input, fetchImpl = fetch) {
-  const res = await request(config, "POST", "/checkout", {
-    product_id: input.productId,
-    email: input.email,
-    first_name: input.firstName,
-    last_name: input.lastName,
-    phone: {
-      number: input.phone,
-      country_code: input.countryCode
-    },
-    custom_metadata: input.metadata,
-    ...input.redirectUrl ? {
-      redirect_url: input.redirectUrl
-    } : {},
-    ...input.discountCode ? {
-      discount_code: input.discountCode
-    } : {}
-  }, fetchImpl);
-  if (!res.ok) throw new Error(chariowError(res.status, res.json));
-  const url2 = findCheckoutUrl(res.json);
-  if (!url2) throw new Error(`Chariow : lien de paiement absent de la r\xE9ponse ${JSON.stringify(res.json).slice(0, 300)}`);
-  return url2;
+
+// supabase/functions/_shared/cinetpay-env.ts
+var opt = (name) => Deno.env.get(name)?.trim() || null;
+function cinetpayEnvironment() {
+  const value = (opt("CINETPAY_ENV") ?? "sandbox").toLowerCase();
+  if (value !== "sandbox" && value !== "production") throw new Error("CINETPAY_ENV doit valoir \xAB sandbox \xBB ou \xAB production \xBB");
+  return value;
+}
+function cinetpayAccounts() {
+  const baseUrl = CINETPAY_BASE_URLS[cinetpayEnvironment()];
+  const accounts2 = {};
+  for (const code of Object.keys(COUNTRIES)) {
+    const apiKey = opt(`CINETPAY_${code}_API_KEY`);
+    const apiPassword = opt(`CINETPAY_${code}_API_PASSWORD`);
+    if (apiKey && apiPassword) accounts2[code] = {
+      apiKey,
+      apiPassword,
+      baseUrl
+    };
+  }
+  return accounts2;
+}
+var DEFAULT_PRICES = {
+  XOF: {
+    monthly: 2e3,
+    yearly: 2e4
+  },
+  XAF: {
+    monthly: 2e3,
+    yearly: 2e4
+  }
+};
+function premiumPrices() {
+  const prices = {};
+  for (const currency of [
+    "XOF",
+    "XAF",
+    "GNF",
+    "CDF"
+  ]) {
+    const read = (offer) => {
+      const raw = opt(`PREMIUM_PRICE_${offer.toUpperCase()}_${currency}`);
+      if (raw === null) return DEFAULT_PRICES[currency]?.[offer] ?? null;
+      const value = Number(raw);
+      if (!Number.isInteger(value) || value <= 0) throw new Error(`PREMIUM_PRICE_${offer.toUpperCase()}_${currency} invalide`);
+      return value;
+    };
+    const monthly = read("monthly");
+    const yearly = read("yearly");
+    if (monthly && yearly) prices[currency] = {
+      monthly,
+      yearly
+    };
+  }
+  return prices;
 }
 
 // supabase/functions/create-checkout/handler.ts
@@ -110,6 +261,22 @@ var fail = (status, error, message) => json(status, {
   message
 });
 var clean = (v, max) => typeof v === "string" ? v.trim().replace(/\s+/g, " ").slice(0, max) : "";
+function availableCountries(deps) {
+  return Object.entries(COUNTRIES).filter(([code, c]) => deps.enabledCountries.includes(code) && deps.prices[c.currency]).map(([code, c]) => {
+    const price = deps.prices[c.currency];
+    return {
+      code,
+      name: c.name,
+      currency: c.currency,
+      calling_code: c.callingCode,
+      offers: OFFERS.map((offer) => ({
+        offer,
+        amount: price[offer],
+        label: priceLabel(price[offer], c.currency, offer)
+      }))
+    };
+  });
+}
 function createHandler(deps) {
   return async function handle(req) {
     if (req.method === "OPTIONS") return new Response(null, {
@@ -126,78 +293,79 @@ function createHandler(deps) {
     } catch {
       return fail(400, "bad_request", "Corps JSON invalide.");
     }
-    if (body.action === "offers") {
-      return json(200, {
-        offers: OFFERS.map((offer) => ({
-          offer,
-          label: deps.offers[offer].label,
-          available: deps.offers[offer].productId !== null
-        }))
-      });
-    }
+    const countries = availableCountries(deps);
+    if (body.action === "offers") return json(200, {
+      countries
+    });
     if (user.isAnonymous || !user.email) {
       return fail(403, "account_required", "Cr\xE9e ton compte avec ton e-mail avant de passer Premium.");
     }
     if (!isOffer(body.offer)) return fail(400, "bad_request", "Offre inconnue.");
-    const productId = deps.offers[body.offer].productId;
-    if (!productId) return fail(503, "offer_unavailable", "Cette offre n'est pas encore disponible.");
-    const firstName = clean(body.first_name, 50);
-    const lastName = clean(body.last_name, 50);
-    const phone = typeof body.phone === "string" ? body.phone.replace(/\D/g, "") : "";
-    const countryCode = typeof body.country_code === "string" ? body.country_code.trim().toUpperCase() : "";
-    if (!firstName || !lastName) return fail(400, "bad_request", "Indique ton pr\xE9nom et ton nom.");
-    if (phone.length < 6 || phone.length > 15) return fail(400, "bad_request", "Num\xE9ro de t\xE9l\xE9phone invalide.");
-    if (!/^[A-Z]{2}$/.test(countryCode)) return fail(400, "bad_request", "Pays invalide.");
-    const discountCode = typeof body.discount_code === "string" ? body.discount_code.trim().slice(0, 100) : "";
+    const offer = body.offer;
+    const country = countries.find((c) => c.code === (typeof body.country_code === "string" ? body.country_code.trim().toUpperCase() : ""));
+    if (!country) return fail(400, "country_unavailable", "Le paiement n'est pas encore disponible dans ce pays.");
+    const firstName = clean(body.first_name, 60);
+    const lastName = clean(body.last_name, 60);
+    if (firstName.length < 2 || lastName.length < 2) return fail(400, "bad_request", "Indique ton pr\xE9nom et ton nom (2 lettres au moins).");
+    const phone = typeof body.phone === "string" ? toE164(body.phone, country.calling_code) : null;
+    if (!phone) return fail(400, "bad_request", `Num\xE9ro de t\xE9l\xE9phone invalide pour ce pays (indicatif +${country.calling_code}).`);
+    const amount = country.offers.find((o) => o.offer === offer).amount;
+    const intent = {
+      merchantTransactionId: newMerchantTransactionId(),
+      userId: user.id,
+      offer,
+      amount,
+      currency: country.currency,
+      country: country.code
+    };
     try {
-      const url2 = await deps.createCheckout({
-        productId,
-        email: user.email,
+      await deps.saveIntent(intent);
+      const init = await deps.createPayment(country.code, {
+        currency: country.currency,
+        merchantTransactionId: intent.merchantTransactionId,
+        amount,
+        successUrl: `${deps.webhookUrl}?page=success`,
+        failedUrl: `${deps.webhookUrl}?page=failed`,
+        notifyUrl: deps.webhookUrl,
+        designation: offer === "monthly" ? "Calbasse Premium 1 mois" : "Calbasse Premium 1 an",
         firstName,
         lastName,
-        phone,
-        countryCode,
-        metadata: {
-          user_id: user.id,
-          offer: body.offer
-        },
-        redirectUrl: deps.redirectUrl,
-        discountCode: discountCode || null
+        email: user.email,
+        phoneE164: phone
       });
+      await deps.attachIntent(intent.merchantTransactionId, init);
       deps.log("paiement cr\xE9\xE9", {
         userId: user.id,
-        offer: body.offer
+        offer,
+        country: country.code,
+        merchantTransactionId: intent.merchantTransactionId
       });
       return json(200, {
-        url: url2
+        url: init.paymentUrl
       });
     } catch (e) {
       deps.log("cr\xE9ation du paiement impossible", {
         userId: user.id,
-        offer: body.offer,
+        offer,
+        country: country.code,
         error: String(e)
       });
-      if (discountCode && /discount|coupon|promo|code/i.test(String(e))) {
-        return fail(400, "invalid_discount", "Ce code promo n\u2019est pas valable pour cette offre.");
-      }
       return fail(502, "checkout_failed", "Le paiement n'a pas pu \xEAtre pr\xE9par\xE9. R\xE9essaie dans un instant.");
     }
   };
 }
 
 // supabase/functions/create-checkout/index.ts
-var opt = (name) => Deno.env.get(name)?.trim() || null;
 var url = Deno.env.get("SUPABASE_URL");
 var serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-var apiKey = opt("CHARIOW_API_KEY");
 if (!url || !serviceKey) throw new Error("SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont requis");
-if (!apiKey) throw new Error("Variable d'environnement manquante : CHARIOW_API_KEY");
 var admin = createClient(url, serviceKey, {
   auth: {
     persistSession: false,
     autoRefreshToken: false
   }
 });
+var accounts = cinetpayAccounts();
 Deno.serve(createHandler({
   async getUser(token) {
     const { data, error } = await admin.auth.getUser(token);
@@ -208,20 +376,28 @@ Deno.serve(createHandler({
       isAnonymous: data.user.is_anonymous ?? false
     };
   },
-  offers: {
-    monthly: {
-      productId: opt("CHARIOW_PRODUCT_MONTHLY"),
-      label: opt("CHARIOW_LABEL_MONTHLY")
-    },
-    yearly: {
-      productId: opt("CHARIOW_PRODUCT_YEARLY"),
-      label: opt("CHARIOW_LABEL_YEARLY")
-    }
+  enabledCountries: Object.keys(accounts),
+  prices: premiumPrices(),
+  webhookUrl: `${url}/functions/v1/cinetpay-webhook`,
+  async saveIntent(intent) {
+    const { error } = await admin.from("payment_intents").insert({
+      merchant_transaction_id: intent.merchantTransactionId,
+      user_id: intent.userId,
+      offer: intent.offer,
+      amount: intent.amount,
+      currency: intent.currency,
+      country: intent.country
+    });
+    if (error) throw error;
   },
-  redirectUrl: opt("CHARIOW_REDIRECT_URL"),
-  createCheckout: (input) => createCheckout({
-    apiKey
-  }, input),
+  async attachIntent(merchantTransactionId, init) {
+    const { error } = await admin.from("payment_intents").update({
+      notify_token: init.notifyToken,
+      transaction_id: init.transactionId || null
+    }).eq("merchant_transaction_id", merchantTransactionId);
+    if (error) throw error;
+  },
+  createPayment: (country, input) => createPayment(accounts[country], input),
   log: (message, extra) => console.log(JSON.stringify({
     message,
     ...extra

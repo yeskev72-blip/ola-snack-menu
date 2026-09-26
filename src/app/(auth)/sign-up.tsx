@@ -1,8 +1,8 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 
-import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
+import { Heading } from '@/components/Heading';
 import { Notice } from '@/components/Notice';
 import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
@@ -29,13 +29,14 @@ export default function SignUp() {
 
   return (
     <Screen
+      back="back"
       footer={
         <>
           <Button label={t('auth.signUp')} loading={action.loading} onPress={submit} />
           <Button label={t('auth.haveAccount')} variant="ghost" onPress={() => router.replace('/sign-in')} />
         </>
       }>
-      <AppText variant="title">{t('auth.signUpTitle')}</AppText>
+      <Heading title={t('auth.signUpTitle')} body={t('auth.signUpBody')} />
       <TextField
         label={t('auth.email')}
         value={email}
