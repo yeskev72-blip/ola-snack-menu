@@ -11,24 +11,23 @@ import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
 import { t } from '@/i18n';
 import { isOnline } from '@/lib/analyze';
-import { formatDate, PAYMENT_COUNTRIES, planStatus } from '@/lib/plan';
-import { fetchOffers, type Offer, type OfferInfo, startCheckout } from '@/lib/premium';
+import { formatDate, planStatus } from '@/lib/plan';
+import { fetchPaymentCountries, type Offer, type PaymentCountry, startCheckout } from '@/lib/premium';
 import { useSession } from '@/state/session';
 import { spacing } from '@/theme';
 
-/** Achat du Premium : choix de l'offre, coordonnées de paiement, page Chariow dans le navigateur. */
+/** Achat du Premium : pays, offre, coordonnées de paiement, page CinetPay dans le navigateur. */
 export default function Premium() {
   const { user, profile, refreshProfile } = useSession();
   const isGuest = user?.isAnonymous ?? true;
   const status = planStatus(profile?.plan, profile?.premium_until);
 
-  const [offers, setOffers] = useState<OfferInfo[] | null>(null);
+  const [countries, setCountries] = useState<PaymentCountry[] | null>(null);
   const [offer, setOffer] = useState<Offer>('monthly');
   const [firstName, setFirstName] = useState(profile?.prenom ?? '');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
-  const [countryCode, setCountryCode] = useState<string>('BJ');
-  const [discountCode, setDiscountCode] = useState('');
+  const [countryCode, setCountryCode] = useState<string | null>(null);
   const [busy, setBusy] = useState<'pay' | 'refresh' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [waiting, setWaiting] = useState(false);
@@ -37,11 +36,11 @@ export default function Premium() {
   useFocusEffect(
     useCallback(() => {
       if (isGuest) return;
-      fetchOffers()
+      fetchPaymentCountries()
         .then((list) => {
-          setOffers(list);
-          const first = list.find((o) => o.available);
-          if (first) setOffer((current) => (list.find((o) => o.offer === current)?.available ? current : first.offer));
+          setCountries(list);
+          // Premier pays par défaut ; le choix de l'utilisateur est gardé s'il reste disponible.
+          setCountryCode((current) => (list.some((c) => c.code === current) ? current : (list[0]?.code ?? null)));
         })
         .catch((e: Error) => setError(e.message));
     }, [isGuest]),
@@ -65,15 +64,17 @@ export default function Premium() {
     }
   }, [waiting, status.kind, profile?.premium_until]);
 
-  const selected = offers?.find((o) => o.offer === offer);
+  const country = countries?.find((c) => c.code === countryCode) ?? null;
+  const selected = country?.offers.find((o) => o.offer === offer) ?? null;
 
   const pay = async () => {
     setError(null);
-    if (!firstName.trim() || !lastName.trim() || phone.replace(/\D/g, '').length < 6) return setError(t('premium.fillAll'));
+    if (!country) return setError(t('premium.noCountry'));
+    if (firstName.trim().length < 2 || lastName.trim().length < 2 || phone.replace(/\D/g, '').length < 6) return setError(t('premium.fillAll'));
     if (!(await isOnline())) return setError(t('premium.offline'));
     setBusy('pay');
     try {
-      const url = await startCheckout({ offer, firstName: firstName.trim(), lastName: lastName.trim(), phone, countryCode, discountCode });
+      const url = await startCheckout({ offer, countryCode: country.code, firstName: firstName.trim(), lastName: lastName.trim(), phone });
       untilBefore.current = profile?.premium_until ?? null;
       setWaiting(true);
       await Linking.openURL(url);
@@ -113,9 +114,9 @@ export default function Premium() {
       footer={
         <>
           <Button
-            label={selected?.label ? t('premium.pay', { label: selected.label }) : t('premium.payNoPrice')}
+            label={selected ? t('premium.pay', { label: selected.label }) : t('premium.payNoPrice')}
             loading={busy === 'pay'}
-            disabled={!selected?.available || busy !== null}
+            disabled={!selected || busy !== null}
             onPress={() => void pay()}
           />
           {waiting ? (
@@ -129,10 +130,18 @@ export default function Premium() {
         <AppText>{t('premium.pitch')}</AppText>
       </Card>
 
+      {countries && countries.length === 0 ? <Notice tone="info" message={t('premium.noCountry')} /> : null}
+
+      <AppText variant="muted">{t('premium.country')}</AppText>
+      <View style={styles.chips} accessibilityRole="radiogroup">
+        {(countries ?? []).map((c) => (
+          <Chip key={c.code} label={c.name} selected={countryCode === c.code} onPress={() => setCountryCode(c.code)} />
+        ))}
+      </View>
+
       <View style={styles.chips} accessibilityRole="radiogroup">
         {(['monthly', 'yearly'] as const).map((o) => {
-          const info = offers?.find((x) => x.offer === o);
-          const price = info?.available ? info.label : t('premium.unavailable');
+          const price = country?.offers.find((x) => x.offer === o)?.label;
           return (
             <Chip
               key={o}
@@ -144,29 +153,15 @@ export default function Premium() {
         })}
       </View>
 
-      <TextField label={t('premium.firstName')} value={firstName} onChangeText={setFirstName} autoComplete="given-name" maxLength={50} />
-      <TextField label={t('premium.lastName')} value={lastName} onChangeText={setLastName} autoComplete="family-name" maxLength={50} />
-      <AppText variant="muted">{t('premium.country')}</AppText>
-      <View style={styles.chips} accessibilityRole="radiogroup">
-        {PAYMENT_COUNTRIES.map((c) => (
-          <Chip key={c.code} label={c.label} selected={countryCode === c.code} onPress={() => setCountryCode(c.code)} />
-        ))}
-      </View>
+      <TextField label={t('premium.firstName')} value={firstName} onChangeText={setFirstName} autoComplete="given-name" maxLength={60} />
+      <TextField label={t('premium.lastName')} value={lastName} onChangeText={setLastName} autoComplete="family-name" maxLength={60} />
       <TextField
-        label={t('premium.phone')}
+        label={country ? t('premium.phoneWithCode', { code: country.calling_code }) : t('premium.phone')}
         value={phone}
-        onChangeText={(text) => setPhone(text.replace(/[^\d ]/g, ''))}
+        onChangeText={(text) => setPhone(text.replace(/[^\d +]/g, ''))}
         keyboardType="phone-pad"
         autoComplete="tel"
-        maxLength={20}
-      />
-      <TextField
-        label={t('premium.discount')}
-        value={discountCode}
-        onChangeText={setDiscountCode}
-        autoCapitalize="characters"
-        autoCorrect={false}
-        maxLength={100}
+        maxLength={22}
       />
 
       {waiting ? <Notice tone="info" message={t('premium.opening')} /> : null}

@@ -18,15 +18,3 @@ export function formatDate(date: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
 }
-
-/** Pays proposés pour le paiement mobile money (code ISO → indicatif). */
-export const PAYMENT_COUNTRIES = [
-  { code: 'BJ', label: 'Bénin' },
-  { code: 'TG', label: 'Togo' },
-  { code: 'CI', label: "Côte d'Ivoire" },
-  { code: 'SN', label: 'Sénégal' },
-  { code: 'BF', label: 'Burkina Faso' },
-  { code: 'ML', label: 'Mali' },
-  { code: 'NE', label: 'Niger' },
-  { code: 'CM', label: 'Cameroun' },
-] as const;

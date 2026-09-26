@@ -178,7 +178,7 @@ exception when insufficient_privilege then null;
 end $$;
 reset role;
 
--- ---------------------------------------------------------------- Premium (Chariow)
+-- ---------------------------------------------------------------- Premium
 set local role service_role;
 do $$
 declare
@@ -229,6 +229,29 @@ end $$;
 do $$ begin
   perform public.grant_premium(auth.uid(), 'faux', 'yearly', 365);
   raise exception 'DEVAIT ÉCHOUER : grant_premium appelé par un client';
+exception when insufficient_privilege then null;
+end $$;
+reset role;
+
+-- Paiements en cours (CinetPay) : réservés au serveur.
+set local role service_role;
+insert into public.payment_intents (merchant_transaction_id, user_id, offer, amount, currency, country, notify_token)
+values ('CBTEST1', '00000000-0000-0000-0000-00000000000b', 'monthly', 2000, 'XOF', 'BJ', 'nt');
+do $$ begin
+  assert (select provider from public.payments where sale_id = 'sale_1') = 'cinetpay', 'prestataire par défaut : cinetpay';
+end $$;
+reset role;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000b","role":"authenticated"}', true);
+do $$ begin
+  perform 1 from public.payment_intents;
+  raise exception 'DEVAIT ÉCHOUER : lecture de payment_intents par un client';
+exception when insufficient_privilege then null;
+end $$;
+do $$ begin
+  insert into public.payment_intents (merchant_transaction_id, user_id, offer, amount, currency, country)
+  values ('CBPIRATE', auth.uid(), 'yearly', 1, 'XOF', 'BJ');
+  raise exception 'DEVAIT ÉCHOUER : création d''un paiement en cours par un client';
 exception when insufficient_privilege then null;
 end $$;
 reset role;

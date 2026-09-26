@@ -13,7 +13,7 @@ Les libellés des tableaux de bord Supabase et Expo peuvent légèrement varier 
 - [ ] Remplir `.env` et tester avec Expo Go (facultatif mais conseillé) — étape 5
 - [ ] Créer un compte **Expo**, relier le projet, déclarer les 2 variables publiques, lancer le build — étape 6
 - [ ] Installer l'APK et dérouler la recette — étape 7
-- [ ] Paiements Premium (Chariow) et ton compte en Premium permanent — [`docs/PAIEMENTS_CHARIOW.md`](PAIEMENTS_CHARIOW.md)
+- [ ] Paiements Premium (CinetPay) et ton compte en Premium permanent — [`docs/PAIEMENTS_CINETPAY.md`](PAIEMENTS_CINETPAY.md)
 - [ ] Avant d'ouvrir l'app à d'autres personnes : SMTP, CAPTCHA, vérification des valeurs nutritionnelles — étape 9
 
 > **Sans terminal ?** Les étapes 1 à 4 (Supabase) peuvent se faire entièrement dans le navigateur :

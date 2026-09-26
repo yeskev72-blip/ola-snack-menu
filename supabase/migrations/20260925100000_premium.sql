@@ -1,4 +1,4 @@
--- Premium payant (Chariow) : durée d'abonnement et historique des paiements.
+-- Premium payant : durée d'abonnement et historique des paiements.
 -- premium_until : fin de l'accès Premium. NULL avec plan = 'premium' = Premium permanent
 -- (compte du propriétaire de l'app, attribué à la main en SQL).
 
