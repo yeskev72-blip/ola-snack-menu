@@ -53,8 +53,8 @@ jobs:
           node-version: 22
           cache: npm
 
+      # Aussi nécessaire pour publier un build existant : eas-cli lit app.config.ts.
       - run: npm ci
-        if: inputs.build_id == ''
 
       - name: Lancer le build sur les serveurs Expo
         id: build
@@ -89,9 +89,18 @@ jobs:
       - name: Attendre la fin du build Expo
         id: wait
         run: |
+          FAILS=0
           for i in $(seq 1 160); do
-            npx --yes eas-cli@latest build:view "${{ steps.build.outputs.id }}" --json > view.json 2>/dev/null || true
-            STATUS=$(jq -r '.status // "UNKNOWN"' view.json 2>/dev/null || echo UNKNOWN)
+            if npx --yes eas-cli@latest build:view "${{ steps.build.outputs.id }}" --json > view.json 2> view.err; then
+              FAILS=0
+              STATUS=$(jq -r '.status // "UNKNOWN"' view.json 2>/dev/null || echo UNKNOWN)
+            else
+              FAILS=$((FAILS + 1))
+              STATUS=UNKNOWN
+              cat view.err
+              # Cinq échecs de suite : inutile d'attendre 80 minutes.
+              if [ "$FAILS" -ge 5 ]; then echo "::error::Lecture du build Expo impossible"; exit 1; fi
+            fi
             echo "Statut : $STATUS"
             case "$STATUS" in
               FINISHED)
