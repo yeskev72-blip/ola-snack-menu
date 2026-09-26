@@ -6,7 +6,14 @@ import { supabase } from '@/lib/supabase';
 export type Offer = 'monthly' | 'yearly';
 export type OfferInfo = { offer: Offer; label: string | null; available: boolean };
 
-export type CheckoutForm = { offer: Offer; firstName: string; lastName: string; phone: string; countryCode: string };
+export type CheckoutForm = {
+  offer: Offer;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  countryCode: string;
+  discountCode?: string;
+};
 
 /** Message français renvoyé par la fonction, sinon message générique. */
 async function functionError(error: unknown, fallback: string): Promise<Error> {
@@ -36,6 +43,7 @@ export async function startCheckout(form: CheckoutForm): Promise<string> {
       last_name: form.lastName,
       phone: form.phone,
       country_code: form.countryCode,
+      ...(form.discountCode?.trim() ? { discount_code: form.discountCode.trim() } : {}),
     },
     timeout: 30_000,
   });

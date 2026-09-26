@@ -255,6 +255,7 @@ export const fr = {
     lastName: 'Nom',
     phone: 'Numéro de téléphone (mobile money)',
     country: 'Pays',
+    discount: 'Code promo (facultatif)',
     pay: 'Payer {label}',
     payNoPrice: 'Continuer vers le paiement',
     opening: 'La page de paiement s’ouvre dans ton navigateur. Reviens ensuite dans l’app : ton Premium s’active quelques secondes après le paiement.',

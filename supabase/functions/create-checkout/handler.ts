@@ -2,7 +2,8 @@
  * Edge Function create-checkout : crée la page de paiement Chariow de l'offre Premium choisie.
  * Réservée aux comptes e-mail (un invité doit d'abord créer son compte). L'identifiant de
  * l'utilisateur part dans les métadonnées de la vente : c'est lui que la notification créditera.
- * Corps : { action: 'offers' } → offres affichables ; { offer, first_name, last_name, phone, country_code } → { url }.
+ * Corps : { action: 'offers' } → offres affichables ;
+ * { offer, first_name, last_name, phone, country_code, discount_code? } → { url }.
  */
 
 import { type CheckoutInput, isOffer, type Offer, OFFERS } from '../_shared/chariow.ts';
@@ -65,6 +66,7 @@ export function createHandler(deps: Deps) {
     if (!firstName || !lastName) return fail(400, 'bad_request', 'Indique ton prénom et ton nom.');
     if (phone.length < 6 || phone.length > 15) return fail(400, 'bad_request', 'Numéro de téléphone invalide.');
     if (!/^[A-Z]{2}$/.test(countryCode)) return fail(400, 'bad_request', 'Pays invalide.');
+    const discountCode = typeof body.discount_code === 'string' ? body.discount_code.trim().slice(0, 100) : '';
 
     try {
       const url = await deps.createCheckout({
@@ -76,11 +78,16 @@ export function createHandler(deps: Deps) {
         countryCode,
         metadata: { user_id: user.id, offer: body.offer },
         redirectUrl: deps.redirectUrl,
+        discountCode: discountCode || null,
       });
       deps.log('paiement créé', { userId: user.id, offer: body.offer });
       return json(200, { url });
     } catch (e) {
       deps.log('création du paiement impossible', { userId: user.id, offer: body.offer, error: String(e) });
+      // Code promo refusé par Chariow : message dédié plutôt qu'une panne générique.
+      if (discountCode && /discount|coupon|promo|code/i.test(String(e))) {
+        return fail(400, 'invalid_discount', 'Ce code promo n’est pas valable pour cette offre.');
+      }
       return fail(502, 'checkout_failed', "Le paiement n'a pas pu être préparé. Réessaie dans un instant.");
     }
   };

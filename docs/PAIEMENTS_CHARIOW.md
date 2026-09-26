@@ -21,7 +21,10 @@ Un invité doit d'abord créer son compte (e-mail) : le Premium est rattaché au
 
 ## 1. Produits Chariow (5 min)
 
-Sur [chariow.com](https://chariow.com), dans ta boutique, crée **deux produits numériques** :
+Sur [chariow.com](https://chariow.com), dans ta boutique, crée **deux produits de type « Files »** (fichiers), avec en
+fichier joint [`docs/boutique/bienvenue-calbasse-premium.pdf`](boutique/bienvenue-calbasse-premium.pdf).
+⚠️ Pas « Services » ni « Coaching » : Chariow refuse de les vendre via son API
+(`HTTP 422 : Service and Coaching products are not supported via the Public API`).
 
 | Produit | Prix (exemple) |
 |---|---|

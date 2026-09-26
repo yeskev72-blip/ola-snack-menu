@@ -83,6 +83,9 @@ async function createCheckout(config, input, fetchImpl = fetch) {
     custom_metadata: input.metadata,
     ...input.redirectUrl ? {
       redirect_url: input.redirectUrl
+    } : {},
+    ...input.discountCode ? {
+      discount_code: input.discountCode
     } : {}
   }, fetchImpl);
   if (!res.ok) throw new Error(chariowError(res.status, res.json));
@@ -145,6 +148,7 @@ function createHandler(deps) {
     if (!firstName || !lastName) return fail(400, "bad_request", "Indique ton pr\xE9nom et ton nom.");
     if (phone.length < 6 || phone.length > 15) return fail(400, "bad_request", "Num\xE9ro de t\xE9l\xE9phone invalide.");
     if (!/^[A-Z]{2}$/.test(countryCode)) return fail(400, "bad_request", "Pays invalide.");
+    const discountCode = typeof body.discount_code === "string" ? body.discount_code.trim().slice(0, 100) : "";
     try {
       const url2 = await deps.createCheckout({
         productId,
@@ -157,7 +161,8 @@ function createHandler(deps) {
           user_id: user.id,
           offer: body.offer
         },
-        redirectUrl: deps.redirectUrl
+        redirectUrl: deps.redirectUrl,
+        discountCode: discountCode || null
       });
       deps.log("paiement cr\xE9\xE9", {
         userId: user.id,
@@ -172,6 +177,9 @@ function createHandler(deps) {
         offer: body.offer,
         error: String(e)
       });
+      if (discountCode && /discount|coupon|promo|code/i.test(String(e))) {
+        return fail(400, "invalid_discount", "Ce code promo n\u2019est pas valable pour cette offre.");
+      }
       return fail(502, "checkout_failed", "Le paiement n'a pas pu \xEAtre pr\xE9par\xE9. R\xE9essaie dans un instant.");
     }
   };

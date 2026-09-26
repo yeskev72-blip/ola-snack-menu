@@ -74,7 +74,23 @@ test('paiement créé : e-mail du compte, identifiant en métadonnées, champs n
     countryCode: 'BJ',
     metadata: { user_id: 'u1', offer: 'monthly' },
     redirectUrl: null,
+    discountCode: null,
   });
+});
+
+test('code promo transmis à Chariow ; code refusé → message dédié', async () => {
+  const { post, checkouts } = setup();
+  await post('compte', { ...FORM, discount_code: ' TEST100 ' });
+  assert.equal(checkouts[0]!.discountCode, 'TEST100');
+
+  const { post: refused } = setup({
+    createCheckout: async () => {
+      throw new Error('Chariow HTTP 422 : Invalid discount code');
+    },
+  });
+  const res = await refused('compte', { ...FORM, discount_code: 'FAUX' });
+  assert.equal(res.status, 400);
+  assert.equal((await res.json()).error, 'invalid_discount');
 });
 
 test('validation : offre, nom, téléphone, pays', async () => {
