@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { ACTIVITY_LEVELS, basalMetabolicRate, clampTarget, dailyTarget } from './calories.ts';
+import { ACTIVITY_LEVELS, basalMetabolicRate, clampTarget, dailyTarget, macroTargets } from './calories.ts';
 
 const femme = { sexe: 'femme', age: 30, taille_cm: 165, poids_kg: 65 } as const;
 const homme = { sexe: 'homme', age: 35, taille_cm: 178, poids_kg: 80 } as const;
@@ -28,4 +28,9 @@ test('plancher de sécurité en perte de poids', () => {
 test('bornes de la base', () => {
   assert.equal(clampTarget(500), 1000);
   assert.equal(clampTarget(9000), 6000);
+});
+
+test('répartition des macros', () => {
+  // 2000 kcal : 500/4 = 125 g, 1000/4 = 250 g, 500/9 ≈ 56 g
+  assert.deepEqual(macroTargets(2000), { proteines: 125, glucides: 250, lipides: 56 });
 });

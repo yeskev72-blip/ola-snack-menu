@@ -40,6 +40,15 @@ const config: ExpoConfig = {
     predictiveBackGestureEnabled: false,
   },
   plugins: [
+    [
+      'expo-font',
+      {
+        // Plus Jakarta Sans embarquée dans l'APK : une famille par graisse (voir fontFamilies dans src/theme.ts).
+        fonts: ['400Regular', '500Medium', '600SemiBold', '700Bold', '800ExtraBold'].map(
+          (w) => `node_modules/@expo-google-fonts/plus-jakarta-sans/${w}/PlusJakartaSans_${w}.ttf`,
+        ),
+      },
+    ],
     'expo-router',
     [
       'expo-image-picker',

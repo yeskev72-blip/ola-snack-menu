@@ -34,9 +34,6 @@ function RootNavigator() {
     <Stack
       screenOptions={{
         headerShown: false,
-        headerTintColor: colors.primary,
-        headerStyle: { backgroundColor: colors.background },
-        headerTitleStyle: { color: colors.text },
         contentStyle: { backgroundColor: colors.background },
       }}>
       <Stack.Protected guard={!isSignedIn}>
@@ -47,14 +44,14 @@ function RootNavigator() {
       </Stack.Protected>
       <Stack.Protected guard={isSignedIn && hasProfile}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="result" options={{ headerShown: true, title: t('result.title') }} />
-        <Stack.Screen name="item-editor" options={{ headerShown: true, title: t('item.title'), presentation: 'modal' }} />
-        <Stack.Screen name="food-picker" options={{ headerShown: true, title: t('picker.title'), presentation: 'modal' }} />
-        <Stack.Screen name="link-account" options={{ headerShown: true, title: t('auth.linkTitle') }} />
-        <Stack.Screen name="profile-edit" options={{ headerShown: true, title: t('profileEdit.title') }} />
-        <Stack.Screen name="premium" options={{ headerShown: true, title: t('premium.title') }} />
-        <Stack.Screen name="meal/[id]" options={{ headerShown: true, title: '' }} />
-        <Stack.Screen name="day/[day]" options={{ headerShown: true, title: '' }} />
+        <Stack.Screen name="result" />
+        <Stack.Screen name="item-editor" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="food-picker" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="link-account" />
+        <Stack.Screen name="profile-edit" />
+        <Stack.Screen name="premium" />
+        <Stack.Screen name="meal/[id]" />
+        <Stack.Screen name="day/[day]" />
       </Stack.Protected>
     </Stack>
   );

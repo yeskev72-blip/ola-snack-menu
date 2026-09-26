@@ -2,6 +2,7 @@ import Storage from 'expo-sqlite/kv-store';
 import { useEffect, useMemo, useState } from 'react';
 
 import type { Food } from '@/lib/database.types';
+import { unitsFor } from '@/lib/portions';
 import { supabase } from '@/lib/supabase';
 
 /**
@@ -96,4 +97,15 @@ export function searchFoods(foods: LocalFood[], query: string): LocalFood[] {
   const q = normalize(query.trim());
   if (!q) return foods;
   return foods.filter((f) => [f.label_fr, ...f.aliases].some((name) => normalize(name).includes(q)));
+}
+
+/** Portion proposée à l'ajout : le repère le plus courant de l'aliment, sinon 100 g. */
+export function defaultGrams(food: Pick<LocalFood, 'portion_reperes'>): number {
+  const preferred = ['assiette', 'boule', 'louche', 'unite', 'morceau', 'bol', 'verre', 'cuillere'];
+  const reperes = food.portion_reperes ?? {};
+  for (const name of preferred) {
+    const grams = reperes[name];
+    if (grams) return grams;
+  }
+  return unitsFor(reperes)[0]?.grams ?? 100;
 }

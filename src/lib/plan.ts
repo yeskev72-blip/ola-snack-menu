@@ -18,3 +18,8 @@ export function formatDate(date: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
 }
+
+/** Jours de Premium restants (arrondis au jour supérieur, jamais négatifs). */
+export function daysLeft(until: Date, now = new Date()): number {
+  return Math.max(0, Math.ceil((until.getTime() - now.getTime()) / 86_400_000));
+}

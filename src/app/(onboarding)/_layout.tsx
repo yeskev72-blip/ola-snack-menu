@@ -11,15 +11,13 @@ export default function OnboardingLayout() {
       <Stack
         screenOptions={{
           headerShown: false,
-          headerTintColor: colors.primary,
-          headerStyle: { backgroundColor: colors.background },
-          headerShadowVisible: false,
-          headerTitle: '',
           contentStyle: { backgroundColor: colors.background },
         }}>
         <Stack.Screen name="goal" />
-        <Stack.Screen name="body" options={{ headerShown: true }} />
-        <Stack.Screen name="target" options={{ headerShown: true }} />
+        <Stack.Screen name="body" />
+        <Stack.Screen name="measures" />
+        <Stack.Screen name="activity" />
+        <Stack.Screen name="target" />
       </Stack>
     </OnboardingDraftProvider>
   );

@@ -1,9 +1,9 @@
-import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Alert, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
+import { Icon } from '@/components/Icon';
 import { Macros } from '@/components/Macros';
 import { Screen } from '@/components/Screen';
 import { t } from '@/i18n';
@@ -11,7 +11,7 @@ import { formatNumber } from '@/lib/format';
 import { deleteMeal, useMeal } from '@/lib/meals';
 import { mealTypeLabel } from '@/lib/mealTypes';
 import { useSession } from '@/state/session';
-import { colors, spacing } from '@/theme';
+import { colors, radius, shadow, spacing } from '@/theme';
 
 export default function MealDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -21,7 +21,7 @@ export default function MealDetail() {
   if (meal === undefined) return null;
   if (meal === null) {
     return (
-      <Screen edges={['bottom']}>
+      <Screen back="back">
         <AppText variant="muted">{t('mealDetail.notFound')}</AppText>
       </Screen>
     );
@@ -42,54 +42,74 @@ export default function MealDetail() {
     ]);
 
   const date = new Date(meal.eaten_at);
+  const when = `${date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })} · ${date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
 
   return (
-    <Screen edges={['bottom']} footer={<Button label={t('mealDetail.delete')} variant="secondary" onPress={confirmDelete} />}>
-      <Stack.Screen options={{ title: t(mealTypeLabel(meal.type_repas)) }} />
-      <AppText variant="muted">
-        {date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} ·{' '}
-        {date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-      </AppText>
-
-      <Card style={styles.summary}>
-        <AppText variant="display" style={styles.kcal}>
-          {formatNumber(meal.total.kcal)}
+    <Screen back="back" footer={<Button label={t('mealDetail.delete')} variant="danger" icon="trash" onPress={confirmDelete} />}>
+      <View style={styles.titles}>
+        <AppText style={styles.type}>
+          {t(mealTypeLabel(meal.type_repas))} · {when}
         </AppText>
-        <AppText variant="muted">{t('common.kcal')}</AppText>
-        <Macros values={meal.total} />
-      </Card>
+        <AppText style={styles.title} accessibilityRole="header">
+          {meal.items.map((it) => it.label).join(', ') || t(mealTypeLabel(meal.type_repas))}
+        </AppText>
+      </View>
 
-      <AppText variant="large">{t('result.items')}</AppText>
-      {meal.items.map((item, i) => (
-        <View key={`${item.label}-${i}`} style={styles.item}>
-          <View style={styles.flex}>
-            <AppText style={styles.label}>{item.label}</AppText>
-            <AppText variant="small">
-              {formatNumber(item.grams)} {t('common.grams')}
+      <View style={styles.kcalRow}>
+        <AppText style={styles.kcal}>{formatNumber(meal.total.kcal)}</AppText>
+        <AppText style={styles.kcalUnit}>{t('common.kcal')}</AppText>
+      </View>
+
+      <Macros values={meal.total} />
+
+      <View style={styles.list}>
+        {meal.items.map((item, i) => (
+          <View key={`${item.label}-${i}`} style={[styles.item, i > 0 && styles.itemBorder]}>
+            <View style={styles.flex}>
+              <View style={styles.itemTitle}>
+                <AppText style={styles.label}>{item.label}</AppText>
+                {item.estimated ? (
+                  <View style={styles.badge}>
+                    <AppText style={styles.badgeText}>{t('result.estimated')}</AppText>
+                  </View>
+                ) : null}
+              </View>
+              <AppText variant="small">
+                {formatNumber(item.grams)} {t('common.grams')}
+              </AppText>
+            </View>
+            <AppText style={styles.itemKcal}>
+              {formatNumber(item.kcal)} {t('common.kcal')}
             </AppText>
           </View>
-          <AppText>
-            {formatNumber(item.kcal)} {t('common.kcal')}
-            {item.estimated ? ` · ${t('result.estimated')}` : ''}
-          </AppText>
+        ))}
+      </View>
+
+      {!meal.synced ? (
+        <View style={styles.pending}>
+          <Icon name="clock" size={16} color={colors.textMuted} />
+          <AppText variant="small">{t('mealDetail.pending')}</AppText>
         </View>
-      ))}
-      {!meal.synced ? <AppText variant="small">{t('mealDetail.pending')}</AppText> : null}
+      ) : null}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  summary: { alignItems: 'center', paddingVertical: spacing.lg, gap: spacing.sm },
-  kcal: { color: colors.primary },
-  item: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
+  titles: { gap: 2 },
+  type: { fontSize: 13, lineHeight: 18, fontWeight: '700', color: colors.accent, textTransform: 'uppercase', letterSpacing: 0.6 },
+  title: { fontSize: 22, lineHeight: 28, fontWeight: '800' },
+  kcalRow: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm },
+  kcal: { fontSize: 44, lineHeight: 50, fontWeight: '800', letterSpacing: -1 },
+  kcalUnit: { fontSize: 18, fontWeight: '700' },
+  list: { borderRadius: radius.card, backgroundColor: colors.surface, ...shadow.card },
+  item: { minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: spacing.sm, paddingHorizontal: spacing.md },
+  itemBorder: { borderTopWidth: 1, borderTopColor: colors.surfaceAlt },
   flex: { flex: 1 },
-  label: { fontWeight: '600' },
+  itemTitle: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: spacing.sm },
+  label: { fontWeight: '700', flexShrink: 1 },
+  itemKcal: { fontWeight: '700' },
+  badge: { paddingHorizontal: spacing.sm, paddingVertical: 2, borderRadius: radius.pill, backgroundColor: '#FBEBC4' },
+  badgeText: { fontSize: 11, lineHeight: 14, fontWeight: '700', color: '#7A5200' },
+  pending: { flexDirection: 'row', alignItems: 'center', gap: 6 },
 });

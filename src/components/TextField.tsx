@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
 
 import { AppText } from '@/components/AppText';
-import { colors, font, radius, spacing, touchTarget } from '@/theme';
+import { Icon } from '@/components/Icon';
+import { colors, font, fontFamily, radius, spacing } from '@/theme';
 
 type Props = TextInputProps & {
   label: string;
@@ -9,18 +11,31 @@ type Props = TextInputProps & {
   error?: string | null;
 };
 
-export function TextField({ label, hint, error, style, ...rest }: Props) {
+/** Champ de saisie : bord fin, bord noir épais au focus, rouge avec icône en cas d'erreur. */
+export function TextField({ label, hint, error, style, onFocus, onBlur, ...rest }: Props) {
+  const [focused, setFocused] = useState(false);
   return (
     <View style={styles.wrap}>
       <AppText style={styles.label}>{label}</AppText>
       <TextInput
         accessibilityLabel={label}
-        placeholderTextColor={colors.textMuted}
-        style={[styles.input, error ? styles.inputError : null, style]}
+        placeholderTextColor="#8A7B6D"
+        style={[styles.input, focused && styles.inputFocused, error ? styles.inputError : null, style]}
+        onFocus={(e) => {
+          setFocused(true);
+          onFocus?.(e);
+        }}
+        onBlur={(e) => {
+          setFocused(false);
+          onBlur?.(e);
+        }}
         {...rest}
       />
       {error ? (
-        <AppText style={styles.error}>{error}</AppText>
+        <View style={styles.errorRow}>
+          <Icon name="alert" size={16} color={colors.danger} />
+          <AppText style={styles.error}>{error}</AppText>
+        </View>
       ) : hint ? (
         <AppText variant="small">{hint}</AppText>
       ) : null}
@@ -29,18 +44,22 @@ export function TextField({ label, hint, error, style, ...rest }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { gap: spacing.xs },
-  label: { fontWeight: '600' },
+  wrap: { gap: 6 },
+  label: { fontWeight: '600', fontSize: 14 },
   input: {
-    minHeight: touchTarget,
-    borderWidth: 2,
+    minHeight: 56,
+    borderWidth: 1.5,
     borderColor: colors.border,
-    borderRadius: radius.sm,
-    backgroundColor: colors.surface,
+    borderRadius: radius.md,
     paddingHorizontal: spacing.md,
-    fontSize: font.large,
+    paddingVertical: 12,
+    fontSize: font.body,
+    fontFamily: fontFamily('500'),
     color: colors.text,
+    backgroundColor: colors.surface,
   },
-  inputError: { borderColor: colors.danger },
-  error: { color: colors.danger, fontSize: font.small },
+  inputFocused: { borderWidth: 2, borderColor: colors.primary },
+  inputError: { borderWidth: 2, borderColor: colors.danger },
+  errorRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  error: { color: colors.danger, fontSize: font.small, fontWeight: '600' },
 });
