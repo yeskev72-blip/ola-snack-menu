@@ -143,6 +143,11 @@ EAS Build compile l'APK dans le cloud d'Expo : pas besoin d'Android Studio.
    Le lien reste disponible sur [expo.dev](https://expo.dev), dans *Projects > calbasse > Builds* :
    bouton **Download** pour le fichier `.apk`, ou **Share** pour envoyer le lien.
 
+**Sans terminal** : GitHub → onglet **Actions** → **Construire l'APK** → **Run workflow**. À la fin du build
+(15 à 30 minutes), l'APK est publié dans les **Releases** du dépôt ; lien direct vers le dernier :
+`https://github.com/<dépôt>/releases/latest/download/calbasse.apk`. Pour publier un build Expo déjà terminé sans
+reconstruire, renseigne son identifiant dans le champ `build_id`.
+
 Profils (`eas.json`) :
 
 | Profil | Usage | Numéro de version (`versionCode`) |
