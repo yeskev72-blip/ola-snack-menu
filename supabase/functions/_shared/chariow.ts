@@ -128,6 +128,8 @@ export type CheckoutInput = {
   countryCode: string;
   metadata: Record<string, string>;
   redirectUrl?: string | null;
+  /** Code promo Chariow : la page de paiement créée par l'API n'a pas de champ pour le saisir. */
+  discountCode?: string | null;
 };
 
 /** Crée une page de paiement Chariow et renvoie son lien. */
@@ -144,6 +146,7 @@ export async function createCheckout(config: ChariowConfig, input: CheckoutInput
       phone: { number: input.phone, country_code: input.countryCode },
       custom_metadata: input.metadata,
       ...(input.redirectUrl ? { redirect_url: input.redirectUrl } : {}),
+      ...(input.discountCode ? { discount_code: input.discountCode } : {}),
     },
     fetchImpl,
   );

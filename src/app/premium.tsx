@@ -28,6 +28,7 @@ export default function Premium() {
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [countryCode, setCountryCode] = useState<string>('BJ');
+  const [discountCode, setDiscountCode] = useState('');
   const [busy, setBusy] = useState<'pay' | 'refresh' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [waiting, setWaiting] = useState(false);
@@ -72,7 +73,7 @@ export default function Premium() {
     if (!(await isOnline())) return setError(t('premium.offline'));
     setBusy('pay');
     try {
-      const url = await startCheckout({ offer, firstName: firstName.trim(), lastName: lastName.trim(), phone, countryCode });
+      const url = await startCheckout({ offer, firstName: firstName.trim(), lastName: lastName.trim(), phone, countryCode, discountCode });
       untilBefore.current = profile?.premium_until ?? null;
       setWaiting(true);
       await Linking.openURL(url);
@@ -158,6 +159,14 @@ export default function Premium() {
         keyboardType="phone-pad"
         autoComplete="tel"
         maxLength={20}
+      />
+      <TextField
+        label={t('premium.discount')}
+        value={discountCode}
+        onChangeText={setDiscountCode}
+        autoCapitalize="characters"
+        autoCorrect={false}
+        maxLength={100}
       />
 
       {waiting ? <Notice tone="info" message={t('premium.opening')} /> : null}

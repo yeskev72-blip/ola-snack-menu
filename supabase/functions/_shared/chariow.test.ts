@@ -46,6 +46,9 @@ test('création du paiement : corps envoyé, clé en en-tête, erreur lisible', 
   assert.deepEqual(body.phone, { number: '97000000', country_code: 'BJ' });
   assert.deepEqual(body.custom_metadata, { user_id: 'u1', offer: 'monthly' });
   assert.equal('redirect_url' in body, false);
+  assert.equal('discount_code' in body, false);
+  await createCheckout({ apiKey: 'k' }, { ...input, discountCode: 'TEST100' }, ok);
+  assert.equal(JSON.parse(String(seen!.init.body)).discount_code, 'TEST100');
 
   const ko = (async () => new Response(JSON.stringify({ message: 'Produit introuvable', errors: [] }), { status: 422 })) as unknown as typeof fetch;
   await assert.rejects(createCheckout({ apiKey: 'k' }, input, ko), /Chariow HTTP 422 : Produit introuvable/);
