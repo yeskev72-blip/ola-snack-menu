@@ -6,7 +6,7 @@
  * { offer, first_name, last_name, phone, country_code, discount_code? } → { url }.
  */
 
-import { type CheckoutInput, isOffer, type Offer, OFFERS } from '../_shared/chariow.ts';
+import { AlreadyPurchasedError, type CheckoutInput, isOffer, type Offer, OFFERS } from '../_shared/chariow.ts';
 
 export type OfferConfig = { productId: string | null; label: string | null };
 
@@ -84,6 +84,13 @@ export function createHandler(deps: Deps) {
       return json(200, { url });
     } catch (e) {
       deps.log('création du paiement impossible', { userId: user.id, offer: body.offer, error: String(e) });
+      if (e instanceof AlreadyPurchasedError) {
+        return fail(
+          409,
+          'already_purchased',
+          'Chariow indique que ton adresse e-mail a déjà acheté cette offre. Contacte-nous pour prolonger ton Premium.',
+        );
+      }
       // Code promo refusé par Chariow : message dédié plutôt qu'une panne générique.
       if (discountCode && /discount|coupon|promo|code/i.test(String(e))) {
         return fail(400, 'invalid_discount', 'Ce code promo n’est pas valable pour cette offre.');

@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import type { CheckoutInput } from '../_shared/chariow.ts';
+import { AlreadyPurchasedError, type CheckoutInput } from '../_shared/chariow.ts';
 import { createHandler, type Deps } from './handler.ts';
 
 const USERS: Record<string, { id: string; email: string | null; isAnonymous: boolean }> = {
@@ -112,4 +112,15 @@ test('échec chez Chariow : 502 avec un message clair', async () => {
   const res = await post('compte', FORM);
   assert.equal(res.status, 502);
   assert.equal((await res.json()).error, 'checkout_failed');
+});
+
+test('produit déjà possédé chez Chariow : 409 avec un message clair', async () => {
+  const { post } = setup({
+    createCheckout: async () => {
+      throw new AlreadyPurchasedError();
+    },
+  });
+  const res = await post('compte', FORM);
+  assert.equal(res.status, 409);
+  assert.equal((await res.json()).error, 'already_purchased');
 });

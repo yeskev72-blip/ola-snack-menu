@@ -119,6 +119,14 @@ async function request(config: ChariowConfig, method: string, path: string, body
   return { status: response.status, ok: response.ok, json };
 }
 
+/** Le client (même e-mail) possède déjà ce produit : Chariow ne crée pas de nouveau paiement. */
+export class AlreadyPurchasedError extends Error {
+  constructor() {
+    super('Chariow : produit déjà acheté par ce client (already_purchased)');
+    this.name = 'AlreadyPurchasedError';
+  }
+}
+
 export type CheckoutInput = {
   productId: string;
   email: string;
@@ -151,6 +159,9 @@ export async function createCheckout(config: ChariowConfig, input: CheckoutInput
     fetchImpl,
   );
   if (!res.ok) throw new Error(chariowError(res.status, res.json));
+  // Chariow refuse de revendre un produit déjà possédé par ce client (même e-mail).
+  const step = isObj(res.json) && isObj(res.json.data) ? res.json.data.step : undefined;
+  if (step === 'already_purchased') throw new AlreadyPurchasedError();
   const url = findCheckoutUrl(res.json);
   if (!url) throw new Error(`Chariow : lien de paiement absent de la réponse ${JSON.stringify(res.json).slice(0, 300)}`);
   return url;

@@ -70,6 +70,12 @@ async function request(config, method, path, body, fetchImpl) {
     json: json2
   };
 }
+var AlreadyPurchasedError = class extends Error {
+  constructor() {
+    super("Chariow : produit d\xE9j\xE0 achet\xE9 par ce client (already_purchased)");
+    this.name = "AlreadyPurchasedError";
+  }
+};
 async function createCheckout(config, input, fetchImpl = fetch) {
   const res = await request(config, "POST", "/checkout", {
     product_id: input.productId,
@@ -89,6 +95,8 @@ async function createCheckout(config, input, fetchImpl = fetch) {
     } : {}
   }, fetchImpl);
   if (!res.ok) throw new Error(chariowError(res.status, res.json));
+  const step = isObj(res.json) && isObj(res.json.data) ? res.json.data.step : void 0;
+  if (step === "already_purchased") throw new AlreadyPurchasedError();
   const url2 = findCheckoutUrl(res.json);
   if (!url2) throw new Error(`Chariow : lien de paiement absent de la r\xE9ponse ${JSON.stringify(res.json).slice(0, 300)}`);
   return url2;
@@ -177,6 +185,9 @@ function createHandler(deps) {
         offer: body.offer,
         error: String(e)
       });
+      if (e instanceof AlreadyPurchasedError) {
+        return fail(409, "already_purchased", "Chariow indique que ton adresse e-mail a d\xE9j\xE0 achet\xE9 cette offre. Contacte-nous pour prolonger ton Premium.");
+      }
       if (discountCode && /discount|coupon|promo|code/i.test(String(e))) {
         return fail(400, "invalid_discount", "Ce code promo n\u2019est pas valable pour cette offre.");
       }

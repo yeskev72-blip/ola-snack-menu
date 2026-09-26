@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { createCheckout, fetchSale, findCheckoutUrl, findSaleId, readSale, safeEqual, verifySignature } from './chariow.ts';
+import { AlreadyPurchasedError, createCheckout, fetchSale, findCheckoutUrl, findSaleId, readSale, safeEqual, verifySignature } from './chariow.ts';
 
 test('lien de paiement : clés connues, lien de retour ignoré', () => {
   assert.equal(findCheckoutUrl({ data: { checkout_url: 'https://pay.chariow.com/c/1', redirect_url: 'https://calbasse.app' } }), 'https://pay.chariow.com/c/1');
@@ -52,6 +52,16 @@ test('création du paiement : corps envoyé, clé en en-tête, erreur lisible', 
 
   const ko = (async () => new Response(JSON.stringify({ message: 'Produit introuvable', errors: [] }), { status: 422 })) as unknown as typeof fetch;
   await assert.rejects(createCheckout({ apiKey: 'k' }, input, ko), /Chariow HTTP 422 : Produit introuvable/);
+});
+
+test('produit déjà acheté par ce client : erreur dédiée', async () => {
+  const owned = (async () =>
+    new Response(
+      JSON.stringify({ data: { step: 'already_purchased', message: 'You already own this product.', payment: { checkout_url: null } } }),
+      { status: 200 },
+    )) as unknown as typeof fetch;
+  const input = { productId: 'p', email: 'a@b.c', firstName: 'A', lastName: 'B', phone: '97000000', countryCode: 'BJ', metadata: {} };
+  await assert.rejects(createCheckout({ apiKey: 'k' }, input, owned), AlreadyPurchasedError);
 });
 
 test('relecture d’une vente : 404 → null', async () => {
