@@ -69,6 +69,8 @@ export type SaleInfo = {
   id: string;
   status: string | null;
   productId: string | null;
+  /** Nom court du produit (ex. « calbasse-1-mois »), accepté aussi par Chariow à la place de l'identifiant. */
+  productSlug: string | null;
   metadata: Record<string, string>;
   amount: number | null;
   currency: string | null;
@@ -90,6 +92,7 @@ export function readSale(response: unknown, saleId: string): SaleInfo {
     id: typeof sale.id === 'string' ? sale.id : saleId,
     status: typeof sale.status === 'string' ? sale.status.toLowerCase() : null,
     productId: typeof product?.id === 'string' ? product.id : typeof sale.product_id === 'string' ? sale.product_id : null,
+    productSlug: typeof product?.slug === 'string' ? product.slug : typeof sale.product_slug === 'string' ? sale.product_slug : null,
     metadata,
     amount: amountObj ? num(amountObj.value ?? amountObj.amount) : num(sale.amount),
     currency: typeof amountObj?.currency === 'string' ? amountObj.currency : typeof sale.currency === 'string' ? sale.currency : null,
@@ -156,6 +159,16 @@ export async function fetchSale(config: ChariowConfig, saleId: string, fetchImpl
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(chariowError(res.status, res.json));
   return readSale(res.json, saleId);
+}
+
+/** Nom court (slug) d'un produit via GET /products/{id} ; null s'il est inconnu. */
+export async function fetchProductSlug(config: ChariowConfig, productId: string, fetchImpl: typeof fetch = fetch): Promise<string | null> {
+  const res = await request(config, 'GET', `/products/${encodeURIComponent(productId)}`, undefined, fetchImpl);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(chariowError(res.status, res.json));
+  const root = isObj(res.json) && isObj(res.json.data) ? res.json.data : isObj(res.json) ? res.json : {};
+  const product = isObj(root.product) ? root.product : root;
+  return typeof product.slug === 'string' ? product.slug : null;
 }
 
 const toHex = (buf: ArrayBuffer) => Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, '0')).join('');

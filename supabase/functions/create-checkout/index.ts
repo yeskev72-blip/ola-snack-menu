@@ -3,8 +3,8 @@
  *
  * Secrets (Edge Functions > Secrets) :
  *   CHARIOW_API_KEY          obligatoire (Chariow > Développeurs), ne quitte jamais le serveur
- *   CHARIOW_PRODUCT_MONTHLY  identifiant du produit « Premium mensuel » (ex. prd_…)
- *   CHARIOW_PRODUCT_YEARLY   identifiant du produit « Premium annuel »
+ *   CHARIOW_PRODUCT_MONTHLY  produit « Premium mensuel » : identifiant (prd_…) ou nom court (ex. calbasse-1-mois)
+ *   CHARIOW_PRODUCT_YEARLY   produit « Premium annuel » : identifiant ou nom court
  *   CHARIOW_LABEL_MONTHLY    facultatif, prix affiché dans l'app (ex. « 1 000 FCFA / mois »)
  *   CHARIOW_LABEL_YEARLY     facultatif (ex. « 10 000 FCFA / an »)
  *   CHARIOW_REDIRECT_URL     facultatif, page affichée après le paiement

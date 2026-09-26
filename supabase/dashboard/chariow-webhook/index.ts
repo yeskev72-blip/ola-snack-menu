@@ -56,6 +56,7 @@ function readSale(response, saleId) {
     id: typeof sale.id === "string" ? sale.id : saleId,
     status: typeof sale.status === "string" ? sale.status.toLowerCase() : null,
     productId: typeof product?.id === "string" ? product.id : typeof sale.product_id === "string" ? sale.product_id : null,
+    productSlug: typeof product?.slug === "string" ? product.slug : typeof sale.product_slug === "string" ? sale.product_slug : null,
     metadata,
     amount: amountObj ? num(amountObj.value ?? amountObj.amount) : num(sale.amount),
     currency: typeof amountObj?.currency === "string" ? amountObj.currency : typeof sale.currency === "string" ? sale.currency : null
@@ -89,6 +90,14 @@ async function fetchSale(config, saleId, fetchImpl = fetch) {
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(chariowError(res.status, res.json));
   return readSale(res.json, saleId);
+}
+async function fetchProductSlug(config, productId, fetchImpl = fetch) {
+  const res = await request(config, "GET", `/products/${encodeURIComponent(productId)}`, void 0, fetchImpl);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(chariowError(res.status, res.json));
+  const root = isObj(res.json) && isObj(res.json.data) ? res.json.data : isObj(res.json) ? res.json : {};
+  const product = isObj(root.product) ? root.product : root;
+  return typeof product.slug === "string" ? product.slug : null;
 }
 var toHex = (buf) => Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, "0")).join("");
 function safeEqual(a, b) {
@@ -181,11 +190,23 @@ function createHandler(deps) {
         ignored: "not_paid"
       });
     }
-    const offer = sale.productId ? deps.productOffers[sale.productId] : void 0;
+    let offer = (sale.productId ? deps.productOffers[sale.productId] : void 0) ?? (sale.productSlug ? deps.productOffers[sale.productSlug] : void 0);
+    if (!offer && sale.productId && !sale.productSlug) {
+      const slug = await deps.fetchProductSlug(sale.productId).catch((e) => {
+        deps.log("lecture du produit impossible", {
+          saleId,
+          productId: sale.productId,
+          error: String(e)
+        });
+        return null;
+      });
+      if (slug) offer = deps.productOffers[slug];
+    }
     if (!offer) {
       deps.log("vente d\u2019un autre produit", {
         saleId,
-        productId: sale.productId
+        productId: sale.productId,
+        productSlug: sale.productSlug
       });
       return json(200, {
         ignored: "other_product"
@@ -257,6 +278,9 @@ Deno.serve(createHandler({
   fetchSale: (saleId) => fetchSale({
     apiKey
   }, saleId),
+  fetchProductSlug: (productId) => fetchProductSlug({
+    apiKey
+  }, productId),
   async grantPremium({ userId, saleId, offer, days, amount, currency }) {
     const { data, error } = await admin.rpc("grant_premium", {
       p_user_id: userId,
