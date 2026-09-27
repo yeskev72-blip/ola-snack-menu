@@ -1,47 +1,32 @@
 /**
- * Edge Function create-checkout : prépare le paiement CinetPay de l'offre Premium choisie.
- * Réservée aux comptes e-mail (un invité doit d'abord créer son compte). Le montant, l'offre et
- * l'utilisateur sont fixés ici et enregistrés (payment_intents) avant d'ouvrir la page CinetPay.
- * Corps : { action: 'offers' } → pays et prix disponibles ;
- * { offer, country_code, first_name, last_name, phone } → { url }.
+ * Edge Function create-checkout : paiement Maketou de l'offre Premium choisie.
+ * Réservée aux comptes e-mail (un invité doit d'abord créer son compte). L'offre, le montant et
+ * l'utilisateur sont fixés ici et enregistrés (payment_intents) avant d'ouvrir la page Maketou.
+ * Corps :
+ *   { action: 'offers' }   → offres disponibles et prix
+ *   { action: 'confirm' }  → relit chez Maketou les paiements en attente de l'utilisateur et crédite les payés
+ *   { offer, first_name, last_name, phone? } → { url } de la page de paiement
  */
 
-import {
-  COUNTRIES,
-  type Currency,
-  isOffer,
-  newMerchantTransactionId,
-  type Offer,
-  OFFERS,
-  type PaymentInit,
-  type PaymentInput,
-  priceLabel,
-  toE164,
-} from '../_shared/cinetpay.ts';
+import { type CartCheckout, type CartInput, isOffer, type Offer, OFFERS, priceLabel } from '../_shared/maketou.ts';
+import { type OfferConfig } from '../_shared/maketou-env.ts';
+import { type SettleDeps, settleIntent, type StoredIntent } from '../_shared/settle.ts';
 
-/** Prix par devise ; une devise sans prix rend ses pays indisponibles. */
-export type Prices = Partial<Record<Currency, Record<Offer, number>>>;
+export type NewIntent = { id: string; userId: string; offer: Offer; amount: number; currency: string };
 
-export type Intent = {
-  merchantTransactionId: string;
-  userId: string;
-  offer: Offer;
-  amount: number;
-  currency: Currency;
-  country: string;
-};
-
-export type Deps = {
+export type Deps = SettleDeps & {
   getUser: (token: string) => Promise<{ id: string; email: string | null; isAnonymous: boolean } | null>;
-  /** Pays dont le compte CinetPay est configuré (clé et mot de passe présents). */
-  enabledCountries: string[];
-  prices: Prices;
-  /** Adresse publique de la fonction cinetpay-webhook (notification et pages de retour). */
-  webhookUrl: string;
-  saveIntent: (intent: Intent) => Promise<void>;
-  attachIntent: (merchantTransactionId: string, init: PaymentInit) => Promise<void>;
-  createPayment: (country: string, input: PaymentInput) => Promise<PaymentInit>;
-  log: (message: string, extra?: Record<string, unknown>) => void;
+  offers: Partial<Record<Offer, OfferConfig>>;
+  currency: string;
+  currencyLabel: string;
+  /** Adresse publique de la fonction maketou-return (retour du navigateur après paiement). */
+  returnUrl: string;
+  newId: () => string;
+  saveIntent: (intent: NewIntent) => Promise<void>;
+  attachCart: (intentId: string, cartId: string) => Promise<void>;
+  /** Paiements en attente récents de l'utilisateur. */
+  pendingIntents: (userId: string) => Promise<StoredIntent[]>;
+  createCart: (input: CartInput) => Promise<CartCheckout>;
 };
 
 const HEADERS = {
@@ -56,23 +41,22 @@ const fail = (status: number, error: string, message: string) => json(status, { 
 
 const clean = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().replace(/\s+/g, ' ').slice(0, max) : '');
 
-/** Pays proposés : compte configuré et prix défini pour sa devise, dans l'ordre de COUNTRIES. */
-export function availableCountries(deps: Pick<Deps, 'enabledCountries' | 'prices'>) {
-  return Object.entries(COUNTRIES)
-    .filter(([code, c]) => deps.enabledCountries.includes(code) && deps.prices[c.currency])
-    .map(([code, c]) => {
-      const price = deps.prices[c.currency]!;
-      return {
-        code,
-        name: c.name,
-        currency: c.currency,
-        calling_code: c.callingCode,
-        offers: OFFERS.map((offer) => ({ offer, amount: price[offer], label: priceLabel(price[offer], c.currency, offer) })),
-      };
-    });
+/** Numéro facultatif : chiffres et « + » initial, 8 à 15 chiffres ; sinon ignoré (Maketou le redemandera). */
+function cleanPhone(v: unknown): string | undefined {
+  if (typeof v !== 'string') return undefined;
+  const digits = v.replace(/\D/g, '');
+  if (digits.length < 8 || digits.length > 15) return undefined;
+  return v.trim().startsWith('+') || v.trim().startsWith('00') ? `+${digits.replace(/^00/, '')}` : digits;
 }
 
 export function createHandler(deps: Deps) {
+  const available = () =>
+    OFFERS.filter((o) => deps.offers[o]).map((offer) => ({
+      offer,
+      amount: deps.offers[offer]!.amount,
+      label: priceLabel(deps.offers[offer]!.amount, deps.currencyLabel, offer),
+    }));
+
   return async function handle(req: Request): Promise<Response> {
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: HEADERS });
     if (req.method !== 'POST') return fail(405, 'method_not_allowed', 'Utilise POST.');
@@ -88,54 +72,55 @@ export function createHandler(deps: Deps) {
       return fail(400, 'bad_request', 'Corps JSON invalide.');
     }
 
-    const countries = availableCountries(deps);
-    if (body.action === 'offers') return json(200, { countries });
+    if (body.action === 'offers') return json(200, { offers: available(), currency: deps.currency });
+
+    if (body.action === 'confirm') {
+      let paid = 0;
+      try {
+        for (const intent of await deps.pendingIntents(user.id)) {
+          const result = await settleIntent(deps, intent).catch((e) => {
+            deps.log('vérification du paiement impossible', { intentId: intent.id, error: String(e) });
+            return 'unknown' as const;
+          });
+          if (result === 'paid') paid++;
+        }
+      } catch (e) {
+        deps.log('lecture des paiements en attente impossible', { userId: user.id, error: String(e) });
+        return fail(502, 'confirm_failed', 'Vérification impossible pour le moment. Réessaie dans un instant.');
+      }
+      return json(200, { paid });
+    }
 
     if (user.isAnonymous || !user.email) {
       return fail(403, 'account_required', 'Crée ton compte avec ton e-mail avant de passer Premium.');
     }
     if (!isOffer(body.offer)) return fail(400, 'bad_request', 'Offre inconnue.');
     const offer = body.offer;
-    const country = countries.find((c) => c.code === (typeof body.country_code === 'string' ? body.country_code.trim().toUpperCase() : ''));
-    if (!country) return fail(400, 'country_unavailable', "Le paiement n'est pas encore disponible dans ce pays.");
+    const config = deps.offers[offer];
+    if (!config) return fail(400, 'offer_unavailable', "Le paiement n'est pas encore disponible.");
 
     const firstName = clean(body.first_name, 60);
     const lastName = clean(body.last_name, 60);
     if (firstName.length < 2 || lastName.length < 2) return fail(400, 'bad_request', 'Indique ton prénom et ton nom (2 lettres au moins).');
-    const phone = typeof body.phone === 'string' ? toE164(body.phone, country.calling_code) : null;
-    if (!phone) return fail(400, 'bad_request', `Numéro de téléphone invalide pour ce pays (indicatif +${country.calling_code}).`);
 
-    const amount = country.offers.find((o) => o.offer === offer)!.amount;
-    const intent: Intent = {
-      merchantTransactionId: newMerchantTransactionId(),
-      userId: user.id,
-      offer,
-      amount,
-      currency: country.currency,
-      country: country.code,
-    };
-
+    const intent: NewIntent = { id: deps.newId(), userId: user.id, offer, amount: config.amount, currency: deps.currency };
     try {
-      // Enregistré avant l'appel : la notification ne peut concerner qu'un paiement préparé ici.
+      // Enregistré avant l'appel : seul un paiement préparé ici peut créditer le Premium.
       await deps.saveIntent(intent);
-      const init = await deps.createPayment(country.code, {
-        currency: country.currency,
-        merchantTransactionId: intent.merchantTransactionId,
-        amount,
-        successUrl: `${deps.webhookUrl}?page=success`,
-        failedUrl: `${deps.webhookUrl}?page=failed`,
-        notifyUrl: deps.webhookUrl,
-        designation: offer === 'monthly' ? 'Calbasse Premium 1 mois' : 'Calbasse Premium 1 an',
+      const checkout = await deps.createCart({
+        productDocumentId: config.productId,
+        email: user.email,
         firstName,
         lastName,
-        email: user.email,
-        phoneE164: phone,
+        phone: cleanPhone(body.phone),
+        redirectURL: `${deps.returnUrl}?intent=${intent.id}`,
+        meta: { intentId: intent.id, userId: user.id, offer },
       });
-      await deps.attachIntent(intent.merchantTransactionId, init);
-      deps.log('paiement créé', { userId: user.id, offer, country: country.code, merchantTransactionId: intent.merchantTransactionId });
-      return json(200, { url: init.paymentUrl });
+      await deps.attachCart(intent.id, checkout.cartId);
+      deps.log('panier créé', { userId: user.id, offer, intentId: intent.id, cartId: checkout.cartId });
+      return json(200, { url: checkout.redirectUrl });
     } catch (e) {
-      deps.log('création du paiement impossible', { userId: user.id, offer, country: country.code, error: String(e) });
+      deps.log('création du paiement impossible', { userId: user.id, offer, error: String(e) });
       return fail(502, 'checkout_failed', "Le paiement n'a pas pu être préparé. Réessaie dans un instant.");
     }
   };

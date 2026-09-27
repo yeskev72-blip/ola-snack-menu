@@ -5,16 +5,10 @@ import { supabase } from '@/lib/supabase';
 
 export type Offer = 'monthly' | 'yearly';
 
-/** Pays où le paiement CinetPay est configuré, avec les prix dans sa devise (réglés côté serveur). */
-export type PaymentCountry = {
-  code: string;
-  name: string;
-  currency: string;
-  calling_code: string;
-  offers: { offer: Offer; amount: number; label: string }[];
-};
+/** Offre Premium vendue sur Maketou, avec son prix (réglé côté serveur). */
+export type PremiumOffer = { offer: Offer; amount: number; label: string };
 
-export type CheckoutForm = { offer: Offer; countryCode: string; firstName: string; lastName: string; phone: string };
+export type CheckoutForm = { offer: Offer; firstName: string; lastName: string; phone: string };
 
 /** Message français renvoyé par la fonction, sinon message générique. */
 async function functionError(error: unknown, fallback: string): Promise<Error> {
@@ -25,28 +19,35 @@ async function functionError(error: unknown, fallback: string): Promise<Error> {
   return new Error(fallback);
 }
 
-/** Pays et prix disponibles (modifiables sans nouvel APK). */
-export async function fetchPaymentCountries(): Promise<PaymentCountry[]> {
-  const { data, error } = await supabase.functions.invoke<{ countries: PaymentCountry[] }>('create-checkout', {
+/** Offres et prix disponibles (modifiables sans nouvel APK). */
+export async function fetchOffers(): Promise<PremiumOffer[]> {
+  const { data, error } = await supabase.functions.invoke<{ offers: PremiumOffer[] }>('create-checkout', {
     body: { action: 'offers' },
     timeout: 20_000,
   });
   if (error || !data) throw await functionError(error, t('premium.offersError'));
-  return data.countries;
+  return data.offers;
 }
 
-/** Prépare le paiement CinetPay et renvoie le lien de la page de paiement. */
+/** Prépare le paiement Maketou et renvoie le lien de la page de paiement. */
 export async function startCheckout(form: CheckoutForm): Promise<string> {
   const { data, error } = await supabase.functions.invoke<{ url: string }>('create-checkout', {
-    body: {
-      offer: form.offer,
-      country_code: form.countryCode,
-      first_name: form.firstName,
-      last_name: form.lastName,
-      phone: form.phone,
-    },
+    body: { offer: form.offer, first_name: form.firstName, last_name: form.lastName, phone: form.phone || undefined },
     timeout: 30_000,
   });
   if (error || !data?.url) throw await functionError(error, t('premium.checkoutError'));
   return data.url;
+}
+
+/**
+ * Fait relire au serveur les paiements en attente (Maketou n'envoie pas de notification) :
+ * un paiement abouti crédite le Premium. Renvoie le nombre de paiements crédités.
+ */
+export async function confirmPayments(): Promise<number> {
+  const { data, error } = await supabase.functions.invoke<{ paid: number }>('create-checkout', {
+    body: { action: 'confirm' },
+    timeout: 30_000,
+  });
+  if (error || !data) throw await functionError(error, t('premium.confirmError'));
+  return data.paid;
 }
