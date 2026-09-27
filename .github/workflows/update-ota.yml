@@ -1,0 +1,58 @@
+name: Publier une mise à jour à distance
+
+# Envoie le code JavaScript courant aux téléphones déjà équipés : la correction s'installe
+# au lancement suivant, sans nouvel APK. Ne couvre pas les changements natifs (module,
+# permission, icône) : ceux-là demandent « Construire l'APK ».
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Canal (preview = APK partagés aujourd’hui)'
+        type: choice
+        options: [preview, production]
+        default: preview
+      message:
+        description: 'Ce que corrige cette mise à jour (visible dans le tableau de bord Expo)'
+        type: string
+        required: true
+
+jobs:
+  update:
+    name: Mise à jour ${{ inputs.channel }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Vérifier le secret EXPO_TOKEN
+        run: '[ -n "$EXPO_TOKEN" ] || { echo "::error::Secret EXPO_TOKEN absent"; exit 1; }'
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      # Garde-fou : une mise à jour à distance ne doit jamais partir avec du code qui ne compile pas,
+      # puisqu'elle s'installe sans que personne ne la valide sur le téléphone.
+      - run: npx tsc --noEmit
+      - run: npm test
+
+      - name: Publier sur le canal ${{ inputs.channel }}
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          npx --yes eas-cli@latest update \
+            --channel "${{ inputs.channel }}" \
+            --message "${{ inputs.message }}" \
+            --non-interactive --json > update.json
+          cat update.json
+          {
+            echo "## Mise à jour publiée ✅"
+            echo
+            echo "Canal : **${{ inputs.channel }}**"
+            echo
+            echo "Les téléphones dont l'APK a la même empreinte l'installeront au prochain lancement."
+            echo "Un APK plus ancien, construit avant un changement natif, ne la reçoit pas : il faut alors le réinstaller."
+          } >> "$GITHUB_STEP_SUMMARY"
