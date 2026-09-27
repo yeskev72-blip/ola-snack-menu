@@ -5,7 +5,6 @@ import { AppState, Linking, Pressable, StyleSheet, ToastAndroid, View } from 're
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
-import { Chip } from '@/components/Chip';
 import { Icon } from '@/components/Icon';
 import { Notice } from '@/components/Notice';
 import { Screen } from '@/components/Screen';
@@ -14,49 +13,54 @@ import { t } from '@/i18n';
 import { isOnline } from '@/lib/analyze';
 import { formatNumber } from '@/lib/format';
 import { formatDate, planStatus } from '@/lib/plan';
-import { fetchPaymentCountries, type Offer, type PaymentCountry, startCheckout } from '@/lib/premium';
+import { confirmPayments, fetchOffers, type Offer, type PremiumOffer, startCheckout } from '@/lib/premium';
 import { useSession } from '@/state/session';
 import { colors, radius, spacing } from '@/theme';
 
-/** Achat du Premium : pays, offre, coordonnées de paiement, page CinetPay dans le navigateur. */
+/** Achat du Premium : offre, coordonnées, page de paiement Maketou dans le navigateur, puis vérification. */
 export default function Premium() {
   const { user, profile, refreshProfile } = useSession();
   const isGuest = user?.isAnonymous ?? true;
   const status = planStatus(profile?.plan, profile?.premium_until);
 
-  const [countries, setCountries] = useState<PaymentCountry[] | null>(null);
-  const [offer, setOffer] = useState<Offer>('monthly');
+  const [offers, setOffers] = useState<PremiumOffer[] | null>(null);
+  const [offer, setOffer] = useState<Offer>('yearly');
   const [firstName, setFirstName] = useState(profile?.prenom ?? '');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
-  const [countryCode, setCountryCode] = useState<string | null>(null);
   const [busy, setBusy] = useState<'pay' | 'refresh' | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [waiting, setWaiting] = useState(false);
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
   const untilBefore = useRef(profile?.premium_until ?? null);
 
+  // Vérifie les paiements en attente puis relit le profil (le Premium est crédité par le serveur).
+  const check = useCallback(async () => {
+    const paid = await confirmPayments().catch(() => 0);
+    await refreshProfile().catch(() => undefined);
+    return paid;
+  }, [refreshProfile]);
+
   useFocusEffect(
     useCallback(() => {
       if (isGuest) return;
-      fetchPaymentCountries()
-        .then((list) => {
-          setCountries(list);
-          // Premier pays par défaut ; le choix de l'utilisateur est gardé s'il reste disponible.
-          setCountryCode((current) => (list.some((c) => c.code === current) ? current : (list[0]?.code ?? null)));
-        })
+      fetchOffers()
+        .then(setOffers)
         .catch((e: Error) => setError(e.message));
-    }, [isGuest]),
+      // Paiement terminé alors que l'app était fermée : crédité dès l'ouverture de l'écran.
+      void check();
+    }, [isGuest, check]),
   );
 
-  // Retour du navigateur après le paiement : on relit le profil (le Premium est crédité par le serveur).
+  // Retour du navigateur après le paiement.
   useEffect(() => {
     if (!waiting) return;
     const sub = AppState.addEventListener('change', (state) => {
-      if (state === 'active') void refreshProfile();
+      if (state === 'active') void check();
     });
     return () => sub.remove();
-  }, [waiting, refreshProfile]);
+  }, [waiting, check]);
 
   // Premium crédité (nouvelle date de fin ou passage en permanent) : confirmation.
   useEffect(() => {
@@ -67,19 +71,18 @@ export default function Premium() {
     }
   }, [waiting, status.kind, profile?.premium_until]);
 
-  const country = countries?.find((c) => c.code === countryCode) ?? null;
-  const selected = country?.offers.find((o) => o.offer === offer) ?? null;
+  const selected = offers?.find((o) => o.offer === offer) ?? null;
 
   const pay = async () => {
     setError(null);
-    if (!country) return setError(t('premium.noCountry'));
-    if (firstName.trim().length < 2 || lastName.trim().length < 2 || phone.replace(/\D/g, '').length < 6) return setError(t('premium.fillAll'));
+    if (firstName.trim().length < 2 || lastName.trim().length < 2) return setError(t('premium.fillAll'));
     if (!(await isOnline())) return setError(t('premium.offline'));
     setBusy('pay');
     try {
-      const url = await startCheckout({ offer, countryCode: country.code, firstName: firstName.trim(), lastName: lastName.trim(), phone });
+      const url = await startCheckout({ offer, firstName: firstName.trim(), lastName: lastName.trim(), phone: phone.trim() });
       untilBefore.current = profile?.premium_until ?? null;
       setCheckoutUrl(url);
+      setInfo(null);
       setWaiting(true);
       await Linking.openURL(url);
     } catch (e) {
@@ -91,12 +94,14 @@ export default function Premium() {
 
   const refresh = async () => {
     setBusy('refresh');
-    await refreshProfile().catch(() => undefined);
+    setInfo(null);
+    const paid = await check();
     setBusy(null);
+    if (paid === 0) setInfo(t('premium.notYet'));
   };
 
-  const monthly = country?.offers.find((o) => o.offer === 'monthly') ?? null;
-  const yearly = country?.offers.find((o) => o.offer === 'yearly') ?? null;
+  const monthly = offers?.find((o) => o.offer === 'monthly') ?? null;
+  const yearly = offers?.find((o) => o.offer === 'yearly') ?? null;
   const freeMonths = monthly && yearly && monthly.amount > 0 ? Math.round(12 - yearly.amount / monthly.amount) : 0;
 
   if (isGuest) {
@@ -108,7 +113,7 @@ export default function Premium() {
     );
   }
 
-  if (waiting && selected && country) {
+  if (waiting && selected) {
     return (
       <Screen
         back="close"
@@ -133,8 +138,8 @@ export default function Premium() {
         <Card>
           <Recap label={t('premium.recapOffer')} value={t(offer === 'monthly' ? 'premium.monthlyShort' : 'premium.yearlyShort')} />
           <Recap label={t('premium.recapAmount')} value={selected.label.split(' / ')[0]!} />
-          <Recap label={t('premium.recapPhone')} value={maskPhone(phone, country.calling_code)} />
         </Card>
+        <Notice tone="info" message={info} />
       </Screen>
     );
   }
@@ -165,7 +170,7 @@ export default function Premium() {
         </Card>
       ) : null}
 
-      {countries && countries.length === 0 ? <Notice tone="info" message={t('premium.noCountry')} /> : null}
+      {offers && offers.length === 0 ? <Notice tone="info" message={t('premium.unavailable')} /> : null}
 
       <View style={styles.offers} accessibilityRole="radiogroup">
         {yearly ? (
@@ -189,15 +194,6 @@ export default function Premium() {
         ) : null}
       </View>
 
-      <AppText style={styles.bold}>{t('premium.country')}</AppText>
-      <View style={styles.countries} accessibilityRole="radiogroup">
-        {(countries ?? []).map((c) => (
-          <View key={c.code} style={styles.countryCell}>
-            <Chip label={c.name} selected={countryCode === c.code} onPress={() => setCountryCode(c.code)} />
-          </View>
-        ))}
-      </View>
-
       <View style={styles.names}>
         <View style={styles.flex}>
           <TextField label={t('premium.firstName')} value={firstName} onChangeText={setFirstName} autoComplete="given-name" maxLength={60} />
@@ -206,23 +202,15 @@ export default function Premium() {
           <TextField label={t('premium.lastName')} value={lastName} onChangeText={setLastName} autoComplete="family-name" maxLength={60} />
         </View>
       </View>
-      <View style={styles.phoneRow}>
-        {country ? (
-          <View style={styles.dial}>
-            <AppText style={styles.bold}>+{country.calling_code}</AppText>
-          </View>
-        ) : null}
-        <View style={styles.flex}>
-          <TextField
-            label={t('premium.phone')}
-            value={phone}
-            onChangeText={(text) => setPhone(text.replace(/[^\d +]/g, ''))}
-            keyboardType="phone-pad"
-            autoComplete="tel"
-            maxLength={22}
-          />
-        </View>
-      </View>
+      <TextField
+        label={t('premium.phoneOptional')}
+        hint={t('premium.phoneHint')}
+        value={phone}
+        onChangeText={(text) => setPhone(text.replace(/[^\d +]/g, ''))}
+        keyboardType="phone-pad"
+        autoComplete="tel"
+        maxLength={22}
+      />
 
       <Notice message={error} />
     </Screen>
@@ -295,13 +283,6 @@ function priceOnly(amount: number, label: string): string {
   return `${formatNumber(amount)} ${currency}`;
 }
 
-/** Numéro masqué pour le récapitulatif : « +229 01 97 •• •• 12 ». */
-function maskPhone(phone: string, callingCode: string): string {
-  const digits = phone.replace(/\D/g, '').replace(new RegExp(`^(00)?${callingCode}`), '');
-  if (digits.length < 6) return `+${callingCode} ${digits}`;
-  return `+${callingCode} ${digits.slice(0, 4)} •• •• ${digits.slice(-2)}`;
-}
-
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   bold: { fontWeight: '700' },
@@ -337,11 +318,7 @@ const styles = StyleSheet.create({
   offerTitle: { fontSize: 17, lineHeight: 22, fontWeight: '800' },
   offerPrice: { fontSize: 17, lineHeight: 22, fontWeight: '800' },
   offerUnit: { fontSize: 13, fontWeight: '600', color: colors.textMuted },
-  countries: { flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -4 },
-  countryCell: { width: '50%', padding: 4 },
   names: { flexDirection: 'row', gap: 10 },
-  phoneRow: { flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm },
-  dial: { height: 56, paddingHorizontal: 14, borderRadius: radius.md, backgroundColor: colors.surfaceAlt, justifyContent: 'center' },
   secure: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
   secureText: { flex: 1, fontSize: 13, lineHeight: 19, color: '#5A4A3C' },
   waitTop: { alignItems: 'center', gap: spacing.md, paddingTop: 12 },

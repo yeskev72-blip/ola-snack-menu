@@ -433,12 +433,12 @@ verify_jwt = false
 enabled = true
 verify_jwt = false
 
-# Paiement Premium (CinetPay) : jeton vérifié dans la fonction (auth.getUser).
+# Paiement Premium (Maketou) : jeton vérifié dans la fonction (auth.getUser).
 [functions.create-checkout]
 enabled = true
 verify_jwt = false
 
-# Notifications CinetPay : pas de jeton Supabase, authentifiées par le notify_token de la transaction.
-[functions.cinetpay-webhook]
+# Retour du navigateur après paiement Maketou : pas de jeton Supabase ; le panier est relu chez Maketou.
+[functions.maketou-return]
 enabled = true
 verify_jwt = false

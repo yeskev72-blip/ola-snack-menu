@@ -233,12 +233,13 @@ exception when insufficient_privilege then null;
 end $$;
 reset role;
 
--- Paiements en cours (CinetPay) : réservés au serveur.
+-- Paiements en cours (Maketou) : réservés au serveur.
 set local role service_role;
-insert into public.payment_intents (merchant_transaction_id, user_id, offer, amount, currency, country, notify_token)
-values ('CBTEST1', '00000000-0000-0000-0000-00000000000b', 'monthly', 2000, 'XOF', 'BJ', 'nt');
+insert into public.payment_intents (id, cart_id, user_id, offer, amount)
+values ('11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', '00000000-0000-0000-0000-00000000000b', 'monthly', 2000);
 do $$ begin
-  assert (select provider from public.payments where sale_id = 'sale_1') = 'cinetpay', 'prestataire par défaut : cinetpay';
+  assert (select provider from public.payments where sale_id = 'sale_1') = 'maketou', 'prestataire par défaut : maketou';
+  assert (select currency from public.payment_intents where id = '11111111-1111-4111-8111-111111111111') = 'XOF', 'devise par défaut : XOF';
 end $$;
 reset role;
 set local role authenticated;
@@ -249,8 +250,8 @@ do $$ begin
 exception when insufficient_privilege then null;
 end $$;
 do $$ begin
-  insert into public.payment_intents (merchant_transaction_id, user_id, offer, amount, currency, country)
-  values ('CBPIRATE', auth.uid(), 'yearly', 1, 'XOF', 'BJ');
+  insert into public.payment_intents (id, user_id, offer, amount)
+  values ('33333333-3333-4333-8333-333333333333', auth.uid(), 'yearly', 1);
   raise exception 'DEVAIT ÉCHOUER : création d''un paiement en cours par un client';
 exception when insufficient_privilege then null;
 end $$;
