@@ -33,6 +33,10 @@ par le modèle.
   renouvellement automatique ; crédité par le serveur après relecture du panier chez Maketou
   (`docs/PAIEMENTS_MAKETOU.md`).
 - **Corrections** : chaque écart entre la prédiction de l'IA et la saisie finale est enregistré pour améliorer la table.
+- **Mises à jour à distance** : une correction du code JavaScript part par l'action « Publier une mise à jour à
+  distance » et s'installe au lancement suivant, sans réinstaller l'APK. Un changement natif (module, permission)
+  demande toujours un nouveau build : l'empreinte (`runtimeVersion` en politique `fingerprint`) change, et les APK
+  antérieurs cessent proprement de recevoir ces mises à jour.
 
 ## Architecture
 

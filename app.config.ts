@@ -81,6 +81,19 @@ const config: ExpoConfig = {
       },
     ],
   ],
+  /**
+   * Mises à jour à distance (EAS Update) : une correction du code JavaScript part par
+   * `eas update` et s'installe au lancement suivant, sans nouvel APK. Un changement natif
+   * (module, permission) demande toujours un nouveau build : l'empreinte change et les
+   * anciens APK cessent alors de recevoir ces mises à jour, au lieu de planter.
+   */
+  updates: {
+    url: `https://u.expo.dev/${EAS_PROJECT_ID}`,
+    // Le démarrage n'attend jamais le réseau : la version déjà installée s'ouvre tout de suite
+    // et la mise à jour téléchargée en fond s'applique au lancement d'après.
+    fallbackToCacheTimeout: 0,
+  },
+  runtimeVersion: { policy: 'fingerprint' },
   extra: EAS_PROJECT_ID ? { eas: { projectId: EAS_PROJECT_ID } } : {},
   experiments: {
     typedRoutes: true,
