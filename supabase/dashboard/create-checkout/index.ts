@@ -199,8 +199,11 @@ var fail = (status, error, message) => json(status, {
   error,
   message
 });
-function errorCode(e) {
-  if (e instanceof MaketouError) return `${e.httpStatus}${e.code ? `/${e.code}` : ""}`;
+function errorCode(e, productId) {
+  if (e instanceof MaketouError) {
+    if (e.httpStatus === 422 && productId !== void 0 && !isUuid(productId)) return "422/produit-non-uuid";
+    return `${e.httpStatus}${e.code ? `/${e.code}` : ""}`;
+  }
   if (typeof e === "object" && e !== null) {
     const code = e.code;
     if (typeof code === "string" && /^[A-Za-z0-9_]{1,40}$/.test(code)) return `db/${code}`;
@@ -211,9 +214,10 @@ function errorCode(e) {
 var clean = (v, max) => typeof v === "string" ? v.trim().replace(/\s+/g, " ").slice(0, max) : "";
 function cleanPhone(v) {
   if (typeof v !== "string") return void 0;
-  const digits = v.replace(/\D/g, "");
-  if (digits.length < 8 || digits.length > 15) return void 0;
-  return v.trim().startsWith("+") || v.trim().startsWith("00") ? `+${digits.replace(/^00/, "")}` : digits;
+  const trimmed = v.trim();
+  if (!trimmed.startsWith("+") && !trimmed.startsWith("00")) return void 0;
+  const digits = trimmed.replace(/\D/g, "").replace(/^00/, "");
+  return /^[1-9]\d{7,14}$/.test(digits) ? `+${digits}` : void 0;
 }
 function createHandler(deps) {
   const available = () => OFFERS.filter((o) => deps.offers[o]).map((offer) => ({
@@ -307,7 +311,7 @@ function createHandler(deps) {
         url: checkout.redirectUrl
       });
     } catch (e) {
-      const code = errorCode(e);
+      const code = errorCode(e, config.productId);
       deps.log("cr\xE9ation du paiement impossible", {
         userId: user.id,
         offer,

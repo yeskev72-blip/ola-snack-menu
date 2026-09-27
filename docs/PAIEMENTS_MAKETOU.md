@@ -78,6 +78,7 @@ Maketou n'a pas de mode test : fais un vrai paiement de 2 000 F (tu pourras te l
 |---|---|---|
 | `400/INVALID_PRODUCT` | `MAKETOU_PRODUCT_*` n'est pas l'identifiant attendu | reprends le `documentId` du produit |
 | `401` ou `401/MISSING_API_KEY` | `MAKETOU_API_KEY` absente ou fausse | recolle la clé |
+| `422/produit-non-uuid` | `MAKETOU_PRODUCT_*` contient le nom court de la page, pas l'identifiant | reprends le `documentId` du produit |
 | `422/VALIDATION_ERROR` | un champ refusé par Maketou | vois les journaux pour le champ |
 | `429` | trop de requêtes | réessaie dans une minute |
 | `db/42P01` | table `payment_intents` absente | exécute la migration (étape 2) |

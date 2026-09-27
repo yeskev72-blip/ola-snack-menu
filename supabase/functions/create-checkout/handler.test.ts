@@ -114,10 +114,15 @@ test('paiement : intention enregistrée, panier créé avec le bon produit et re
   assert.deepEqual(attached, [[INTENT_ID, CART_ID]]);
 });
 
-test('paiement : numéro invalide ignoré', async () => {
+test('paiement : numéro sans indicatif ou invalide ignoré', async () => {
+  for (const phone of ['12', '01 97 00 00 00', '', 'abc']) {
+    const { post, created } = setup();
+    await post('compte', { ...FORM, phone });
+    assert.equal(created[0]!.phone, undefined, phone);
+  }
   const { post, created } = setup();
-  await post('compte', { ...FORM, phone: '12' });
-  assert.equal(created[0]!.phone, undefined);
+  await post('compte', { ...FORM, phone: '00229 01 97 00 00 00' });
+  assert.equal(created[0]!.phone, '+2290197000000', 'préfixe 00 accepté');
 });
 
 test('code de diagnostic', () => {
@@ -126,6 +131,12 @@ test('code de diagnostic', () => {
   assert.equal(errorCode({ code: '42P01', message: 'relation does not exist' }), 'db/42P01');
   assert.equal(errorCode(new Error('The signal has been aborted')), 'timeout');
   assert.equal(errorCode(new Error('boom')), 'inconnu');
+  assert.equal(
+    errorCode(new MaketouError('x', 422, 'VALIDATION_ERROR'), 'calbasse-premium-1-mois'),
+    '422/produit-non-uuid',
+    'nom court pris pour un identifiant',
+  );
+  assert.equal(errorCode(new MaketouError('x', 422, 'VALIDATION_ERROR'), CART_ID), '422/VALIDATION_ERROR');
   assert.equal(errorCode({ code: 'clé secrète ; texte libre' }), 'inconnu', 'aucun texte libre recopié');
 });
 
