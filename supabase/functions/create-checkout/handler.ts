@@ -8,7 +8,7 @@
  *   { offer, first_name, last_name, phone? } → { url } de la page de paiement
  */
 
-import { type CartCheckout, type CartInput, isOffer, type Offer, OFFERS, priceLabel } from '../_shared/maketou.ts';
+import { type CartCheckout, type CartInput, isOffer, isUuid, MaketouError, type Offer, OFFERS, priceLabel } from '../_shared/maketou.ts';
 import { type OfferConfig } from '../_shared/maketou-env.ts';
 import { type SettleDeps, settleIntent, type StoredIntent } from '../_shared/settle.ts';
 
@@ -39,14 +39,38 @@ const HEADERS = {
 const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: HEADERS });
 const fail = (status: number, error: string, message: string) => json(status, { error, message });
 
+/**
+ * Code court joint au message d'erreur pour le support : « 400/INVALID_PRODUCT » (refus de Maketou),
+ * « db/42P01 » (table absente, migration oubliée). Jamais de secret ni de texte libre.
+ * Un refus de validation avec un identifiant de produit qui n'est pas un UUID le désigne
+ * (cas courant : le nom court de la page du produit a été pris pour son identifiant).
+ */
+export function errorCode(e: unknown, productId?: string): string {
+  if (e instanceof MaketouError) {
+    if (e.httpStatus === 422 && productId !== undefined && !isUuid(productId)) return '422/produit-non-uuid';
+    return `${e.httpStatus}${e.code ? `/${e.code}` : ''}`;
+  }
+  if (typeof e === 'object' && e !== null) {
+    const code = (e as { code?: unknown }).code;
+    if (typeof code === 'string' && /^[A-Za-z0-9_]{1,40}$/.test(code)) return `db/${code}`;
+  }
+  if (e instanceof Error && /abort|timeout/i.test(e.message)) return 'timeout';
+  return 'inconnu';
+}
+
 const clean = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().replace(/\s+/g, ' ').slice(0, max) : '');
 
-/** Numéro facultatif : chiffres et « + » initial, 8 à 15 chiffres ; sinon ignoré (Maketou le redemandera). */
+/**
+ * Numéro facultatif, envoyé seulement s'il est au format international (« +229… » ou « 00229… ») :
+ * sans indicatif on ne peut pas deviner le pays, et Maketou refuse un numéro local. Sinon il est
+ * omis et Maketou le demande sur sa page.
+ */
 function cleanPhone(v: unknown): string | undefined {
   if (typeof v !== 'string') return undefined;
-  const digits = v.replace(/\D/g, '');
-  if (digits.length < 8 || digits.length > 15) return undefined;
-  return v.trim().startsWith('+') || v.trim().startsWith('00') ? `+${digits.replace(/^00/, '')}` : digits;
+  const trimmed = v.trim();
+  if (!trimmed.startsWith('+') && !trimmed.startsWith('00')) return undefined;
+  const digits = trimmed.replace(/\D/g, '').replace(/^00/, '');
+  return /^[1-9]\d{7,14}$/.test(digits) ? `+${digits}` : undefined;
 }
 
 export function createHandler(deps: Deps) {
@@ -120,8 +144,9 @@ export function createHandler(deps: Deps) {
       deps.log('panier créé', { userId: user.id, offer, intentId: intent.id, cartId: checkout.cartId });
       return json(200, { url: checkout.redirectUrl });
     } catch (e) {
-      deps.log('création du paiement impossible', { userId: user.id, offer, error: String(e) });
-      return fail(502, 'checkout_failed', "Le paiement n'a pas pu être préparé. Réessaie dans un instant.");
+      const code = errorCode(e, config.productId);
+      deps.log('création du paiement impossible', { userId: user.id, offer, code, error: String(e) });
+      return fail(502, 'checkout_failed', `Le paiement n'a pas pu être préparé. Réessaie dans un instant. (code : ${code})`);
     }
   };
 }

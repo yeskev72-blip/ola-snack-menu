@@ -386,7 +386,7 @@ export const fr = {
     confirmError: 'Vérification du paiement impossible. Réessaie dans un instant.',
     unavailable: 'Le paiement n’est pas encore disponible. Réessaie plus tard.',
     phoneOptional: 'Numéro mobile money (facultatif)',
-    phoneHint: 'Tu pourras aussi le saisir sur la page de paiement.',
+    phoneHint: 'Avec l’indicatif, par exemple +229… Sinon tu le saisiras sur la page de paiement.',
     recapOffer: 'Formule',
     recapAmount: 'Montant',
     reopen: 'Rouvrir la page de paiement',
