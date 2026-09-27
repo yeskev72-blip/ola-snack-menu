@@ -1,0 +1,910 @@
+/*
+ * Page de présentation de Calbasse.
+ * Parti pris : la nuit du maquis puis la lumière du jour. En-tête et pied sombres, corps crème,
+ * accent terre cuite et or, motif de calebasse en cercles concentriques, bande tissée en séparation.
+ * Le rendu est volontairement le même en thème clair ou sombre : toutes les couleurs sont explicites.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Nuit */
+  --night: #17110d;
+  --night-2: #241a13;
+  --night-3: #322418;
+
+  /* Jour */
+  --cream: #faf4ea;
+  --cream-2: #f2e7d6;
+  --paper: #fffdfa;
+  --line: #e4d6c1;
+
+  /* Encres */
+  --ink: #1b1511;
+  --ink-soft: #5d4c3d;
+  --ink-on-night: #f7efe3;
+  --ink-on-night-soft: #c3b3a1;
+
+  /* Accents */
+  --terre: #c9551f;
+  --terre-clair: #e0762f;
+  --or: #e8b33a;
+  --feuille: #6f9243;
+  --protein: #d64545;
+  --carbs: #e8a317;
+  --fat: #2f6fdb;
+
+  --shadow: 0 6px 24px rgba(40, 22, 8, 0.1);
+  --shadow-hard: 0 22px 50px rgba(10, 6, 3, 0.45);
+  --gutter: 20px;
+  --radius: 22px;
+
+  --display: 'Bricolage Grotesque', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --body: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+a {
+  color: var(--terre);
+}
+
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible {
+  outline: 3px solid var(--or);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+.wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding-inline: var(--gutter);
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--display);
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: clamp(40px, 10.5vw, 78px);
+  line-height: 0.96;
+  font-weight: 800;
+  letter-spacing: -2px;
+}
+
+h2 {
+  font-size: clamp(28px, 6vw, 44px);
+  line-height: 1.02;
+  font-weight: 800;
+  letter-spacing: -1.2px;
+}
+
+h3 {
+  font-size: 20px;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+p {
+  margin: 0;
+  max-width: 60ch;
+}
+
+.eyebrow {
+  margin: 0;
+  font-family: var(--body);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+  color: var(--terre);
+}
+
+.on-night .eyebrow {
+  color: var(--or);
+}
+
+.lead {
+  font-size: 19px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.on-night .lead {
+  color: var(--ink-on-night-soft);
+}
+
+section {
+  padding-block: clamp(52px, 10vw, 96px);
+}
+
+.section-head {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+/* --- Nuit : en-tête, accroche, rappel final ----------------------------- */
+
+.on-night {
+  position: relative;
+  background: var(--night);
+  color: var(--ink-on-night);
+  overflow: hidden;
+}
+
+/* Calebasse vue de dessus, débordant du cadre. */
+.calabash {
+  position: absolute;
+  pointer-events: none;
+  inset-inline-end: -34%;
+  inset-block-start: -18%;
+  width: min(760px, 108vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, transparent 0 46%, rgba(232, 179, 58, 0.16) 46% 47%, transparent 47%),
+    radial-gradient(circle, transparent 0 60%, rgba(224, 118, 47, 0.22) 60% 61.4%, transparent 61.4%),
+    radial-gradient(circle, transparent 0 74%, rgba(247, 239, 227, 0.1) 74% 75%, transparent 75%);
+}
+
+.site-header {
+  padding-block: 20px;
+}
+
+.site-header .wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 23px;
+  letter-spacing: -0.6px;
+  color: var(--ink-on-night);
+  text-decoration: none;
+}
+
+.header-link {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--or);
+  text-decoration: none;
+}
+
+.hero .wrap {
+  position: relative;
+  display: grid;
+  gap: clamp(36px, 7vw, 60px);
+  align-items: center;
+  padding-block: clamp(8px, 2vw, 20px) clamp(56px, 10vw, 104px);
+}
+
+@media (min-width: 920px) {
+  .hero .wrap {
+    grid-template-columns: 1.08fr 0.92fr;
+  }
+}
+
+.hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.hero h1 em {
+  font-style: normal;
+  color: var(--or);
+}
+
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.btn {
+  min-height: 58px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding-inline: 28px;
+  border-radius: 999px;
+  border: 0;
+  font-family: var(--body);
+  font-size: 17px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--terre-clair);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(201, 85, 31, 0.32);
+}
+
+.btn-primary:hover {
+  background: var(--or);
+  color: var(--night);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-on-night);
+  border: 1.5px solid rgba(247, 239, 227, 0.28);
+}
+
+.btn-ghost:hover {
+  border-color: var(--or);
+  color: var(--or);
+}
+
+.btn-dark {
+  background: var(--night);
+  color: var(--ink-on-night);
+}
+
+.btn-dark:hover {
+  background: var(--terre);
+}
+
+.note {
+  font-size: 14.5px;
+  color: var(--ink-on-night-soft);
+}
+
+.note-light {
+  font-size: 14.5px;
+  color: var(--ink-soft);
+}
+
+/* Preuves chiffrées sous l'accroche */
+.proof {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 30px;
+  margin-top: 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.proof li {
+  display: flex;
+  flex-direction: column;
+}
+
+.proof b {
+  font-family: var(--display);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.proof span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-on-night-soft);
+}
+
+/* --- Maquette du journal ------------------------------------------------ */
+
+.phone {
+  position: relative;
+  justify-self: center;
+  /* La carte est claire alors qu'elle est posée sur la nuit : l'encre repasse en sombre. */
+  color: var(--ink);
+  width: min(304px, 100%);
+  background: var(--paper);
+  border-radius: 34px;
+  padding: 16px 13px 20px;
+  box-shadow: var(--shadow-hard);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transform: rotate(-1.4deg);
+}
+
+.phone-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.phone-name {
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding-inline: 12px;
+  border-radius: 999px;
+  background: var(--cream-2);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.week span {
+  height: 34px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  border: 2px solid transparent;
+  font-variant-numeric: tabular-nums;
+}
+
+.week .filled {
+  border-color: var(--terre);
+  color: var(--ink);
+}
+
+.week .today {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.summary-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 20px;
+  background: var(--cream);
+}
+
+.big-number {
+  font-family: var(--display);
+  font-size: 42px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.summary-card small {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.macro-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.macro {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 10px;
+  border-radius: 14px;
+  background: var(--cream);
+}
+
+.macro i {
+  width: 7px;
+  height: 24px;
+  border-radius: 4px;
+  flex: none;
+}
+
+.macro b {
+  display: block;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.macro small {
+  font-size: 11px;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.meal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 16px;
+  background: var(--cream);
+}
+
+.meal-thumb {
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  flex: none;
+  background: radial-gradient(circle at 50% 50%, #f3d9a4 38%, #d9a55b 39%, #d9a55b 62%, #8a5a36 63%);
+}
+
+.meal-type {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: var(--terre);
+}
+
+.meal-name {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.meal-kcal {
+  font-size: 13px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* --- Bande tissée ------------------------------------------------------- */
+
+.weave {
+  height: 12px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--terre) 0 16px,
+    var(--or) 16px 24px,
+    var(--night) 24px 32px,
+    var(--feuille) 32px 40px,
+    var(--cream-2) 40px 56px
+  );
+}
+
+/* --- Table des plats ---------------------------------------------------- */
+
+.table-section {
+  background: var(--cream-2);
+}
+
+.dish-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+  background: var(--paper);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.dish-table caption {
+  caption-side: bottom;
+  padding-top: 14px;
+  font-size: 14.5px;
+  color: var(--ink-soft);
+  text-align: left;
+}
+
+.dish-table th,
+.dish-table td {
+  padding: 13px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+
+.dish-table thead th {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  background: var(--cream);
+}
+
+.dish-table tbody tr:last-child th,
+.dish-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.dish-table tbody th {
+  font-weight: 700;
+}
+
+.dish-table .num {
+  text-align: right;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.dish-table .cue {
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+/* --- Étapes ------------------------------------------------------------- */
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 18px;
+  counter-reset: step;
+}
+
+@media (min-width: 760px) {
+  .steps {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.steps li {
+  counter-increment: step;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 26px 24px 24px;
+  border-radius: var(--radius);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.steps li::before {
+  content: counter(step);
+  font-family: var(--display);
+  font-size: 46px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -2px;
+  color: var(--cream-2);
+}
+
+.steps p {
+  color: var(--ink-soft);
+  font-size: 16px;
+}
+
+/* --- Atouts ------------------------------------------------------------- */
+
+.features {
+  display: grid;
+  gap: 18px;
+}
+
+@media (min-width: 700px) {
+  .features {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.feature {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 20px;
+  border-top: 2px solid var(--line);
+}
+
+.feature p {
+  color: var(--ink-soft);
+  font-size: 16px;
+}
+
+/* --- Offres ------------------------------------------------------------- */
+
+.plans {
+  display: grid;
+  gap: 18px;
+  align-items: start;
+}
+
+@media (min-width: 780px) {
+  .plans {
+    grid-template-columns: 1fr 1.08fr;
+  }
+}
+
+.plan {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 28px 26px;
+  border-radius: var(--radius);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.plan-premium {
+  background: var(--night);
+  color: var(--ink-on-night);
+  box-shadow: var(--shadow-hard);
+}
+
+.plan-label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.plan-premium .plan-label {
+  color: var(--or);
+}
+
+.price {
+  font-family: var(--display);
+  font-size: clamp(36px, 7vw, 46px);
+  font-weight: 800;
+  letter-spacing: -1.6px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.price small {
+  font-family: var(--body);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--ink-soft);
+}
+
+.plan-premium .price small {
+  color: var(--ink-on-night-soft);
+}
+
+.yearly {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--or);
+  color: var(--night);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.plan ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 16.5px;
+}
+
+.plan li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.plan li::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  margin-top: 9px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--terre);
+}
+
+.plan-premium li::before {
+  background: var(--or);
+}
+
+.plan-note {
+  font-size: 14.5px;
+  color: var(--ink-soft);
+}
+
+.plan-premium .plan-note {
+  color: var(--ink-on-night-soft);
+}
+
+/* --- Installation ------------------------------------------------------- */
+
+.install-steps {
+  margin: 0;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-size: 17px;
+  max-width: 60ch;
+}
+
+.install-steps strong {
+  font-weight: 800;
+}
+
+/* --- Questions ---------------------------------------------------------- */
+
+.faq {
+  display: flex;
+  flex-direction: column;
+}
+
+details {
+  border-bottom: 1px solid var(--line);
+}
+
+details:first-of-type {
+  border-top: 1px solid var(--line);
+}
+
+summary {
+  cursor: pointer;
+  padding-block: 20px;
+  font-size: 18px;
+  font-weight: 700;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+summary::after {
+  content: '+';
+  font-family: var(--display);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--terre);
+  line-height: 1;
+}
+
+details[open] summary::after {
+  content: '–';
+}
+
+details p {
+  margin: -4px 0 22px;
+  color: var(--ink-soft);
+  font-size: 16.5px;
+}
+
+/* --- Rappel final et pied ----------------------------------------------- */
+
+.closing .wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.site-footer {
+  background: var(--night);
+  color: var(--ink-on-night-soft);
+  padding-block: 26px 40px;
+  font-size: 15px;
+}
+
+.site-footer .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 26px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.site-footer a {
+  color: var(--ink-on-night);
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+/* --- Page de texte (confidentialité) ------------------------------------ */
+
+.prose {
+  max-width: 68ch;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-block: clamp(28px, 6vw, 48px) clamp(48px, 9vw, 80px);
+}
+
+.prose h1 {
+  font-size: clamp(34px, 7vw, 52px);
+}
+
+.prose h2 {
+  margin-top: 24px;
+  font-size: clamp(22px, 4vw, 27px);
+}
+
+.prose ul {
+  margin: 0;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.prose .updated {
+  font-size: 15px;
+  color: var(--ink-soft);
+}
+
+.todo {
+  background: var(--or);
+  color: var(--night);
+  padding: 1px 8px;
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: 0.9em;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .btn,
+  .header-link,
+  summary::after {
+    transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+  }
+}
