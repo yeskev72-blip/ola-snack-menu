@@ -72,9 +72,20 @@ Maketou n'a pas de mode test : fais un vrai paiement de 2 000 F (tu pourras te l
    select id, cart_id, offer, amount, status, created_at from public.payment_intents order by created_at desc limit 5;
    select created_at, provider, sale_id, offer, days, premium_until from public.payments order by created_at desc limit 5;
    ```
-4. Si rien n'arrive : **Edge Functions → create-checkout → Logs** (`création du paiement impossible` + raison, par
-   exemple `INVALID_PRODUCT` si l'identifiant du produit est faux, `INVALID_API_KEY` pour la clé) ou
-   **maketou-return → Logs**.
+4. Si le paiement ne se prépare pas, l'app affiche un **code** entre parenthèses. Il dit quoi corriger :
+
+| Code | Cause | Correction |
+|---|---|---|
+| `400/INVALID_PRODUCT` | `MAKETOU_PRODUCT_*` n'est pas l'identifiant attendu | reprends le `documentId` du produit |
+| `401` ou `401/MISSING_API_KEY` | `MAKETOU_API_KEY` absente ou fausse | recolle la clé |
+| `422/VALIDATION_ERROR` | un champ refusé par Maketou | vois les journaux pour le champ |
+| `429` | trop de requêtes | réessaie dans une minute |
+| `db/42P01` | table `payment_intents` absente | exécute la migration (étape 2) |
+| `db/42703`, `db/23502` | table à l'ancien format | exécute la migration (étape 2) |
+| `timeout` | Maketou n'a pas répondu | réessaie |
+
+   Le détail complet reste dans **Edge Functions → create-checkout → Logs**
+   (`création du paiement impossible`, avec `code` et `error`).
 
 ## À savoir
 

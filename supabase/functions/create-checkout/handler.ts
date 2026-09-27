@@ -8,7 +8,7 @@
  *   { offer, first_name, last_name, phone? } → { url } de la page de paiement
  */
 
-import { type CartCheckout, type CartInput, isOffer, type Offer, OFFERS, priceLabel } from '../_shared/maketou.ts';
+import { type CartCheckout, type CartInput, isOffer, MaketouError, type Offer, OFFERS, priceLabel } from '../_shared/maketou.ts';
 import { type OfferConfig } from '../_shared/maketou-env.ts';
 import { type SettleDeps, settleIntent, type StoredIntent } from '../_shared/settle.ts';
 
@@ -38,6 +38,20 @@ const HEADERS = {
 
 const json = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: HEADERS });
 const fail = (status: number, error: string, message: string) => json(status, { error, message });
+
+/**
+ * Code court joint au message d'erreur pour le support : « 400/INVALID_PRODUCT » (refus de Maketou),
+ * « db/42P01 » (table absente, migration oubliée). Jamais de secret ni de texte libre.
+ */
+export function errorCode(e: unknown): string {
+  if (e instanceof MaketouError) return `${e.httpStatus}${e.code ? `/${e.code}` : ''}`;
+  if (typeof e === 'object' && e !== null) {
+    const code = (e as { code?: unknown }).code;
+    if (typeof code === 'string' && /^[A-Za-z0-9_]{1,40}$/.test(code)) return `db/${code}`;
+  }
+  if (e instanceof Error && /abort|timeout/i.test(e.message)) return 'timeout';
+  return 'inconnu';
+}
 
 const clean = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().replace(/\s+/g, ' ').slice(0, max) : '');
 
@@ -120,8 +134,9 @@ export function createHandler(deps: Deps) {
       deps.log('panier créé', { userId: user.id, offer, intentId: intent.id, cartId: checkout.cartId });
       return json(200, { url: checkout.redirectUrl });
     } catch (e) {
-      deps.log('création du paiement impossible', { userId: user.id, offer, error: String(e) });
-      return fail(502, 'checkout_failed', "Le paiement n'a pas pu être préparé. Réessaie dans un instant.");
+      const code = errorCode(e);
+      deps.log('création du paiement impossible', { userId: user.id, offer, code, error: String(e) });
+      return fail(502, 'checkout_failed', `Le paiement n'a pas pu être préparé. Réessaie dans un instant. (code : ${code})`);
     }
   };
 }

@@ -5,7 +5,8 @@ import { test } from 'node:test';
 
 import type { CartInput, CartState } from '../_shared/maketou.ts';
 import type { StoredIntent } from '../_shared/settle.ts';
-import { createHandler, type Deps, type NewIntent } from './handler.ts';
+import { MaketouError } from '../_shared/maketou.ts';
+import { createHandler, type Deps, errorCode, type NewIntent } from './handler.ts';
 
 const USERS: Record<string, { id: string; email: string | null; isAnonymous: boolean }> = {
   compte: { id: 'u1', email: 'awa@test.local', isAnonymous: false },
@@ -119,15 +120,35 @@ test('paiement : numéro invalide ignoré', async () => {
   assert.equal(created[0]!.phone, undefined);
 });
 
-test('paiement : erreur Maketou → 502 lisible', async () => {
+test('code de diagnostic', () => {
+  assert.equal(errorCode(new MaketouError('x', 400, 'INVALID_PRODUCT')), '400/INVALID_PRODUCT');
+  assert.equal(errorCode(new MaketouError('x', 401, null)), '401');
+  assert.equal(errorCode({ code: '42P01', message: 'relation does not exist' }), 'db/42P01');
+  assert.equal(errorCode(new Error('The signal has been aborted')), 'timeout');
+  assert.equal(errorCode(new Error('boom')), 'inconnu');
+  assert.equal(errorCode({ code: 'clé secrète ; texte libre' }), 'inconnu', 'aucun texte libre recopié');
+});
+
+test('paiement : erreur Maketou → 502 avec le code du refus', async () => {
   const { post } = setup({
     createCart: async () => {
-      throw new Error('Maketou HTTP 400 : INVALID_PRODUCT');
+      throw new MaketouError('Maketou HTTP 400 : produit indisponible', 400, 'INVALID_PRODUCT');
     },
   });
   const res = await post('compte', FORM);
   assert.equal(res.status, 502);
-  assert.match((await res.json()).message, /n'a pas pu être préparé/);
+  const { message } = await res.json();
+  assert.match(message, /n'a pas pu être préparé/);
+  assert.match(message, /400\/INVALID_PRODUCT/);
+});
+
+test('paiement : migration oubliée → code de la base', async () => {
+  const { post } = setup({
+    saveIntent: async () => {
+      throw { code: '42P01', message: 'relation "payment_intents" does not exist' };
+    },
+  });
+  assert.match((await (await post('compte', FORM)).json()).message, /db\/42P01/);
 });
 
 test('confirm : panier payé → Premium crédité une fois', async () => {

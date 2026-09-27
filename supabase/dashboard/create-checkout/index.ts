@@ -199,6 +199,15 @@ var fail = (status, error, message) => json(status, {
   error,
   message
 });
+function errorCode(e) {
+  if (e instanceof MaketouError) return `${e.httpStatus}${e.code ? `/${e.code}` : ""}`;
+  if (typeof e === "object" && e !== null) {
+    const code = e.code;
+    if (typeof code === "string" && /^[A-Za-z0-9_]{1,40}$/.test(code)) return `db/${code}`;
+  }
+  if (e instanceof Error && /abort|timeout/i.test(e.message)) return "timeout";
+  return "inconnu";
+}
 var clean = (v, max) => typeof v === "string" ? v.trim().replace(/\s+/g, " ").slice(0, max) : "";
 function cleanPhone(v) {
   if (typeof v !== "string") return void 0;
@@ -298,12 +307,14 @@ function createHandler(deps) {
         url: checkout.redirectUrl
       });
     } catch (e) {
+      const code = errorCode(e);
       deps.log("cr\xE9ation du paiement impossible", {
         userId: user.id,
         offer,
+        code,
         error: String(e)
       });
-      return fail(502, "checkout_failed", "Le paiement n'a pas pu \xEAtre pr\xE9par\xE9. R\xE9essaie dans un instant.");
+      return fail(502, "checkout_failed", `Le paiement n'a pas pu \xEAtre pr\xE9par\xE9. R\xE9essaie dans un instant. (code : ${code})`);
     }
   };
 }
