@@ -228,7 +228,7 @@ function Hero() {
       </View>
       <View style={styles.compare}>
         <View style={styles.compareCol}>
-          <AppText style={styles.compareFree}>2</AppText>
+          <AppText style={styles.compareFree}>1</AppText>
           <AppText style={styles.compareFreeLabel}>{t('profile.planFree')}</AppText>
         </View>
         <Icon name="arrowRight" size={24} color="#B9AB9C" />

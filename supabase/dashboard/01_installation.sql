@@ -8,6 +8,7 @@
 --   npx supabase@latest migration repair --status applied 20260925100000
 --   npx supabase@latest migration repair --status applied 20260926120000
 --   npx supabase@latest migration repair --status applied 20260927100000
+--   npx supabase@latest migration repair --status applied 20260927190000
 
 begin;
 
@@ -715,6 +716,25 @@ create index payment_intents_user_pending on public.payment_intents (user_id, cr
 -- Réservé au service role (Edge Functions) : RLS sans politique pour les clients.
 alter table public.payment_intents enable row level security;
 revoke all on public.payment_intents from anon, authenticated;
+
+-- ============================================================================
+-- 20260927190000_quota_gratuit.sql
+-- ============================================================================
+-- Le compte gratuit passe de 2 à 1 scan par jour : le coût d'un scan (appel à l'IA) est payé par
+-- l'éditeur, et l'écart avec le Premium doit rester lisible. Invité et gratuit sont désormais
+-- au même niveau ; seul le compte permet de garder son journal d'un téléphone à l'autre.
+create or replace function public.scan_quota(p_plan text, p_is_anonymous boolean)
+returns integer
+language sql
+immutable
+set search_path = ''
+as $$
+  select case
+    when p_is_anonymous then 1
+    when p_plan = 'premium' then 30
+    else 1
+  end;
+$$;
 
 -- ============================================================================
 -- Table des plats (valeurs approximatives à vérifier, voir docs/FOODS_TODO.md)

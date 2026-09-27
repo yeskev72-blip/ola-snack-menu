@@ -28,7 +28,7 @@ par le modèle.
 - **Historique** : calories par jour sur 7 et 30 jours avec la cible, moyenne, détail par journée.
 - **Hors ligne** : journal consultable et enregistrable sans réseau (saisie sans photo), synchronisé au retour
   du réseau ; le scan IA, lui, exige internet et le dit clairement.
-- **Quota** : invité 1, gratuit 2, premium 30 scans par jour (heure du Bénin), vérifié côté serveur.
+- **Quota** : invité 1, gratuit 1, premium 30 scans par jour (heure du Bénin), vérifié côté serveur.
 - **Premium** : mensuel (30 jours) ou annuel (365 jours), payé par mobile money ou carte via Maketou, sans
   renouvellement automatique ; crédité par le serveur après relecture du panier chez Maketou
   (`docs/PAIEMENTS_MAKETOU.md`).
