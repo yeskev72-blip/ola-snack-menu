@@ -195,6 +195,171 @@ async function callGeminiResilient(configs, req, options) {
   return failure();
 }
 
+// supabase/functions/_shared/openrouter.ts
+var OPENROUTER_API_BASE = "https://openrouter.ai/api/v1";
+var emptyUsage2 = {
+  promptTokens: null,
+  outputTokens: null,
+  thoughtsTokens: null,
+  totalTokens: null
+};
+function readUsage2(body) {
+  const u = body?.usage;
+  if (!u) return emptyUsage2;
+  const n = (v) => typeof v === "number" ? v : null;
+  return {
+    promptTokens: n(u.prompt_tokens),
+    outputTokens: n(u.completion_tokens),
+    thoughtsTokens: null,
+    totalTokens: n(u.total_tokens)
+  };
+}
+function errorMessage2(body) {
+  return body?.error?.message ?? null;
+}
+function buildOpenRouterBody(config, req) {
+  return {
+    model: config.model,
+    messages: [
+      {
+        role: "system",
+        content: req.systemPrompt
+      },
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: req.userText
+          },
+          {
+            type: "image_url",
+            image_url: {
+              url: `data:image/jpeg;base64,${req.imageBase64}`
+            }
+          }
+        ]
+      }
+    ],
+    response_format: {
+      type: "json_object"
+    },
+    max_tokens: config.maxOutputTokens
+  };
+}
+async function callOpenRouter(config, req, fetchImpl = fetch) {
+  const started = Date.now();
+  const elapsed = () => Date.now() - started;
+  let response;
+  try {
+    response = await fetchImpl(`${config.apiBase}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${config.apiKey}`,
+        // Recommandé par OpenRouter pour identifier l'app dans son tableau de bord ; sans effet sur la requête.
+        "HTTP-Referer": "https://github.com/yeskev72-blip/ola-snack-menu",
+        "X-Title": "Calbasse"
+      },
+      body: JSON.stringify(buildOpenRouterBody(config, req)),
+      signal: AbortSignal.timeout(config.timeoutMs)
+    });
+  } catch (e) {
+    const timeout = e instanceof Error && (e.name === "TimeoutError" || e.name === "AbortError");
+    return {
+      ok: false,
+      error: timeout ? "timeout" : `r\xE9seau : ${String(e)}`,
+      retryable: true,
+      overloaded: true,
+      usage: emptyUsage2,
+      latencyMs: elapsed(),
+      model: config.model
+    };
+  }
+  let body = null;
+  try {
+    body = await response.json();
+  } catch {
+  }
+  const usage = readUsage2(body);
+  if (!response.ok) {
+    const message = errorMessage2(body) ?? response.statusText;
+    return {
+      ok: false,
+      error: `HTTP ${response.status} : ${message}`.slice(0, 500),
+      retryable: response.status === 429 || response.status >= 500,
+      overloaded: response.status === 429 || response.status >= 500,
+      usage,
+      latencyMs: elapsed(),
+      model: config.model
+    };
+  }
+  const choice = body?.choices?.[0];
+  const text = choice?.message?.content;
+  if (!text) {
+    return {
+      ok: false,
+      error: `r\xE9ponse vide (${choice?.finish_reason ?? "inconnu"})`,
+      retryable: true,
+      usage,
+      latencyMs: elapsed(),
+      model: config.model
+    };
+  }
+  return {
+    ok: true,
+    text,
+    usage,
+    latencyMs: elapsed(),
+    model: config.model
+  };
+}
+var defaultSleep2 = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+async function callOpenRouterResilient(configs, req, options) {
+  const sleep = options.sleep ?? defaultSleep2;
+  const started = Date.now();
+  const remaining = () => options.budgetMs - (Date.now() - started);
+  const MIN_CALL_MS = 5e3;
+  let last = null;
+  let anyOverloaded = false;
+  const failures = [];
+  const failure = () => {
+    const final = failures.pop();
+    return {
+      ...final,
+      ...anyOverloaded ? {
+        overloaded: true
+      } : {},
+      earlierFailures: failures
+    };
+  };
+  for (const config of configs) {
+    for (let attempt = 0; attempt <= options.retryDelaysMs.length; attempt++) {
+      if (attempt > 0) {
+        const delay = options.retryDelaysMs[attempt - 1];
+        if (remaining() - delay < MIN_CALL_MS) break;
+        await sleep(delay);
+      }
+      if (last && remaining() < MIN_CALL_MS) return failure();
+      const timeoutMs = Math.min(config.timeoutMs, Math.max(remaining(), MIN_CALL_MS));
+      const result = await callOpenRouter({
+        ...config,
+        timeoutMs
+      }, req, options.fetchImpl);
+      if (result.ok) return {
+        ...result,
+        earlierFailures: failures
+      };
+      last = result;
+      failures.push(result);
+      if (result.overloaded) anyOverloaded = true;
+      options.onFailure?.(result);
+      if (!result.overloaded || result.error === "timeout" || result.error.startsWith("HTTP 429")) break;
+    }
+  }
+  return failure();
+}
+
 // supabase/functions/_shared/analysis.ts
 var OTHER_FOOD_KEY = "autre";
 var LIMITS = {
@@ -783,6 +948,12 @@ function parseTemperature(raw) {
   if (!Number.isFinite(value) || value < 0 || value > 2) throw new Error("GEMINI_TEMPERATURE invalide");
   return value;
 }
+var AI_PROVIDERS = [
+  "gemini",
+  "openrouter"
+];
+var aiProvider = env("AI_PROVIDER", "gemini");
+if (!AI_PROVIDERS.includes(aiProvider)) throw new Error("AI_PROVIDER invalide");
 var THINKING_LEVELS = [
   "minimal",
   "low",
@@ -792,7 +963,8 @@ var THINKING_LEVELS = [
 var thinkingLevel = env("GEMINI_THINKING_LEVEL", "low");
 if (!THINKING_LEVELS.includes(thinkingLevel)) throw new Error("GEMINI_THINKING_LEVEL invalide");
 var geminiConfig = {
-  apiKey: env("GEMINI_API_KEY"),
+  // Clé nécessaire seulement pour ce fournisseur ; en mode openrouter, le secret peut rester absent.
+  apiKey: aiProvider === "gemini" ? env("GEMINI_API_KEY") : "",
   apiBase: env("GEMINI_API_BASE", GEMINI_API_BASE),
   model: env("GEMINI_MODEL", "gemini-flash-lite-latest"),
   temperature: parseTemperature(env("GEMINI_TEMPERATURE", "0.3")),
@@ -812,6 +984,43 @@ var modelChain = [
   geminiConfig,
   ...fallbackConfigs
 ];
+var openRouterConfig = {
+  apiKey: aiProvider === "openrouter" ? env("OPENROUTER_API_KEY") : "",
+  apiBase: env("OPENROUTER_API_BASE", OPENROUTER_API_BASE),
+  model: env("OPENROUTER_MODEL", "google/gemini-2.5-flash-lite"),
+  maxOutputTokens: 4096,
+  timeoutMs: 45e3
+};
+var openRouterFallbacks = env("OPENROUTER_FALLBACK_MODELS", "none").split(",").map((m) => m.trim()).filter((m) => m !== "" && m !== "none" && m !== openRouterConfig.model).map((model) => ({
+  ...openRouterConfig,
+  model
+}));
+var openRouterChain = [
+  openRouterConfig,
+  ...openRouterFallbacks
+];
+var activeModel = aiProvider === "openrouter" ? openRouterConfig.model : geminiConfig.model;
+var callAi = (req) => aiProvider === "openrouter" ? callOpenRouterResilient(openRouterChain, req, {
+  retryDelaysMs: [
+    2e3
+  ],
+  budgetMs: 5e4,
+  onFailure: (r) => !r.ok && console.error(JSON.stringify({
+    message: "essai OpenRouter en \xE9chec",
+    model: r.model,
+    error: r.error
+  }))
+}) : callGeminiResilient(modelChain, req, {
+  retryDelaysMs: [
+    2e3
+  ],
+  budgetMs: 5e4,
+  onFailure: (r) => !r.ok && console.error(JSON.stringify({
+    message: "essai Gemini en \xE9chec",
+    model: r.model,
+    error: r.error
+  }))
+});
 var storePhotos = env("STORE_PHOTOS", "false") === "true";
 var admin = createClient(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"), {
   auth: {
@@ -826,7 +1035,7 @@ function decodeBase64(data) {
   return bytes;
 }
 var handler = createHandler({
-  model: geminiConfig.model,
+  model: activeModel,
   maxAttempts: 2,
   async getUser(token) {
     const { data, error } = await admin.auth.getUser(token);
@@ -878,18 +1087,8 @@ var handler = createHandler({
     return data;
   },
   // Modèle saturé (503) : un second essai 2 s plus tard, puis les modèles de secours ; réponse en moins de 50 s
-  // pour rester sous le délai de l'app (60 s).
-  gemini: (req) => callGeminiResilient(modelChain, req, {
-    retryDelaysMs: [
-      2e3
-    ],
-    budgetMs: 5e4,
-    onFailure: (r) => !r.ok && console.error(JSON.stringify({
-      message: "essai Gemini en \xE9chec",
-      model: r.model,
-      error: r.error
-    }))
-  }),
+  // pour rester sous le délai de l'app (60 s). Fournisseur choisi par AI_PROVIDER (Gemini direct ou OpenRouter).
+  gemini: (req) => callAi(req),
   async logCall({ scanId, userId, kind, attempt, model, result, error }) {
     const { error: dbError } = await admin.from("scan_calls").insert({
       scan_id: scanId,
