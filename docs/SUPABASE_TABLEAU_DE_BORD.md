@@ -76,6 +76,28 @@ Menu de gauche : **Authentication**.
    → **Save**. La clé Gemini reste ici, jamais dans l'app. (`SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY`
    sont fournies automatiquement aux fonctions : ne les ajoute pas.)
 
+### Variante — payer par crédit prépayé (OpenRouter)
+
+La facturation de Google, comme celle d'OpenAI et d'Anthropic, refuse les cartes prépayées.
+[OpenRouter](https://openrouter.ai) revend les mêmes modèles et fonctionne par crédit déposé à l'avance :
+le solde se consomme à chaque scan, et plus de solde signifie plus d'appel — jamais de facture surprise.
+
+1. Sur [openrouter.ai](https://openrouter.ai) : crée un compte, puis **Credits** → dépose une petite somme.
+2. **Keys** → **Create key** → copie la clé.
+3. Dans les mêmes secrets Supabase, ajoute :
+
+   | Nom | Valeur |
+   |---|---|
+   | `AI_PROVIDER` | `openrouter` |
+   | `OPENROUTER_API_KEY` | ta clé OpenRouter |
+   | `OPENROUTER_MODEL` | `google/gemini-2.5-flash-lite` (facultatif : c'est déjà la valeur par défaut) |
+
+   `GEMINI_API_KEY` devient inutile dans ce mode, mais tu peux la laisser : repasser à la facturation
+   Google directe ne demande alors que de remettre `AI_PROVIDER` à `gemini`.
+
+Changer `OPENROUTER_MODEL` suffit à essayer un autre modèle, y compris d'un autre fournisseur
+(par exemple `anthropic/claude-haiku-4.5`), sans rien redéployer.
+
 ## Étape 5 — Déployer les deux fonctions (10 min)
 
 Pour **chacune** des deux fonctions :
