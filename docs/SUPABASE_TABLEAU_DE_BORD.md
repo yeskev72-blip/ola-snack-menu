@@ -76,27 +76,33 @@ Menu de gauche : **Authentication**.
    → **Save**. La clé Gemini reste ici, jamais dans l'app. (`SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY`
    sont fournies automatiquement aux fonctions : ne les ajoute pas.)
 
-### Variante — payer par crédit prépayé (OpenRouter)
+### Variante — payer par crédit prépayé et Mobile Money (RodiumAi)
 
 La facturation de Google, comme celle d'OpenAI et d'Anthropic, refuse les cartes prépayées.
-[OpenRouter](https://openrouter.ai) revend les mêmes modèles et fonctionne par crédit déposé à l'avance :
-le solde se consomme à chaque scan, et plus de solde signifie plus d'appel — jamais de facture surprise.
+[RodiumAi](https://www.rodiumai.io) relaie les mêmes modèles derrière une API compatible OpenAI, se
+recharge par **Mobile Money** (MTN MoMo, Orange Money, Wave, Moov…) et facture un crédit déposé à
+l'avance : le solde se consomme à chaque scan, et plus de solde signifie plus d'appel — jamais de
+facture surprise.
 
-1. Sur [openrouter.ai](https://openrouter.ai) : crée un compte, puis **Credits** → dépose une petite somme.
-2. **Keys** → **Create key** → copie la clé.
+1. Sur [rodiumai.io](https://www.rodiumai.io) : crée un compte, puis recharge ton portefeuille RODI.
+2. Dans le tableau de bord : crée une clé API (format `rd_sk_…`) → copie-la.
 3. Dans les mêmes secrets Supabase, ajoute :
 
    | Nom | Valeur |
    |---|---|
-   | `AI_PROVIDER` | `openrouter` |
-   | `OPENROUTER_API_KEY` | ta clé OpenRouter |
-   | `OPENROUTER_MODEL` | `google/gemini-2.5-flash-lite` (facultatif : c'est déjà la valeur par défaut) |
+   | `AI_PROVIDER` | `gateway` |
+   | `GATEWAY_API_KEY` | ta clé `rd_sk_…` |
+   | `GATEWAY_MODEL` | l'identifiant du modèle choisi, ex. `google/gemini-2.5-flash-lite` |
 
    `GEMINI_API_KEY` devient inutile dans ce mode, mais tu peux la laisser : repasser à la facturation
    Google directe ne demande alors que de remettre `AI_PROVIDER` à `gemini`.
 
-Changer `OPENROUTER_MODEL` suffit à essayer un autre modèle, y compris d'un autre fournisseur
-(par exemple `anthropic/claude-haiku-4.5`), sans rien redéployer.
+Changer `GATEWAY_MODEL` suffit à essayer un autre modèle, y compris d'un autre fournisseur
+(`anthropic/…`, `openai/…`), sans rien redéployer. `GATEWAY_API_BASE` permet d'utiliser une autre
+passerelle compatible OpenAI (OpenRouter…) sans changer le code.
+
+> **Sous-traitant supplémentaire** : les photos transitent alors par la passerelle en plus du modèle.
+> La politique de confidentialité doit le mentionner (`site/confidentialite.html`).
 
 ## Étape 5 — Déployer les deux fonctions (10 min)
 

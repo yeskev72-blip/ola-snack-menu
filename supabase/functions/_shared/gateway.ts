@@ -1,25 +1,27 @@
 /**
- * Appel à l'API OpenRouter (chat/completions, compatible OpenAI) pour les mêmes modèles Gemini,
- * quand la facturation Google directe n'est pas utilisable (ex. carte prépayée refusée). Le crédit
- * OpenRouter se dépose à l'avance (carte ou crypto) et se consomme requête par requête : plus de solde,
- * plus d'appel — jamais de facture surprise.
+ * Appel à une passerelle IA compatible OpenAI (POST /chat/completions), quand la facturation
+ * directe des fournisseurs n'est pas utilisable — leurs cartes prépayées sont refusées.
+ *
+ * Par défaut RodiumAi, qui se recharge par Mobile Money et facture un crédit prépayé : le solde se
+ * consomme requête par requête, et plus de solde signifie plus d'appel, jamais de facture surprise.
+ * Fonctionne avec toute autre passerelle du même format (OpenRouter…) en changeant GATEWAY_API_BASE.
  *
  * Renvoie le même type `GeminiResult` que gemini.ts pour rester interchangeable dans analyze-meal.
  */
 
 import type { GeminiRequest, GeminiResult, GeminiUsage } from './gemini.ts';
 
-export type OpenRouterConfig = {
+export type GatewayConfig = {
   apiKey: string;
-  /** Racine de l'API ; modifiable pour les tests. */
+  /** Racine de l'API, sans barre finale ; modifiable pour changer de passerelle ou pour les tests. */
   apiBase: string;
-  /** Ex. « google/gemini-2.5-flash-lite » : lu depuis la variable OPENROUTER_MODEL. */
+  /** Identifiant préfixé par le fournisseur, ex. « google/gemini-2.5-flash-lite ». */
   model: string;
   maxOutputTokens: number;
   timeoutMs: number;
 };
 
-export const OPENROUTER_API_BASE = 'https://openrouter.ai/api/v1';
+export const RODIUM_API_BASE = 'https://api.rodiumai.io/v1';
 
 const emptyUsage: GeminiUsage = { promptTokens: null, outputTokens: null, thoughtsTokens: null, totalTokens: null };
 
@@ -32,12 +34,12 @@ function readUsage(body: unknown): GeminiUsage {
 
 type ApiError = { error?: { message?: string; code?: number | string } };
 
-/** Message d'erreur renvoyé par OpenRouter (ou le modèle sous-jacent qu'il relaie). */
+/** Message d'erreur renvoyé par la passerelle (ou le modèle sous-jacent qu'elle relaie). */
 export function errorMessage(body: unknown): string | null {
   return (body as ApiError | null)?.error?.message ?? null;
 }
 
-export function buildOpenRouterBody(config: OpenRouterConfig, req: GeminiRequest) {
+export function buildGatewayBody(config: GatewayConfig, req: GeminiRequest) {
   return {
     model: config.model,
     messages: [
@@ -55,7 +57,7 @@ export function buildOpenRouterBody(config: OpenRouterConfig, req: GeminiRequest
   };
 }
 
-export async function callOpenRouter(config: OpenRouterConfig, req: GeminiRequest, fetchImpl: typeof fetch = fetch): Promise<GeminiResult> {
+export async function callGateway(config: GatewayConfig, req: GeminiRequest, fetchImpl: typeof fetch = fetch): Promise<GeminiResult> {
   const started = Date.now();
   const elapsed = () => Date.now() - started;
 
@@ -66,11 +68,11 @@ export async function callOpenRouter(config: OpenRouterConfig, req: GeminiReques
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${config.apiKey}`,
-        // Recommandé par OpenRouter pour identifier l'app dans son tableau de bord ; sans effet sur la requête.
+        // Identifie l'app dans le tableau de bord des passerelles qui le lisent ; ignoré par les autres.
         'HTTP-Referer': 'https://github.com/yeskev72-blip/ola-snack-menu',
         'X-Title': 'Calbasse',
       },
-      body: JSON.stringify(buildOpenRouterBody(config, req)),
+      body: JSON.stringify(buildGatewayBody(config, req)),
       signal: AbortSignal.timeout(config.timeoutMs),
     });
   } catch (e) {
@@ -116,7 +118,7 @@ export async function callOpenRouter(config: OpenRouterConfig, req: GeminiReques
   return { ok: true, text, usage, latencyMs: elapsed(), model: config.model };
 }
 
-export type OpenRouterResilienceOptions = {
+export type GatewayResilienceOptions = {
   /** Attentes avant chaque nouvel essai du même modèle saturé. */
   retryDelaysMs: number[];
   budgetMs: number;
@@ -131,10 +133,10 @@ const defaultSleep = (ms: number) => new Promise<void>((resolve) => setTimeout(r
  * Même stratégie que callGeminiResilient (gemini.ts) : modèle saturé (429/5xx) réessayé sur place,
  * puis passage au modèle de secours suivant ; renvoie le premier succès, sinon le dernier échec.
  */
-export async function callOpenRouterResilient(
-  configs: OpenRouterConfig[],
+export async function callGatewayResilient(
+  configs: GatewayConfig[],
   req: GeminiRequest,
-  options: OpenRouterResilienceOptions,
+  options: GatewayResilienceOptions,
 ): Promise<GeminiResult> {
   const sleep = options.sleep ?? defaultSleep;
   const started = Date.now();
@@ -157,7 +159,7 @@ export async function callOpenRouterResilient(
       }
       if (last && remaining() < MIN_CALL_MS) return failure();
       const timeoutMs = Math.min(config.timeoutMs, Math.max(remaining(), MIN_CALL_MS));
-      const result = await callOpenRouter({ ...config, timeoutMs }, req, options.fetchImpl);
+      const result = await callGateway({ ...config, timeoutMs }, req, options.fetchImpl);
       if (result.ok) return { ...result, earlierFailures: failures };
       last = result;
       failures.push(result);

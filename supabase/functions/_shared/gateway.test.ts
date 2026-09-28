@@ -3,12 +3,12 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { buildOpenRouterBody, callOpenRouter, callOpenRouterResilient, OPENROUTER_API_BASE, type OpenRouterConfig } from './openrouter.ts';
+import { buildGatewayBody, callGateway, callGatewayResilient, type GatewayConfig, RODIUM_API_BASE } from './gateway.ts';
 import type { GeminiRequest } from './gemini.ts';
 
-const config: OpenRouterConfig = {
+const config: GatewayConfig = {
   apiKey: 'cle-de-test',
-  apiBase: OPENROUTER_API_BASE,
+  apiBase: RODIUM_API_BASE,
   model: 'google/gemini-2.5-flash-lite',
   maxOutputTokens: 4096,
   timeoutMs: 1000,
@@ -19,7 +19,7 @@ const reply = (status: number, body: unknown): typeof fetch =>
   (async () => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })) as typeof fetch;
 
 test('corps de requête : image en data URL, JSON forcé', () => {
-  const body = buildOpenRouterBody(config, request);
+  const body = buildGatewayBody(config, request);
   assert.equal(body.model, 'google/gemini-2.5-flash-lite');
   assert.equal(body.messages[0]!.role, 'system');
   assert.equal(body.messages[0]!.content, 'système');
@@ -29,7 +29,7 @@ test('corps de requête : image en data URL, JSON forcé', () => {
   assert.deepEqual(body.response_format, { type: 'json_object' });
 });
 
-test('appel : clé en en-tête Authorization Bearer', async () => {
+test('appel : clé en en-tête Authorization Bearer, sur la racine configurée', async () => {
   let seenUrl = '';
   let seenAuth: string | null = null;
   const fake = (async (url: string, init: RequestInit) => {
@@ -37,13 +37,13 @@ test('appel : clé en en-tête Authorization Bearer', async () => {
     seenAuth = new Headers(init.headers).get('Authorization');
     return new Response(JSON.stringify({ choices: [{ message: { content: '{}' } }] }), { status: 200 });
   }) as unknown as typeof fetch;
-  await callOpenRouter(config, request, fake);
-  assert.equal(seenUrl, 'https://openrouter.ai/api/v1/chat/completions');
+  await callGateway(config, request, fake);
+  assert.equal(seenUrl, 'https://api.rodiumai.io/v1/chat/completions');
   assert.equal(seenAuth, 'Bearer cle-de-test');
 });
 
 test('succès : texte + tokens', async () => {
-  const r = await callOpenRouter(
+  const r = await callGateway(
     config,
     request,
     reply(200, { choices: [{ message: { content: '{"ok":true}' } }], usage: { prompt_tokens: 1500, completion_tokens: 200, total_tokens: 1700 } }),
@@ -54,17 +54,23 @@ test('succès : texte + tokens', async () => {
 });
 
 test('erreurs : 429/500 relançables, 400 non', async () => {
-  const r429 = await callOpenRouter(config, request, reply(429, { error: { message: 'rate limited' } }));
+  const r429 = await callGateway(config, request, reply(429, { error: { message: 'rate limited' } }));
   assert.ok(!r429.ok && r429.retryable);
-  const r500 = await callOpenRouter(config, request, reply(503, { error: { message: 'indisponible' } }));
+  const r500 = await callGateway(config, request, reply(503, { error: { message: 'indisponible' } }));
   assert.ok(!r500.ok && r500.retryable);
-  const r400 = await callOpenRouter(config, request, reply(400, { error: { message: 'modèle inconnu' } }));
+  const r400 = await callGateway(config, request, reply(400, { error: { message: 'modèle inconnu' } }));
   assert.ok(!r400.ok && !r400.retryable);
   assert.match(r400.error, /HTTP 400 : modèle inconnu/);
 });
 
+test('crédit épuisé (402) : échec définitif, message conservé', async () => {
+  const r = await callGateway(config, request, reply(402, { error: { message: 'Insufficient RODI balance' } }));
+  assert.ok(!r.ok && !r.retryable);
+  assert.match(r.error, /Insufficient RODI balance/);
+});
+
 test('réponse vide ou tronquée', async () => {
-  const r = await callOpenRouter(config, request, reply(200, { choices: [{ message: {}, finish_reason: 'length' }] }));
+  const r = await callGateway(config, request, reply(200, { choices: [{ message: {}, finish_reason: 'length' }] }));
   assert.ok(!r.ok);
   assert.match(r.error, /length/);
 });
@@ -73,7 +79,7 @@ test('coupure réseau et délai dépassé', async () => {
   const down = (async () => {
     throw new TypeError('fetch failed');
   }) as typeof fetch;
-  const r = await callOpenRouter(config, request, down);
+  const r = await callGateway(config, request, down);
   assert.ok(!r.ok && r.retryable);
 
   const slow = ((_url: string, init: RequestInit) =>
@@ -81,7 +87,7 @@ test('coupure réseau et délai dépassé', async () => {
       init.signal?.addEventListener('abort', () => reject(init.signal?.reason));
     })) as unknown as typeof fetch;
   const keepAlive = setTimeout(() => undefined, 1000);
-  const t = await callOpenRouter({ ...config, timeoutMs: 20 }, request, slow);
+  const t = await callGateway({ ...config, timeoutMs: 20 }, request, slow);
   clearTimeout(keepAlive);
   assert.ok(!t.ok);
   assert.equal(t.error, 'timeout');
@@ -99,12 +105,12 @@ function byModel(statuses: Record<string, number[]>) {
   }) as unknown as typeof fetch;
   return { seen, fetchImpl };
 }
-const secours: OpenRouterConfig = { ...config, model: 'google/gemini-flash-latest' };
+const secours: GatewayConfig = { ...config, model: 'google/gemini-flash-latest' };
 const noWait = { retryDelaysMs: [1000, 3000], budgetMs: 50_000, sleep: async () => undefined };
 
 test('saturation : même modèle réessayé, succès au 2e essai', async () => {
   const { seen, fetchImpl } = byModel({ 'google/gemini-2.5-flash-lite': [503, 200] });
-  const r = await callOpenRouterResilient([config, secours], request, { ...noWait, fetchImpl });
+  const r = await callGatewayResilient([config, secours], request, { ...noWait, fetchImpl });
   assert.ok(r.ok);
   assert.equal(r.model, 'google/gemini-2.5-flash-lite');
   assert.deepEqual(seen, ['google/gemini-2.5-flash-lite', 'google/gemini-2.5-flash-lite']);
@@ -112,14 +118,14 @@ test('saturation : même modèle réessayé, succès au 2e essai', async () => {
 
 test('quota dépassé (429) : passage direct au secours', async () => {
   const { seen, fetchImpl } = byModel({ 'google/gemini-2.5-flash-lite': [429], 'google/gemini-flash-latest': [200] });
-  const r = await callOpenRouterResilient([config, secours], request, { ...noWait, fetchImpl });
+  const r = await callGatewayResilient([config, secours], request, { ...noWait, fetchImpl });
   assert.ok(r.ok);
   assert.deepEqual(seen, ['google/gemini-2.5-flash-lite', 'google/gemini-flash-latest']);
 });
 
 test('tout est saturé : dernier échec renvoyé, marqué « overloaded »', async () => {
   const { seen, fetchImpl } = byModel({ 'google/gemini-2.5-flash-lite': [], 'google/gemini-flash-latest': [] });
-  const r = await callOpenRouterResilient([config, secours], request, { ...noWait, fetchImpl });
+  const r = await callGatewayResilient([config, secours], request, { ...noWait, fetchImpl });
   assert.ok(!r.ok && r.overloaded);
   assert.equal(seen.length, 6);
 });

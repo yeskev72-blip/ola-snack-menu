@@ -195,8 +195,8 @@ async function callGeminiResilient(configs, req, options) {
   return failure();
 }
 
-// supabase/functions/_shared/openrouter.ts
-var OPENROUTER_API_BASE = "https://openrouter.ai/api/v1";
+// supabase/functions/_shared/gateway.ts
+var RODIUM_API_BASE = "https://api.rodiumai.io/v1";
 var emptyUsage2 = {
   promptTokens: null,
   outputTokens: null,
@@ -217,7 +217,7 @@ function readUsage2(body) {
 function errorMessage2(body) {
   return body?.error?.message ?? null;
 }
-function buildOpenRouterBody(config, req) {
+function buildGatewayBody(config, req) {
   return {
     model: config.model,
     messages: [
@@ -247,7 +247,7 @@ function buildOpenRouterBody(config, req) {
     max_tokens: config.maxOutputTokens
   };
 }
-async function callOpenRouter(config, req, fetchImpl = fetch) {
+async function callGateway(config, req, fetchImpl = fetch) {
   const started = Date.now();
   const elapsed = () => Date.now() - started;
   let response;
@@ -257,11 +257,11 @@ async function callOpenRouter(config, req, fetchImpl = fetch) {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${config.apiKey}`,
-        // Recommandé par OpenRouter pour identifier l'app dans son tableau de bord ; sans effet sur la requête.
+        // Identifie l'app dans le tableau de bord des passerelles qui le lisent ; ignoré par les autres.
         "HTTP-Referer": "https://github.com/yeskev72-blip/ola-snack-menu",
         "X-Title": "Calbasse"
       },
-      body: JSON.stringify(buildOpenRouterBody(config, req)),
+      body: JSON.stringify(buildGatewayBody(config, req)),
       signal: AbortSignal.timeout(config.timeoutMs)
     });
   } catch (e) {
@@ -315,7 +315,7 @@ async function callOpenRouter(config, req, fetchImpl = fetch) {
   };
 }
 var defaultSleep2 = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-async function callOpenRouterResilient(configs, req, options) {
+async function callGatewayResilient(configs, req, options) {
   const sleep = options.sleep ?? defaultSleep2;
   const started = Date.now();
   const remaining = () => options.budgetMs - (Date.now() - started);
@@ -342,7 +342,7 @@ async function callOpenRouterResilient(configs, req, options) {
       }
       if (last && remaining() < MIN_CALL_MS) return failure();
       const timeoutMs = Math.min(config.timeoutMs, Math.max(remaining(), MIN_CALL_MS));
-      const result = await callOpenRouter({
+      const result = await callGateway({
         ...config,
         timeoutMs
       }, req, options.fetchImpl);
@@ -950,7 +950,7 @@ function parseTemperature(raw) {
 }
 var AI_PROVIDERS = [
   "gemini",
-  "openrouter"
+  "gateway"
 ];
 var aiProvider = env("AI_PROVIDER", "gemini");
 if (!AI_PROVIDERS.includes(aiProvider)) throw new Error("AI_PROVIDER invalide");
@@ -984,29 +984,30 @@ var modelChain = [
   geminiConfig,
   ...fallbackConfigs
 ];
-var openRouterConfig = {
-  apiKey: aiProvider === "openrouter" ? env("OPENROUTER_API_KEY") : "",
-  apiBase: env("OPENROUTER_API_BASE", OPENROUTER_API_BASE),
-  model: env("OPENROUTER_MODEL", "google/gemini-2.5-flash-lite"),
+var gatewayConfig = {
+  apiKey: aiProvider === "gateway" ? env("GATEWAY_API_KEY") : "",
+  // Sans barre finale : l'appel ajoute « /chat/completions ».
+  apiBase: env("GATEWAY_API_BASE", RODIUM_API_BASE).replace(/\/+$/, ""),
+  model: env("GATEWAY_MODEL", "google/gemini-2.5-flash-lite"),
   maxOutputTokens: 4096,
   timeoutMs: 45e3
 };
-var openRouterFallbacks = env("OPENROUTER_FALLBACK_MODELS", "none").split(",").map((m) => m.trim()).filter((m) => m !== "" && m !== "none" && m !== openRouterConfig.model).map((model) => ({
-  ...openRouterConfig,
+var gatewayFallbacks = env("GATEWAY_FALLBACK_MODELS", "none").split(",").map((m) => m.trim()).filter((m) => m !== "" && m !== "none" && m !== gatewayConfig.model).map((model) => ({
+  ...gatewayConfig,
   model
 }));
-var openRouterChain = [
-  openRouterConfig,
-  ...openRouterFallbacks
+var gatewayChain = [
+  gatewayConfig,
+  ...gatewayFallbacks
 ];
-var activeModel = aiProvider === "openrouter" ? openRouterConfig.model : geminiConfig.model;
-var callAi = (req) => aiProvider === "openrouter" ? callOpenRouterResilient(openRouterChain, req, {
+var activeModel = aiProvider === "gateway" ? gatewayConfig.model : geminiConfig.model;
+var callAi = (req) => aiProvider === "gateway" ? callGatewayResilient(gatewayChain, req, {
   retryDelaysMs: [
     2e3
   ],
   budgetMs: 5e4,
   onFailure: (r) => !r.ok && console.error(JSON.stringify({
-    message: "essai OpenRouter en \xE9chec",
+    message: "essai passerelle en \xE9chec",
     model: r.model,
     error: r.error
   }))
@@ -1087,7 +1088,7 @@ var handler = createHandler({
     return data;
   },
   // Modèle saturé (503) : un second essai 2 s plus tard, puis les modèles de secours ; réponse en moins de 50 s
-  // pour rester sous le délai de l'app (60 s). Fournisseur choisi par AI_PROVIDER (Gemini direct ou OpenRouter).
+  // pour rester sous le délai de l'app (60 s). Fournisseur choisi par AI_PROVIDER (Gemini direct ou passerelle).
   gemini: (req) => callAi(req),
   async logCall({ scanId, userId, kind, attempt, model, result, error }) {
     const { error: dbError } = await admin.from("scan_calls").insert({
