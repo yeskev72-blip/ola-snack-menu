@@ -1,0 +1,12 @@
+# Déploiement Netlify du site vitrine (dossier « site » à la racine du dépôt).
+
+[build]
+  publish = "."
+
+# Adresse courte et stable pour le téléchargement : calbasse.netlify.app/apk renvoie
+# toujours vers l'APK de la dernière version publiée, sans avoir à republier le site.
+[[redirects]]
+  from = "/apk"
+  to = "https://github.com/yeskev72-blip/ola-snack-menu/releases/latest/download/calbasse.apk"
+  status = 302
+  force = true
