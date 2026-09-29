@@ -2,8 +2,10 @@
 # GitHub > onglet Actions > « Construire l'APK » > Run workflow.
 # Prérequis : secret de dépôt EXPO_TOKEN (jeton d'accès expo.dev) ; variables
 # EXPO_PUBLIC_SUPABASE_URL / EXPO_PUBLIC_SUPABASE_ANON_KEY déclarées sur expo.dev.
-# À la fin, l'APK est publié dans GitHub > Releases (lien direct, sans passer par expo.dev) :
-#   https://github.com/<dépôt>/releases/latest/download/calbasse.apk
+# À la fin, l'APK est publié à deux endroits :
+#   - sur le site (site/calbasse.apk, servi par Netlify) : c'est le lien public de téléchargement,
+#     qui continue de fonctionner même si ce dépôt est privé ;
+#   - dans GitHub > Releases, comme archive des versions successives.
 name: Construire l'APK
 
 on:
@@ -129,11 +131,30 @@ jobs:
             --title "Calbasse APK n°${{ github.run_number }} (${{ inputs.profile }}, $SHORT)" \
             --notes "APK construit depuis le commit $SHORT. Télécharge **calbasse.apk** ci-dessous, puis ouvre-le sur le téléphone. Build Expo : ${{ steps.build.outputs.url }}" \
             --latest
-          LINK="https://github.com/${{ github.repository }}/releases/latest/download/calbasse.apk"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      # Le téléchargement public passe par le site, pas par les Releases : le dépôt peut donc
+      # être privé sans couper la distribution. Netlify republie dès que main change.
+      - name: Publier l'APK sur le site
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout -B publication-apk origin/main
+          cp calbasse.apk site/calbasse.apk
+          git add site/calbasse.apk
+          if git diff --cached --quiet; then
+            echo "APK identique à celui déjà en ligne : rien à publier."
+          else
+            git commit -m "APK n°${{ github.run_number }} en téléchargement sur le site"
+            git push origin HEAD:main
+          fi
           {
             echo
             echo "## APK prêt ✅"
             echo
-            echo "Téléchargement direct : $LINK"
-            echo "Page de la version : https://github.com/${{ github.repository }}/releases/tag/$TAG"
+            echo "Téléchargement public : https://calbasse.netlify.app/apk"
+            echo
+            echo "Le site se republie tout seul ; compte une minute avant que le nouveau fichier soit servi."
+            echo "Archive de cette version : Releases > apk-${{ github.run_number }}-${{ inputs.profile }}"
           } >> "$GITHUB_STEP_SUMMARY"

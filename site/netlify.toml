@@ -3,10 +3,18 @@
 [build]
   publish = "."
 
-# Adresse courte et stable pour le téléchargement : calbasse.netlify.app/apk renvoie
-# toujours vers l'APK de la dernière version publiée, sans avoir à republier le site.
+# L'APK est servi par Netlify, et non par les releases GitHub : le dépôt peut rester privé
+# sans que le téléchargement cesse de fonctionner. Le fichier est remplacé à chaque build
+# par le workflow « Construire l'APK ».
 [[redirects]]
   from = "/apk"
-  to = "https://github.com/yeskev72-blip/ola-snack-menu/releases/latest/download/calbasse.apk"
+  to = "/calbasse.apk"
   status = 302
   force = true
+
+# Sans ce type, certains navigateurs affichent le fichier au lieu de le télécharger.
+[[headers]]
+  for = "/calbasse.apk"
+  [headers.values]
+    Content-Type = "application/vnd.android.package-archive"
+    Content-Disposition = "attachment; filename=\"calbasse.apk\""
