@@ -43,6 +43,16 @@ test('prompt système : liste des plats et règles clés', () => {
   assert.ok(prompt.includes('Afrique de l'));
 });
 
+// Un aliment hors liste doit être rendu tel quel via « autre », jamais remplacé par le plat
+// le plus ressemblant de la liste : une pomme avait été identifiée comme un ananas.
+test('prompt système : la liste ne doit pas brider les aliments reconnus', () => {
+  const prompt = buildSystemPrompt(FOODS);
+  assert.ok(prompt.includes('monde entier'), 'le rôle ne se limite pas à une cuisine régionale');
+  assert.ok(prompt.includes('INTERDIT'), 'la substitution est explicitement interdite');
+  assert.ok(prompt.includes(OTHER_FOOD_KEY), 'le repli hors liste est décrit');
+  assert.equal(/choisis en priorité un food_key/.test(prompt), false, 'plus de biais vers la liste');
+});
+
 test('texte utilisateur : indice et réponses', () => {
   assert.match(buildUserText({ hint: null, answers: [] }), /pas donné d'indice/);
   const text = buildUserText({ hint: 'riz', answers: [{ question: 'Sauce ?', answer: 'Graine' }] });
