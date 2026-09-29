@@ -2,6 +2,11 @@
  * Edge Function analyze-meal (Deno). Branche les vraies dépendances sur handler.ts.
  *
  * Secrets (supabase secrets set …) :
+ *   AI_PROVIDER             « gemini » (défaut, facturation Google directe) ou « gateway »
+ *                           (passerelle compatible OpenAI facturée en crédit prépayé — RodiumAi par
+ *                           défaut, rechargeable par Mobile Money, quand les cartes sont refusées)
+ *
+ *   --- AI_PROVIDER=gemini ---
  *   GEMINI_API_KEY          obligatoire, ne quitte jamais le serveur
  *   GEMINI_MODEL            défaut « gemini-flash-lite-latest » (modèle léger, offre gratuite)
  *   GEMINI_FALLBACK_MODELS  modèles de secours si le principal est saturé, séparés par des virgules ;
@@ -10,15 +15,24 @@
  *                           (refusés en 400 par les modèles actuels) ; défaut : requête simplifiée
  *   GEMINI_TEMPERATURE      avec GEMINI_STRUCTURED seulement ; défaut 0.3 ; « default » = valeur du modèle
  *   GEMINI_THINKING_LEVEL   avec GEMINI_STRUCTURED seulement ; défaut « low »
- *   STORE_PHOTOS            « true » pour conserver les photos (si l'utilisateur a consenti)
  *   GEMINI_API_BASE         facultatif (tests, proxy) ; défaut : API publique de Google
+ *
+ *   --- AI_PROVIDER=gateway ---
+ *   GATEWAY_API_KEY          obligatoire, ne quitte jamais le serveur (RodiumAi : « rd_sk_… »)
+ *   GATEWAY_MODEL            défaut « google/gemini-2.5-flash-lite » ; accepte tout modèle de la
+ *                            passerelle, y compris d'un autre fournisseur (« anthropic/… », « openai/… »)
+ *   GATEWAY_FALLBACK_MODELS  modèles de secours, séparés par des virgules ; défaut « none »
+ *   GATEWAY_API_BASE         facultatif ; défaut RodiumAi. Toute passerelle compatible OpenAI convient
+ *
+ *   STORE_PHOTOS            « true » pour conserver les photos (si l'utilisateur a consenti)
  * Fournis automatiquement par Supabase : SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY.
  */
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 import type { FoodRef } from '../_shared/analysis.ts';
-import { callGeminiResilient, GEMINI_API_BASE, type GeminiConfig } from '../_shared/gemini.ts';
+import { callGeminiResilient, GEMINI_API_BASE, type GeminiConfig, type GeminiResult } from '../_shared/gemini.ts';
+import { callGatewayResilient, type GatewayConfig, RODIUM_API_BASE } from '../_shared/gateway.ts';
 import { createHandler } from './handler.ts';
 
 function env(name: string, fallback?: string): string {
@@ -34,12 +48,17 @@ function parseTemperature(raw: string): number | null {
   return value;
 }
 
+const AI_PROVIDERS = ['gemini', 'gateway'] as const;
+const aiProvider = env('AI_PROVIDER', 'gemini') as (typeof AI_PROVIDERS)[number];
+if (!AI_PROVIDERS.includes(aiProvider)) throw new Error('AI_PROVIDER invalide');
+
 const THINKING_LEVELS = ['minimal', 'low', 'medium', 'high'] as const;
 const thinkingLevel = env('GEMINI_THINKING_LEVEL', 'low') as (typeof THINKING_LEVELS)[number];
 if (!THINKING_LEVELS.includes(thinkingLevel)) throw new Error('GEMINI_THINKING_LEVEL invalide');
 
 const geminiConfig: GeminiConfig = {
-  apiKey: env('GEMINI_API_KEY'),
+  // Clé nécessaire seulement pour ce fournisseur ; en mode openrouter, le secret peut rester absent.
+  apiKey: aiProvider === 'gemini' ? env('GEMINI_API_KEY') : '',
   apiBase: env('GEMINI_API_BASE', GEMINI_API_BASE),
   model: env('GEMINI_MODEL', 'gemini-flash-lite-latest'),
   temperature: parseTemperature(env('GEMINI_TEMPERATURE', '0.3')),
@@ -58,6 +77,35 @@ const fallbackConfigs: GeminiConfig[] = env('GEMINI_FALLBACK_MODELS', 'gemini-fl
   .map((model) => ({ ...geminiConfig, model, thinkingLevel: null }));
 const modelChain = [geminiConfig, ...fallbackConfigs];
 
+const gatewayConfig: GatewayConfig = {
+  apiKey: aiProvider === 'gateway' ? env('GATEWAY_API_KEY') : '',
+  // Sans barre finale : l'appel ajoute « /chat/completions ».
+  apiBase: env('GATEWAY_API_BASE', RODIUM_API_BASE).replace(/\/+$/, ''),
+  model: env('GATEWAY_MODEL', 'google/gemini-2.5-flash-lite'),
+  maxOutputTokens: 4096,
+  timeoutMs: 45_000,
+};
+const gatewayFallbacks: GatewayConfig[] = env('GATEWAY_FALLBACK_MODELS', 'none')
+  .split(',')
+  .map((m) => m.trim())
+  .filter((m) => m !== '' && m !== 'none' && m !== gatewayConfig.model)
+  .map((model) => ({ ...gatewayConfig, model }));
+const gatewayChain = [gatewayConfig, ...gatewayFallbacks];
+
+const activeModel = aiProvider === 'gateway' ? gatewayConfig.model : geminiConfig.model;
+const callAi = (req: Parameters<typeof callGeminiResilient>[1]): Promise<GeminiResult> =>
+  aiProvider === 'gateway'
+    ? callGatewayResilient(gatewayChain, req, {
+      retryDelaysMs: [2_000],
+      budgetMs: 50_000,
+      onFailure: (r) => !r.ok && console.error(JSON.stringify({ message: 'essai passerelle en échec', model: r.model, error: r.error })),
+    })
+    : callGeminiResilient(modelChain, req, {
+      retryDelaysMs: [2_000],
+      budgetMs: 50_000,
+      onFailure: (r) => !r.ok && console.error(JSON.stringify({ message: 'essai Gemini en échec', model: r.model, error: r.error })),
+    });
+
 const storePhotos = env('STORE_PHOTOS', 'false') === 'true';
 
 // Client service role : contourne la RLS, n'est utilisé que côté serveur.
@@ -73,7 +121,7 @@ function decodeBase64(data: string): Uint8Array {
 }
 
 const handler = createHandler({
-  model: geminiConfig.model,
+  model: activeModel,
   maxAttempts: 2,
 
   async getUser(token) {
@@ -117,13 +165,8 @@ const handler = createHandler({
   },
 
   // Modèle saturé (503) : un second essai 2 s plus tard, puis les modèles de secours ; réponse en moins de 50 s
-  // pour rester sous le délai de l'app (60 s).
-  gemini: (req) =>
-    callGeminiResilient(modelChain, req, {
-      retryDelaysMs: [2_000],
-      budgetMs: 50_000,
-      onFailure: (r) => !r.ok && console.error(JSON.stringify({ message: 'essai Gemini en échec', model: r.model, error: r.error })),
-    }),
+  // pour rester sous le délai de l'app (60 s). Fournisseur choisi par AI_PROVIDER (Gemini direct ou passerelle).
+  gemini: (req) => callAi(req),
 
   async logCall({ scanId, userId, kind, attempt, model, result, error }) {
     const { error: dbError } = await admin.from('scan_calls').insert({

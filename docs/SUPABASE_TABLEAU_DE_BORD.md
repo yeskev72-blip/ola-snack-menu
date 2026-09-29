@@ -76,6 +76,51 @@ Menu de gauche : **Authentication**.
    → **Save**. La clé Gemini reste ici, jamais dans l'app. (`SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY`
    sont fournies automatiquement aux fonctions : ne les ajoute pas.)
 
+### Variante — payer par crédit prépayé et Mobile Money (RodiumAi)
+
+La facturation de Google, comme celle d'OpenAI et d'Anthropic, refuse les cartes prépayées.
+[RodiumAi](https://www.rodiumai.io) relaie les mêmes modèles derrière une API compatible OpenAI, se
+recharge par **Mobile Money** (MTN MoMo, Orange Money, Wave, Moov…) et facture un crédit déposé à
+l'avance : le solde se consomme à chaque scan, et plus de solde signifie plus d'appel — jamais de
+facture surprise.
+
+1. Sur [rodiumai.io](https://www.rodiumai.io) : crée un compte, puis recharge ton portefeuille RODI.
+2. Dans le tableau de bord : crée une clé API (format `rd_sk_…`) → copie-la.
+3. Dans les mêmes secrets Supabase, ajoute :
+
+   | Nom | Valeur |
+   |---|---|
+   | `AI_PROVIDER` | `gateway` |
+   | `GATEWAY_API_KEY` | ta clé `rd_sk_…` |
+   | `GATEWAY_MODEL` | `google/gemini-2.5-flash-lite` (facultatif : c'est déjà la valeur par défaut) |
+
+   `GEMINI_API_KEY` devient inutile dans ce mode, mais tu peux la laisser : repasser à la facturation
+   Google directe ne demande alors que de remettre `AI_PROVIDER` à `gemini`.
+
+> « Compatible OpenAI » ne désigne que le **format** de la requête, adopté par toute l'industrie.
+> Le modèle qui analyse la photo reste celui de `GATEWAY_MODEL` : aucune donnée ne va chez OpenAI.
+
+#### Modèles Google utilisables et tarifs
+
+Relevés sur la page *Models* de RodiumAi (1 USD ≈ 742,5 RODI) ; le premier est le moins cher et sert
+par défaut. Les tarifs sont ceux de Google : la passerelle ne prend pas de marge sur les jetons.
+
+| `GATEWAY_MODEL` | Entrée / 1M | Sortie / 1M |
+|---|---|---|
+| `google/gemini-2.5-flash-lite` | ~0,10 $ | ~0,40 $ |
+| `google/gemini-3.1-flash-lite` | ~0,25 $ | ~1,50 $ |
+| `google/gemini-2.5-flash` | ~0,30 $ | ~2,50 $ |
+
+`GATEWAY_FALLBACK_MODELS` (vide par défaut) accepte une liste séparée par des virgules, utilisée si le
+modèle principal est saturé ou indisponible : par exemple `google/gemini-3.1-flash-lite`. Un scan qui
+bascule sur un secours coûte alors le tarif de ce secours — d'où le choix de ne rien mettre par défaut.
+
+Changer `GATEWAY_MODEL` suffit à essayer un autre modèle, sans rien redéployer. `GATEWAY_API_BASE`
+permet d'utiliser une autre passerelle du même format (OpenRouter…) sans changer le code.
+
+> **Sous-traitant supplémentaire** : les photos transitent alors par la passerelle en plus du modèle.
+> La politique de confidentialité doit le mentionner (`site/confidentialite.html`).
+
 ## Étape 5 — Déployer les deux fonctions (10 min)
 
 Pour **chacune** des deux fonctions :

@@ -73,12 +73,17 @@ Téléphone (APK)                                   Supabase
 |---|---|---|
 | App (`.env` en local, EAS en build) | `EXPO_PUBLIC_SUPABASE_URL` | URL du projet Supabase (publique) |
 | | `EXPO_PUBLIC_SUPABASE_ANON_KEY` | clé `anon` / publishable (publique, sécurité assurée par la RLS) |
-| Secrets Supabase (`supabase/functions/.env`) | `GEMINI_API_KEY` | clé Gemini — **jamais dans l'app** |
+| Secrets Supabase (`supabase/functions/.env`) | `AI_PROVIDER` | `gemini` par défaut (facturation Google directe) ; `gateway` pour passer par une passerelle à crédit prépayé |
+| | `GEMINI_API_KEY` | clé Gemini — **jamais dans l'app** |
 | | `GEMINI_MODEL` | défaut `gemini-flash-lite-latest`, modifiable sans republier l'app |
 | | `GEMINI_FALLBACK_MODELS` | défaut `gemini-flash-lite-latest,gemini-flash-latest` : secours si le modèle principal est saturé ou à court de quota ; `none` pour désactiver |
 | | `GEMINI_STRUCTURED` | `false` par défaut : requête simplifiée (forme JSON décrite dans le prompt) ; `true` impose schéma, température et réflexion |
 | | `GEMINI_TEMPERATURE` | avec `GEMINI_STRUCTURED=true` : défaut `0.3` ; `default` = valeur du modèle |
 | | `GEMINI_THINKING_LEVEL` | avec `GEMINI_STRUCTURED=true` : défaut `low` (coût et latence) |
+| | `GATEWAY_API_KEY` | avec `AI_PROVIDER=gateway` : clé de la passerelle — **jamais dans l'app** |
+| | `GATEWAY_API_BASE` | défaut `https://api.rodiumai.io/v1` (RodiumAi, rechargeable par Mobile Money) ; toute passerelle compatible OpenAI convient |
+| | `GATEWAY_MODEL` | défaut `google/gemini-2.5-flash-lite` ; accepte aussi les modèles d'autres fournisseurs (`anthropic/…`, `openai/…`) sans changer le code |
+| | `GATEWAY_FALLBACK_MODELS` | modèles de secours séparés par des virgules ; défaut `none` |
 | | `STORE_PHOTOS` | `false` par défaut ; `true` conserve les photos des utilisateurs consentants |
 | | `MAKETOU_API_KEY`, `MAKETOU_PRODUCT_MONTHLY`, `MAKETOU_PRODUCT_YEARLY`, `PREMIUM_PRICE_*` | paiements Premium (`docs/PAIEMENTS_MAKETOU.md`) — **jamais dans l'app** |
 | Fournies par Supabase | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | utilisées par les Edge Functions seulement |
