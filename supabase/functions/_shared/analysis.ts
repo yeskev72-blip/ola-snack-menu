@@ -150,8 +150,12 @@ RÈGLES
 {"not_food": false, "items": [{"food_key": "<clé de la liste ou ${OTHER_FOOD_KEY}>", "label": "<libellé>", "grams": <nombre>, "confidence": <0 à 1>, "estimate_100g": null ou {"kcal": <nombre>, "proteines": <nombre>, "glucides": <nombre>, "lipides": <nombre>}}], "questions": [{"id": "<identifiant court>", "text": "<question>", "options": ["<réponse>", "<réponse>"]}], "confidence_globale": <0 à 1>}
 Au plus ${LIMITS.maxItems} éléments.
 
-LISTE DE RÉFÉRENCE
-${foods.map(foodLine).join('\n')}`;
+LISTE DE RÉFÉRENCE — aliments dont l'application connaît déjà les valeurs
+${foods.map(foodLine).join('\n')}
+
+RAPPEL FINAL, le plus important. Cette liste est courte et très incomplète : elle couvre surtout des plats d'Afrique de l'Ouest et presque aucun aliment courant d'ailleurs — ni pomme, ni poire, ni raisin, ni fraise, ni pizza, ni yaourt, ni fromage, ni pâtes, ni céréales, ni sandwich. C'est normal et attendu.
+Avant de répondre, relis chacun de tes éléments : si le libellé que tu as écrit ne décrit pas exactement ce que montre la photo, alors le food_key est faux. Remplace-le par « ${OTHER_FOOD_KEY} » et renseigne estimate_100g.
+Une pomme n'est pas un ananas. Un aliment hors liste correctement nommé avec « ${OTHER_FOOD_KEY} » vaut toujours mieux qu'un food_key de la liste posé sur le mauvais aliment.`;
 }
 
 export function buildUserText(req: Pick<AnalyzeRequest, 'hint' | 'answers'>): string {

@@ -481,8 +481,12 @@ R\xC8GLES
 {"not_food": false, "items": [{"food_key": "<cl\xE9 de la liste ou ${OTHER_FOOD_KEY}>", "label": "<libell\xE9>", "grams": <nombre>, "confidence": <0 \xE0 1>, "estimate_100g": null ou {"kcal": <nombre>, "proteines": <nombre>, "glucides": <nombre>, "lipides": <nombre>}}], "questions": [{"id": "<identifiant court>", "text": "<question>", "options": ["<r\xE9ponse>", "<r\xE9ponse>"]}], "confidence_globale": <0 \xE0 1>}
 Au plus ${LIMITS.maxItems} \xE9l\xE9ments.
 
-LISTE DE R\xC9F\xC9RENCE
-${foods.map(foodLine).join("\n")}`;
+LISTE DE R\xC9F\xC9RENCE \u2014 aliments dont l'application conna\xEEt d\xE9j\xE0 les valeurs
+${foods.map(foodLine).join("\n")}
+
+RAPPEL FINAL, le plus important. Cette liste est courte et tr\xE8s incompl\xE8te : elle couvre surtout des plats d'Afrique de l'Ouest et presque aucun aliment courant d'ailleurs \u2014 ni pomme, ni poire, ni raisin, ni fraise, ni pizza, ni yaourt, ni fromage, ni p\xE2tes, ni c\xE9r\xE9ales, ni sandwich. C'est normal et attendu.
+Avant de r\xE9pondre, relis chacun de tes \xE9l\xE9ments : si le libell\xE9 que tu as \xE9crit ne d\xE9crit pas exactement ce que montre la photo, alors le food_key est faux. Remplace-le par \xAB ${OTHER_FOOD_KEY} \xBB et renseigne estimate_100g.
+Une pomme n'est pas un ananas. Un aliment hors liste correctement nomm\xE9 avec \xAB ${OTHER_FOOD_KEY} \xBB vaut toujours mieux qu'un food_key de la liste pos\xE9 sur le mauvais aliment.`;
 }
 function buildUserText(req) {
   const lines = [
