@@ -92,14 +92,31 @@ facture surprise.
    |---|---|
    | `AI_PROVIDER` | `gateway` |
    | `GATEWAY_API_KEY` | ta clé `rd_sk_…` |
-   | `GATEWAY_MODEL` | l'identifiant du modèle choisi, ex. `google/gemini-2.5-flash-lite` |
+   | `GATEWAY_MODEL` | `google/gemini-2.5-flash-lite` (facultatif : c'est déjà la valeur par défaut) |
 
    `GEMINI_API_KEY` devient inutile dans ce mode, mais tu peux la laisser : repasser à la facturation
    Google directe ne demande alors que de remettre `AI_PROVIDER` à `gemini`.
 
-Changer `GATEWAY_MODEL` suffit à essayer un autre modèle, y compris d'un autre fournisseur
-(`anthropic/…`, `openai/…`), sans rien redéployer. `GATEWAY_API_BASE` permet d'utiliser une autre
-passerelle compatible OpenAI (OpenRouter…) sans changer le code.
+> « Compatible OpenAI » ne désigne que le **format** de la requête, adopté par toute l'industrie.
+> Le modèle qui analyse la photo reste celui de `GATEWAY_MODEL` : aucune donnée ne va chez OpenAI.
+
+#### Modèles Google utilisables et tarifs
+
+Relevés sur la page *Models* de RodiumAi (1 USD ≈ 742,5 RODI) ; le premier est le moins cher et sert
+par défaut. Les tarifs sont ceux de Google : la passerelle ne prend pas de marge sur les jetons.
+
+| `GATEWAY_MODEL` | Entrée / 1M | Sortie / 1M |
+|---|---|---|
+| `google/gemini-2.5-flash-lite` | ~0,10 $ | ~0,40 $ |
+| `google/gemini-3.1-flash-lite` | ~0,25 $ | ~1,50 $ |
+| `google/gemini-2.5-flash` | ~0,30 $ | ~2,50 $ |
+
+`GATEWAY_FALLBACK_MODELS` (vide par défaut) accepte une liste séparée par des virgules, utilisée si le
+modèle principal est saturé ou indisponible : par exemple `google/gemini-3.1-flash-lite`. Un scan qui
+bascule sur un secours coûte alors le tarif de ce secours — d'où le choix de ne rien mettre par défaut.
+
+Changer `GATEWAY_MODEL` suffit à essayer un autre modèle, sans rien redéployer. `GATEWAY_API_BASE`
+permet d'utiliser une autre passerelle du même format (OpenRouter…) sans changer le code.
 
 > **Sous-traitant supplémentaire** : les photos transitent alors par la passerelle en plus du modèle.
 > La politique de confidentialité doit le mentionner (`site/confidentialite.html`).
