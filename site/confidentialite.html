@@ -36,7 +36,7 @@
 
     <main class="wrap prose">
       <h1>Politique de confidentialité</h1>
-      <p class="updated">Dernière mise à jour : 28 septembre 2026</p>
+      <p class="updated">Dernière mise à jour : 29 septembre 2026</p>
       <p>
         Calbasse est une application Android de suivi des calories. Ce texte explique quelles données sont collectées,
         à quoi elles servent, qui y a accès et comment les effacer.
@@ -69,15 +69,15 @@
 
       <h2>Tes photos de repas</h2>
       <p>
-        La photo que tu prends est envoyée à l'API Gemini de Google pour être analysée, puis elle n'est pas conservée
-        par Calbasse. Elle ne sert ni à la publicité ni à te profiler.
+        La photo que tu prends est envoyée pour être analysée par le modèle Gemini de Google, puis elle n'est pas
+        conservée par Calbasse. Elle ne sert ni à la publicité ni à te profiler.
       </p>
       <p>
-        Calbasse utilise aujourd'hui l'<strong>offre gratuite</strong> de l'API Gemini. Dans ce cadre, les conditions de
-        Google l'autorisent à utiliser le contenu envoyé — ta photo et l'indication facultative que tu ajoutes — pour
-        améliorer ses propres produits. Google ne reçoit ni ton nom, ni ton e-mail, ni aucune autre donnée de ton
-        compte : seulement l'image et le texte du scan. Cette page sera mise à jour dès que Calbasse passera sur
-        l'offre payante de Google, qui exclut cet usage.
+        Cet envoi passe par <strong>RodiumAi</strong>, un service qui transmet la demande au modèle et facture l'analyse
+        à Calbasse. Ni RodiumAi ni Google ne reçoivent ton nom, ton e-mail ou une autre donnée de ton compte :
+        uniquement l'image et l'indication facultative que tu ajoutes. L'analyse est facturée, et à ce titre les
+        conditions de Google excluent d'utiliser ce contenu pour améliorer ses produits.
+        <span class="todo">À COMPLÉTER : ce que RodiumAi conserve, d'après ses propres conditions</span>
       </p>
       <p>
         Dans ton profil, un interrupteur <strong>désactivé par défaut</strong> te permet en plus de partager tes
@@ -91,6 +91,10 @@
         <li>
           <strong>Supabase</strong> — hébergement de la base de données et de l'authentification, sur des serveurs situés
           dans l'Union européenne.
+        </li>
+        <li>
+          <strong>RodiumAi</strong> — acheminement de la photo vers le modèle d'analyse, aux conditions décrites
+          ci-dessus.
         </li>
         <li>
           <strong>Google (Gemini)</strong> — analyse de la photo du plat, aux conditions décrites ci-dessus.
