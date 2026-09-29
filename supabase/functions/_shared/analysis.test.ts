@@ -51,6 +51,9 @@ test('prompt système : la liste ne doit pas brider les aliments reconnus', () =
   assert.ok(prompt.includes('INTERDIT'), 'la substitution est explicitement interdite');
   assert.ok(prompt.includes(OTHER_FOOD_KEY), 'le repli hors liste est décrit');
   assert.equal(/choisis en priorité un food_key/.test(prompt), false, 'plus de biais vers la liste');
+  // La consigne doit venir APRÈS la liste : c'est la fin du prompt qui pèse le plus.
+  assert.ok(prompt.indexOf('RAPPEL FINAL') > prompt.indexOf('LISTE DE RÉFÉRENCE'), 'rappel placé après la liste');
+  assert.ok(prompt.trimEnd().endsWith("qu'un food_key de la liste posé sur le mauvais aliment."), 'le prompt finit par la consigne');
 });
 
 test('texte utilisateur : indice et réponses', () => {
