@@ -151,6 +151,8 @@ supabase/
   functions/          analyze-meal, delete-account, logique partagée (_shared)
   templates/          e-mails avec code de confirmation
   tests/              tests RLS/quota + imitation Supabase pour PostgreSQL nu
+site/               page de téléchargement et confidentialité, publiées sur Netlify
+                    (branche main, dossier de base « site ») ; /apk redirige vers le dernier APK
 docs/
   SETUP.md            mise en route, secrets, build APK, recette
   SUPABASE_TABLEAU_DE_BORD.md  configuration de Supabase depuis le navigateur
