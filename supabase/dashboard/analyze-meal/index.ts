@@ -371,7 +371,10 @@ var LIMITS = {
   maxItems: 12,
   maxQuestions: 2,
   minGrams: 1,
-  maxGrams: 2e3
+  maxGrams: 2e3,
+  /** Portions nommées proposées par le modèle pour un aliment hors table. */
+  maxPortions: 4,
+  maxPortionLabelLength: 40
 };
 var UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 var isRecord = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -481,6 +484,8 @@ R\xC8GLES
 
    Poids courants pour les aliments absents de la liste. Ce sont des rep\xE8res pour un sp\xE9cimen MOYEN, pas des r\xE9ponses \xE0 recopier : un m\xEAme fruit va du simple au triple selon sa taille, alors descends ou monte franchement d\xE8s que la photo montre un aliment petit ou gros. Pomme, orange : petite 100 g, moyenne 150 g, grosse 220 g. Mangue : petite 150 g, moyenne 250 g, grosse 400 g. Banane \xE9pluch\xE9e : petite 80 g, moyenne 120 g, grosse 170 g. \u0152uf \u2248 55 g ; tranche de pain \u2248 30 g ; part de pizza \u2248 125 g ; pot de yaourt \u2248 125 g ; verre \u2248 250 ml ; bouteille individuelle \u2248 500 ml.
 
+   e) Propose des portions nomm\xE9es. Pour tout aliment absent de la liste, remplis \xAB portions \xBB avec 2 \xE0 4 fa\xE7ons naturelles de compter CET aliment, de la plus petite \xE0 la plus grosse, chacune avec son poids en grammes : un fruit entier donne \xAB petite pomme \xBB 100, \xAB pomme moyenne \xBB 150, \xAB grosse pomme \xBB 220 ; du pain donne \xAB 1 tranche \xBB 30, \xAB 2 tranches \xBB 60 ; une boisson donne \xAB 1 verre \xBB 250, \xAB 1 bouteille \xBB 500 ; un plat en sauce donne \xAB 1 louche \xBB 120, \xAB 2 louches \xBB 240. Ce sont les choix que l'utilisateur touchera pour corriger ton estimation, donc ils doivent \xEAtre parlants et adapt\xE9s \xE0 cet aliment pr\xE9cis. Pour un aliment de la liste, renvoie une liste vide : l'application a d\xE9j\xE0 ses rep\xE8res.
+
    Ne r\xE9ponds jamais le poids moyen par r\xE9flexe. Le poids moyen est la r\xE9ponse uniquement quand l'aliment para\xEEt vraiment moyen \xE0 c\xF4t\xE9 de ton rep\xE8re d'\xE9chelle ; sinon c'est une erreur, et elle est syst\xE9matique.
 
    Quand l'aliment figure dans la liste, ses rep\xE8res de portion priment sur tout ce qui pr\xE9c\xE8de. Une portion d\xE9passe rarement ${LIMITS.maxGrams} g.
@@ -567,21 +572,46 @@ function buildResponseSchema(foodKeys) {
             confidence: {
               type: "NUMBER"
             },
-            estimate_100g: estimate
+            estimate_100g: estimate,
+            portions: {
+              type: "ARRAY",
+              maxItems: LIMITS.maxPortions,
+              items: {
+                type: "OBJECT",
+                properties: {
+                  label: {
+                    type: "STRING"
+                  },
+                  grams: {
+                    type: "NUMBER"
+                  }
+                },
+                required: [
+                  "label",
+                  "grams"
+                ],
+                propertyOrdering: [
+                  "label",
+                  "grams"
+                ]
+              }
+            }
           },
           required: [
             "food_key",
             "label",
             "grams",
             "confidence",
-            "estimate_100g"
+            "estimate_100g",
+            "portions"
           ],
           propertyOrdering: [
             "food_key",
             "label",
             "grams",
             "confidence",
-            "estimate_100g"
+            "estimate_100g",
+            "portions"
           ]
         }
       },
@@ -656,6 +686,29 @@ function parseEstimate(v) {
     glucides: round1(e.glucides),
     lipides: round1(e.lipides)
   };
+}
+function parsePortions(raw) {
+  if (!Array.isArray(raw)) return [];
+  const seen = /* @__PURE__ */ new Set();
+  const portions = [];
+  for (const entry of raw) {
+    if (!isRecord(entry)) continue;
+    const { label, grams } = entry;
+    if (typeof label !== "string" || !label.trim()) continue;
+    if (!isFiniteNumber(grams) || grams <= 0) continue;
+    const clean = label.trim().slice(0, LIMITS.maxPortionLabelLength);
+    const weight = round1(clamp(grams, LIMITS.minGrams, LIMITS.maxGrams));
+    const dedupe = `${clean.toLowerCase()}|${weight}`;
+    if (seen.has(dedupe) || seen.has(String(weight))) continue;
+    seen.add(dedupe);
+    seen.add(String(weight));
+    portions.push({
+      label: clean,
+      grams: weight
+    });
+    if (portions.length === LIMITS.maxPortions) break;
+  }
+  return portions.sort((a, b) => a.grams - b.grams);
 }
 function validateModelOutput(text, knownKeys, opts) {
   let raw;
@@ -744,7 +797,9 @@ function validateModelOutput(text, knownKeys, opts) {
       label: label.trim().slice(0, 120),
       grams: round1(clamp(grams, LIMITS.minGrams, LIMITS.maxGrams)),
       confidence: round2(clamp(confidence, 0, 1)),
-      estimate_100g: estimate
+      estimate_100g: estimate,
+      // Les plats de la table ont leurs propres repères de portion : ceux du modèle sont ignorés.
+      portions: food_key === OTHER_FOOD_KEY ? parsePortions(it.portions) : []
     });
   }
   const questions = [];

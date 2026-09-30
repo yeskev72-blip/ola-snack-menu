@@ -16,6 +16,9 @@ export const LIMITS = {
   maxQuestions: 2,
   minGrams: 1,
   maxGrams: 2000,
+  /** Portions nommées proposées par le modèle pour un aliment hors table. */
+  maxPortions: 4,
+  maxPortionLabelLength: 40,
 } as const;
 
 export type FoodRef = {
@@ -37,6 +40,9 @@ export type AnalyzeRequest = {
 
 export type Estimate100g = { kcal: number; proteines: number; glucides: number; lipides: number };
 
+/** « 1 pomme moyenne » = 150 g : façon naturelle de compter un aliment absent de la table. */
+export type NamedPortion = { label: string; grams: number };
+
 export type AnalyzedItem = {
   food_key: string;
   label: string;
@@ -44,6 +50,12 @@ export type AnalyzedItem = {
   confidence: number;
   /** Uniquement pour food_key = « autre » : valeurs estimées par l'IA, affichées comme telles. */
   estimate_100g: Estimate100g | null;
+  /**
+   * Portions nommées proposées par le modèle, uniquement pour « autre ». Vide pour un plat de
+   * la table, qui a ses propres repères. Le modèle juge mal les tailles : ces portions donnent
+   * à l'utilisateur de quoi le corriger d'un appui, sans taper de grammes.
+   */
+  portions: NamedPortion[];
 };
 
 export type Question = { id: string; text: string; options: string[] };
@@ -150,6 +162,8 @@ RÈGLES
 
    Poids courants pour les aliments absents de la liste. Ce sont des repères pour un spécimen MOYEN, pas des réponses à recopier : un même fruit va du simple au triple selon sa taille, alors descends ou monte franchement dès que la photo montre un aliment petit ou gros. Pomme, orange : petite 100 g, moyenne 150 g, grosse 220 g. Mangue : petite 150 g, moyenne 250 g, grosse 400 g. Banane épluchée : petite 80 g, moyenne 120 g, grosse 170 g. Œuf ≈ 55 g ; tranche de pain ≈ 30 g ; part de pizza ≈ 125 g ; pot de yaourt ≈ 125 g ; verre ≈ 250 ml ; bouteille individuelle ≈ 500 ml.
 
+   e) Propose des portions nommées. Pour tout aliment absent de la liste, remplis « portions » avec 2 à 4 façons naturelles de compter CET aliment, de la plus petite à la plus grosse, chacune avec son poids en grammes : un fruit entier donne « petite pomme » 100, « pomme moyenne » 150, « grosse pomme » 220 ; du pain donne « 1 tranche » 30, « 2 tranches » 60 ; une boisson donne « 1 verre » 250, « 1 bouteille » 500 ; un plat en sauce donne « 1 louche » 120, « 2 louches » 240. Ce sont les choix que l'utilisateur touchera pour corriger ton estimation, donc ils doivent être parlants et adaptés à cet aliment précis. Pour un aliment de la liste, renvoie une liste vide : l'application a déjà ses repères.
+
    Ne réponds jamais le poids moyen par réflexe. Le poids moyen est la réponse uniquement quand l'aliment paraît vraiment moyen à côté de ton repère d'échelle ; sinon c'est une erreur, et elle est systématique.
 
    Quand l'aliment figure dans la liste, ses repères de portion priment sur tout ce qui précède. Une portion dépasse rarement ${LIMITS.maxGrams} g.
@@ -214,9 +228,19 @@ export function buildResponseSchema(foodKeys: string[]) {
             grams: { type: 'NUMBER' },
             confidence: { type: 'NUMBER' },
             estimate_100g: estimate,
+            portions: {
+              type: 'ARRAY',
+              maxItems: LIMITS.maxPortions,
+              items: {
+                type: 'OBJECT',
+                properties: { label: { type: 'STRING' }, grams: { type: 'NUMBER' } },
+                required: ['label', 'grams'],
+                propertyOrdering: ['label', 'grams'],
+              },
+            },
           },
-          required: ['food_key', 'label', 'grams', 'confidence', 'estimate_100g'],
-          propertyOrdering: ['food_key', 'label', 'grams', 'confidence', 'estimate_100g'],
+          required: ['food_key', 'label', 'grams', 'confidence', 'estimate_100g', 'portions'],
+          propertyOrdering: ['food_key', 'label', 'grams', 'confidence', 'estimate_100g', 'portions'],
         },
       },
       questions: {
@@ -261,6 +285,32 @@ function parseEstimate(v: unknown): Estimate100g | null {
  * Valide le texte JSON renvoyé par Gemini. Les écarts bénins sont corrigés (bornes,
  * arrondis) ; les écarts de structure rendent la réponse invalide (→ une relance).
  */
+/**
+ * Portions nommées du modèle : au plus LIMITS.maxPortions, triées du plus léger au plus lourd,
+ * sans doublon de libellé ni de poids. Une portion mal formée est ignorée plutôt que de faire
+ * échouer tout le scan : elle n'est qu'une aide à la correction, pas une donnée nutritionnelle.
+ */
+function parsePortions(raw: unknown): NamedPortion[] {
+  if (!Array.isArray(raw)) return [];
+  const seen = new Set<string>();
+  const portions: NamedPortion[] = [];
+  for (const entry of raw) {
+    if (!isRecord(entry)) continue;
+    const { label, grams } = entry;
+    if (typeof label !== 'string' || !label.trim()) continue;
+    if (!isFiniteNumber(grams) || grams <= 0) continue;
+    const clean = label.trim().slice(0, LIMITS.maxPortionLabelLength);
+    const weight = round1(clamp(grams, LIMITS.minGrams, LIMITS.maxGrams));
+    const dedupe = `${clean.toLowerCase()}|${weight}`;
+    if (seen.has(dedupe) || seen.has(String(weight))) continue;
+    seen.add(dedupe);
+    seen.add(String(weight));
+    portions.push({ label: clean, grams: weight });
+    if (portions.length === LIMITS.maxPortions) break;
+  }
+  return portions.sort((a, b) => a.grams - b.grams);
+}
+
 export function validateModelOutput(text: string, knownKeys: ReadonlySet<string>, opts: { allowQuestions: boolean }): Result<Analysis> {
   let raw: unknown;
   try {
@@ -302,6 +352,8 @@ export function validateModelOutput(text: string, knownKeys: ReadonlySet<string>
       grams: round1(clamp(grams, LIMITS.minGrams, LIMITS.maxGrams)),
       confidence: round2(clamp(confidence, 0, 1)),
       estimate_100g: estimate,
+      // Les plats de la table ont leurs propres repères de portion : ceux du modèle sont ignorés.
+      portions: food_key === OTHER_FOOD_KEY ? parsePortions(it.portions) : [],
     });
   }
 

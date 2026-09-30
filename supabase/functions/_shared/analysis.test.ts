@@ -71,6 +71,78 @@ test('prompt système : méthode d’estimation des portions', () => {
   assert.equal(/\(pomme, orange, mangue\) ≈ 150 à 200 g/.test(prompt), false, 'plus de fourchette qui exclut les petits fruits');
 });
 
+// Le modèle juge mal les tailles : il fournit des portions nommées pour que l'utilisateur
+// corrige d'un appui, comme le font Cal AI ou MyFitnessPal, sans table d'aliments occidentaux.
+test('prompt système : portions nommées pour les aliments hors table', () => {
+  const prompt = buildSystemPrompt(FOODS);
+  assert.ok(prompt.includes('portions'), 'le champ est demandé');
+  assert.ok(/petite pomme/.test(prompt), 'exemple de fruit entier');
+  assert.ok(/1 louche/.test(prompt), 'exemple de plat en sauce');
+  assert.ok(/renvoie une liste vide/.test(prompt), 'rien à proposer pour un plat de la table');
+});
+
+test('schéma : portions déclarées et bornées', () => {
+  const item = buildResponseSchema([...KEYS]).properties.items.items;
+  assert.equal(item.properties.portions.maxItems, LIMITS.maxPortions);
+  assert.deepEqual(item.properties.portions.items.required, ['label', 'grams']);
+  assert.ok(item.required.includes('portions'));
+});
+
+test('validation : portions nettoyées, triées et bornées', () => {
+  const withPortions = (portions: unknown) =>
+    JSON.stringify({
+      ...VALID_OUTPUT,
+      items: [
+        {
+          food_key: 'autre',
+          label: 'Pomme',
+          grams: 150,
+          confidence: 0.5,
+          estimate_100g: { kcal: 52, proteines: 0.3, glucides: 14, lipides: 0.2 },
+          portions,
+        },
+      ],
+    });
+  const parse = (portions: unknown) => {
+    const r = validateModelOutput(withPortions(portions), KEYS, { allowQuestions: true });
+    assert.ok(r.ok);
+    return r.value.items[0]!.portions;
+  };
+
+  assert.deepEqual(
+    parse([
+      { label: 'grosse pomme', grams: 220 },
+      { label: 'petite pomme', grams: 100 },
+      { label: 'pomme moyenne', grams: 150 },
+    ]),
+    [
+      { label: 'petite pomme', grams: 100 },
+      { label: 'pomme moyenne', grams: 150 },
+      { label: 'grosse pomme', grams: 220 },
+    ],
+    'triées du plus léger au plus lourd',
+  );
+
+  // Une portion mal formée est ignorée : elle n'aide qu'à corriger, elle ne doit pas faire
+  // échouer un scan par ailleurs valide.
+  assert.deepEqual(parse([{ label: '', grams: 100 }, { label: 'ok', grams: 0 }, { label: 'ok', grams: 'x' }]), []);
+  assert.deepEqual(parse('pas un tableau'), []);
+  assert.deepEqual(parse(undefined), [], 'champ absent : ancienne réponse acceptée');
+  assert.deepEqual(parse([{ label: 'une', grams: 100 }, { label: 'autre', grams: 100 }]).length, 1, 'même poids : une seule');
+  assert.equal(parse(Array.from({ length: 9 }, (_, i) => ({ label: `p${i}`, grams: (i + 1) * 10 }))).length, LIMITS.maxPortions);
+  assert.equal(parse([{ label: 'x'.repeat(99), grams: 100 }])[0]!.label.length, LIMITS.maxPortionLabelLength);
+  assert.equal(parse([{ label: 'énorme', grams: 99999 }])[0]!.grams, LIMITS.maxGrams, 'poids plafonné');
+});
+
+// Les plats de la table ont leurs propres repères : ceux du modèle ne doivent pas les remplacer.
+test('validation : portions ignorées pour un plat de la table', () => {
+  const base = structuredClone(VALID_OUTPUT);
+  const out = { ...base, items: base.items.map((it) => ({ ...it, portions: [{ label: 'inventée', grams: 111 }] })) };
+  const r = validateModelOutput(JSON.stringify(out), KEYS, { allowQuestions: true });
+  assert.ok(r.ok);
+  assert.deepEqual(r.value.items[0]!.portions, []);
+});
+
 test('texte utilisateur : indice et réponses', () => {
   assert.match(buildUserText({ hint: null, answers: [] }), /pas donné d'indice/);
   const text = buildUserText({ hint: 'riz', answers: [{ question: 'Sauce ?', answer: 'Graine' }] });

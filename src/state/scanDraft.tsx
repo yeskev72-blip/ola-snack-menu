@@ -1,7 +1,7 @@
 import { randomUUID } from 'expo-crypto';
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
 
-import type { AnalysisResponse, AnalyzedItem, PreparedPhoto, Question } from '@/lib/analyze';
+import type { AnalysisResponse, AnalyzedItem, NamedPortion, PreparedPhoto, Question } from '@/lib/analyze';
 import type { TypeRepas } from '@/lib/database.types';
 import type { Per100g } from '@/lib/nutrition';
 
@@ -15,6 +15,8 @@ export type DraftItem = {
   /** Confiance de l'IA ; null dès que l'utilisateur a modifié l'élément. */
   confidence: number | null;
   estimate_100g: Per100g | null;
+  /** Portions nommées de l'IA, hors table uniquement. Absent pour un plat ajouté à la main. */
+  portions?: NamedPortion[];
 };
 
 export type ScanInfo = {
@@ -66,6 +68,7 @@ function toDraftItem(item: AnalyzedItem): DraftItem {
     grams: item.grams,
     confidence: item.confidence,
     estimate_100g: other ? item.estimate_100g : null,
+    portions: other ? item.portions : undefined,
   };
 }
 
