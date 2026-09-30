@@ -63,7 +63,12 @@ test('prompt système : méthode d’estimation des portions', () => {
   assert.ok(prompt.includes("Trouve l'échelle"), 'étape de mise à l’échelle');
   assert.ok(prompt.includes('Juge le volume'), 'volume plutôt que surface');
   assert.ok(prompt.includes('g/ml'), 'densités fournies');
-  assert.ok(/pomme, orange, mangue/.test(prompt), 'poids courants hors liste');
+  assert.ok(/petite 100 g, moyenne 150 g, grosse 220 g/.test(prompt), 'poids courants hors liste, du petit au gros');
+  // Une pomme de 100 g avait été annoncée à 180 g : l'ancienne consigne « ≈ 150 à 200 g » rendait
+  // la bonne réponse impossible. Le poids doit se mesurer, pas se recopier.
+  assert.ok(prompt.includes('6 cm ≈ 100 g'), 'échelle diamètre → poids');
+  assert.ok(prompt.includes('cube du diamètre'), 'le poids varie au cube, pas linéairement');
+  assert.equal(/\(pomme, orange, mangue\) ≈ 150 à 200 g/.test(prompt), false, 'plus de fourchette qui exclut les petits fruits');
 });
 
 test('texte utilisateur : indice et réponses', () => {

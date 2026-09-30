@@ -477,7 +477,11 @@ R\xC8GLES
 
    c) Convertis le volume en grammes. Ordres de grandeur : sauces et liquides \u2248 1 g pour 1 ml ; f\xE9culents cuits tass\xE9s (riz, p\xE2te, couscous) \u2248 0,8 g/ml ; viande et poisson \u2248 1 g/ml ; salade et feuilles crues \u2248 0,2 g/ml ; aliments frits et a\xE9r\xE9s \u2248 0,5 g/ml.
 
-   Poids courants, utiles surtout pour les aliments absents de la liste : fruit qui tient dans la main (pomme, orange, mangue) \u2248 150 \xE0 200 g ; banane \xE9pluch\xE9e \u2248 120 g ; \u0153uf \u2248 55 g ; tranche de pain \u2248 30 g ; part de pizza \u2248 125 g ; pot de yaourt \u2248 125 g ; verre \u2248 250 ml ; bouteille individuelle \u2248 500 ml.
+   d) Pour un aliment rond et entier (fruit, tubercule, boule de p\xE2te), mesure son diam\xE8tre avec le rep\xE8re d'\xE9chelle, puis lis ce tableau \u2014 il vaut pour une pomme, une orange, une tomate, tout ce qui est \xE0 peu pr\xE8s sph\xE9rique : 6 cm \u2248 100 g ; 7 cm \u2248 150 g ; 8 cm \u2248 220 g ; 9 cm \u2248 300 g ; 10 cm \u2248 400 g. Le poids suit le cube du diam\xE8tre : un fruit \xE0 peine plus large est beaucoup plus lourd, et un fruit \xE0 peine plus petit est beaucoup plus l\xE9ger.
+
+   Poids courants pour les aliments absents de la liste. Ce sont des rep\xE8res pour un sp\xE9cimen MOYEN, pas des r\xE9ponses \xE0 recopier : un m\xEAme fruit va du simple au triple selon sa taille, alors descends ou monte franchement d\xE8s que la photo montre un aliment petit ou gros. Pomme, orange : petite 100 g, moyenne 150 g, grosse 220 g. Mangue : petite 150 g, moyenne 250 g, grosse 400 g. Banane \xE9pluch\xE9e : petite 80 g, moyenne 120 g, grosse 170 g. \u0152uf \u2248 55 g ; tranche de pain \u2248 30 g ; part de pizza \u2248 125 g ; pot de yaourt \u2248 125 g ; verre \u2248 250 ml ; bouteille individuelle \u2248 500 ml.
+
+   Ne r\xE9ponds jamais le poids moyen par r\xE9flexe. Le poids moyen est la r\xE9ponse uniquement quand l'aliment para\xEEt vraiment moyen \xE0 c\xF4t\xE9 de ton rep\xE8re d'\xE9chelle ; sinon c'est une erreur, et elle est syst\xE9matique.
 
    Quand l'aliment figure dans la liste, ses rep\xE8res de portion priment sur tout ce qui pr\xE9c\xE8de. Une portion d\xE9passe rarement ${LIMITS.maxGrams} g.
 

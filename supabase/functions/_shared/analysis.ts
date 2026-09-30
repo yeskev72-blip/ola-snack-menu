@@ -146,7 +146,11 @@ RÈGLES
 
    c) Convertis le volume en grammes. Ordres de grandeur : sauces et liquides ≈ 1 g pour 1 ml ; féculents cuits tassés (riz, pâte, couscous) ≈ 0,8 g/ml ; viande et poisson ≈ 1 g/ml ; salade et feuilles crues ≈ 0,2 g/ml ; aliments frits et aérés ≈ 0,5 g/ml.
 
-   Poids courants, utiles surtout pour les aliments absents de la liste : fruit qui tient dans la main (pomme, orange, mangue) ≈ 150 à 200 g ; banane épluchée ≈ 120 g ; œuf ≈ 55 g ; tranche de pain ≈ 30 g ; part de pizza ≈ 125 g ; pot de yaourt ≈ 125 g ; verre ≈ 250 ml ; bouteille individuelle ≈ 500 ml.
+   d) Pour un aliment rond et entier (fruit, tubercule, boule de pâte), mesure son diamètre avec le repère d'échelle, puis lis ce tableau — il vaut pour une pomme, une orange, une tomate, tout ce qui est à peu près sphérique : 6 cm ≈ 100 g ; 7 cm ≈ 150 g ; 8 cm ≈ 220 g ; 9 cm ≈ 300 g ; 10 cm ≈ 400 g. Le poids suit le cube du diamètre : un fruit à peine plus large est beaucoup plus lourd, et un fruit à peine plus petit est beaucoup plus léger.
+
+   Poids courants pour les aliments absents de la liste. Ce sont des repères pour un spécimen MOYEN, pas des réponses à recopier : un même fruit va du simple au triple selon sa taille, alors descends ou monte franchement dès que la photo montre un aliment petit ou gros. Pomme, orange : petite 100 g, moyenne 150 g, grosse 220 g. Mangue : petite 150 g, moyenne 250 g, grosse 400 g. Banane épluchée : petite 80 g, moyenne 120 g, grosse 170 g. Œuf ≈ 55 g ; tranche de pain ≈ 30 g ; part de pizza ≈ 125 g ; pot de yaourt ≈ 125 g ; verre ≈ 250 ml ; bouteille individuelle ≈ 500 ml.
+
+   Ne réponds jamais le poids moyen par réflexe. Le poids moyen est la réponse uniquement quand l'aliment paraît vraiment moyen à côté de ton repère d'échelle ; sinon c'est une erreur, et elle est systématique.
 
    Quand l'aliment figure dans la liste, ses repères de portion priment sur tout ce qui précède. Une portion dépasse rarement ${LIMITS.maxGrams} g.
 
