@@ -44,17 +44,28 @@ jobs:
       - run: npm test
 
       # Les EXPO_PUBLIC_* sont figées dans le bundle au moment de sa construction. Si elles
-      # manquent ici, la mise à jour part sans l'URL Supabase et l'app affiche « Configuration
-      # manquante » sur tous les téléphones. C'est arrivé : ce contrôle est là pour que ça ne
-      # reparte jamais en silence. Les valeurs ne sont pas affichées, seulement leur présence.
-      - name: Vérifier les variables de l'environnement ${{ inputs.channel }}
+      # manquent, la mise à jour part sans l'URL Supabase et l'app affiche « Configuration
+      # manquante » sur tous les téléphones. C'est arrivé le 30/09/2026. On construit donc le
+      # bundle à part, avec les variables de l'environnement EAS, pour pouvoir l'inspecter
+      # avant de le publier.
+      - name: Construire le bundle avec la configuration de ${{ inputs.channel }}
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           npx --yes eas-cli@latest env:exec "${{ inputs.channel }}" \
-            '[ -n "$EXPO_PUBLIC_SUPABASE_URL" ] && [ -n "$EXPO_PUBLIC_SUPABASE_ANON_KEY" ]' \
-            --non-interactive \
-          || { echo "::error::EXPO_PUBLIC_SUPABASE_URL ou EXPO_PUBLIC_SUPABASE_ANON_KEY absente de l'environnement « ${{ inputs.channel }} » sur expo.dev. Publier maintenant casserait l'app."; exit 1; }
+            'npx expo export --platform android --output-dir dist' --non-interactive
+
+      # Le contrôle porte sur le bundle réellement publié, pas sur la présence des variables :
+      # c'est la seule preuve que la configuration a bien été injectée. Seul le domaine est
+      # cherché, jamais une valeur de clé, pour ne rien exposer dans les journaux.
+      - name: Vérifier que la configuration est dans le bundle
+        run: |
+          if grep -rq 'supabase\.co' dist/; then
+            echo "Configuration Supabase présente dans le bundle."
+          else
+            echo "::error::Le bundle ne contient pas l'URL Supabase : publier maintenant afficherait « Configuration manquante » sur tous les téléphones. Vérifier EXPO_PUBLIC_SUPABASE_URL et EXPO_PUBLIC_SUPABASE_ANON_KEY dans l'environnement « ${{ inputs.channel }} » sur expo.dev."
+            exit 1
+          fi
 
       - name: Publier sur le canal ${{ inputs.channel }}
         env:
@@ -64,6 +75,7 @@ jobs:
             --channel "${{ inputs.channel }}" \
             --environment "${{ inputs.channel }}" \
             --message "${{ inputs.message }}" \
+            --skip-bundler --input-dir dist \
             --non-interactive --json > update.json
           cat update.json
           {
