@@ -7,6 +7,9 @@ import { t } from '@/i18n';
 import type { Per100g } from '@/lib/nutrition';
 import { supabase } from '@/lib/supabase';
 
+/** « 1 pomme moyenne » = 150 g : portion nommée proposée par l'IA pour un aliment hors table. */
+export type NamedPortion = { label: string; grams: number };
+
 /** Réponse de l'Edge Function analyze-meal (voir supabase/functions/analyze-meal/handler.ts). */
 export type AnalyzedItem = {
   food_key: string;
@@ -14,6 +17,8 @@ export type AnalyzedItem = {
   grams: number;
   confidence: number;
   estimate_100g: Per100g | null;
+  /** Absent tant que l'Edge Function n'est pas redéployée : l'app doit fonctionner sans. */
+  portions?: NamedPortion[];
 };
 export type Question = { id: string; text: string; options: string[] };
 export type QuotaInfo = { used: number; quota: number; remaining: number };

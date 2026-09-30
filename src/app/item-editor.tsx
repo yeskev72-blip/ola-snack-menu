@@ -62,7 +62,13 @@ export default function ItemEditor() {
     }
   };
 
-  const sizes = sizeChoices(estimatedGrams);
+  // Portions nommées de l'IA pour cet aliment précis (« pomme moyenne · 150 g ») ; à défaut,
+  // trois tailles calculées autour de son estimation.
+  const aiPortions = item.portions ?? [];
+  const sizes =
+    aiPortions.length > 0
+      ? aiPortions.map((p) => ({ key: p.label, label: p.label, grams: p.grams }))
+      : sizeChoices(estimatedGrams).map((c) => ({ key: c.name, label: t(SIZE_LABELS[c.name]), grams: c.grams }));
   const chooseSize = (chosen: number) => {
     setUnit(GRAMS);
     setGramsText(formatInput(chosen));
@@ -122,8 +128,8 @@ export default function ItemEditor() {
           <View style={styles.wrap}>
             {sizes.map((s) => (
               <Chip
-                key={s.name}
-                label={`${t(SIZE_LABELS[s.name])} · ${formatNumber(s.grams)} g`}
+                key={s.key}
+                label={`${s.label} · ${formatNumber(s.grams)} g`}
                 selected={unit === GRAMS && grams === s.grams}
                 onPress={() => chooseSize(s.grams)}
               />
