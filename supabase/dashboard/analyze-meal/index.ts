@@ -469,7 +469,17 @@ R\xC8GLES
 
 3. Sauces et huile, souvent invisibles. Compte chaque sauce comme un \xE9l\xE9ment s\xE9par\xE9 du f\xE9culent qu'elle accompagne, m\xEAme si elle est en partie cach\xE9e dessous. Compte l'huile de cuisson (huile_palme ou huile_vegetale) comme un \xE9l\xE9ment s\xE9par\xE9 quand elle se voit en exc\xE8s : flaque, couche d'huile en surface, aliments luisants. Les plats frits et les sauces de la liste incluent d\xE9j\xE0 leur huile de cuisson normale : n'ajoute de l'huile que pour l'exc\xE8s visible, pour ne pas la compter deux fois.
 
-4. Portions. Estime les grammes \xE0 partir de rep\xE8res visibles : taille de l'assiette (assiette plate courante \u2248 24 \xE0 26 cm, bol \u2248 15 cm), couverts, main, emballage. Appuie-toi sur les rep\xE8res de portion de la liste. Une portion est rarement au-dessus de ${LIMITS.maxGrams} g.
+4. Portions. Ne devine pas un poids d'un coup : proc\xE8de en trois temps.
+
+   a) Trouve l'\xE9chelle. Cherche dans l'image un objet dont la taille est connue : assiette plate \u2248 24 \xE0 26 cm de diam\xE8tre, assiette creuse \u2248 22 cm, bol \u2248 15 cm, cuill\xE8re \xE0 soupe \u2248 8 cm de long, fourchette \u2248 19 cm, canette \u2248 12 cm de haut, main d'adulte \u2248 18 cm, pouce \u2248 6 cm. Si rien ne donne l'\xE9chelle, suppose une assiette plate courante et baisse nettement la confiance de l'\xE9l\xE9ment : la photo seule ne dit pas si un aliment est petit et proche ou gros et loin.
+
+   b) Juge le volume, pas la surface. Deux assiettes peuvent \xEAtre couvertes pareil pour des poids tr\xE8s diff\xE9rents : ce qui compte est l'\xE9paisseur du tas. Une couche fine et un monticule ne p\xE8sent pas la m\xEAme chose.
+
+   c) Convertis le volume en grammes. Ordres de grandeur : sauces et liquides \u2248 1 g pour 1 ml ; f\xE9culents cuits tass\xE9s (riz, p\xE2te, couscous) \u2248 0,8 g/ml ; viande et poisson \u2248 1 g/ml ; salade et feuilles crues \u2248 0,2 g/ml ; aliments frits et a\xE9r\xE9s \u2248 0,5 g/ml.
+
+   Poids courants, utiles surtout pour les aliments absents de la liste : fruit qui tient dans la main (pomme, orange, mangue) \u2248 150 \xE0 200 g ; banane \xE9pluch\xE9e \u2248 120 g ; \u0153uf \u2248 55 g ; tranche de pain \u2248 30 g ; part de pizza \u2248 125 g ; pot de yaourt \u2248 125 g ; verre \u2248 250 ml ; bouteille individuelle \u2248 500 ml.
+
+   Quand l'aliment figure dans la liste, ses rep\xE8res de portion priment sur tout ce qui pr\xE9c\xE8de. Une portion d\xE9passe rarement ${LIMITS.maxGrams} g.
 
 5. N'invente pas. Si un \xE9l\xE9ment important est incertain (aliment cach\xE9, sauce ambigu\xEB, quantit\xE9 impossible \xE0 juger), baisse sa confidence et pose au plus ${LIMITS.maxQuestions} questions courtes, chacune avec 2 \xE0 4 r\xE9ponses possibles, uniquement si la r\xE9ponse change nettement les calories. Exemple : \xAB Sauce \xE0 l'huile de palme ou \xE0 la tomate ? \xBB. Si tout est clair, ne pose aucune question.
 

@@ -138,7 +138,17 @@ RÈGLES
 
 3. Sauces et huile, souvent invisibles. Compte chaque sauce comme un élément séparé du féculent qu'elle accompagne, même si elle est en partie cachée dessous. Compte l'huile de cuisson (huile_palme ou huile_vegetale) comme un élément séparé quand elle se voit en excès : flaque, couche d'huile en surface, aliments luisants. Les plats frits et les sauces de la liste incluent déjà leur huile de cuisson normale : n'ajoute de l'huile que pour l'excès visible, pour ne pas la compter deux fois.
 
-4. Portions. Estime les grammes à partir de repères visibles : taille de l'assiette (assiette plate courante ≈ 24 à 26 cm, bol ≈ 15 cm), couverts, main, emballage. Appuie-toi sur les repères de portion de la liste. Une portion est rarement au-dessus de ${LIMITS.maxGrams} g.
+4. Portions. Ne devine pas un poids d'un coup : procède en trois temps.
+
+   a) Trouve l'échelle. Cherche dans l'image un objet dont la taille est connue : assiette plate ≈ 24 à 26 cm de diamètre, assiette creuse ≈ 22 cm, bol ≈ 15 cm, cuillère à soupe ≈ 8 cm de long, fourchette ≈ 19 cm, canette ≈ 12 cm de haut, main d'adulte ≈ 18 cm, pouce ≈ 6 cm. Si rien ne donne l'échelle, suppose une assiette plate courante et baisse nettement la confiance de l'élément : la photo seule ne dit pas si un aliment est petit et proche ou gros et loin.
+
+   b) Juge le volume, pas la surface. Deux assiettes peuvent être couvertes pareil pour des poids très différents : ce qui compte est l'épaisseur du tas. Une couche fine et un monticule ne pèsent pas la même chose.
+
+   c) Convertis le volume en grammes. Ordres de grandeur : sauces et liquides ≈ 1 g pour 1 ml ; féculents cuits tassés (riz, pâte, couscous) ≈ 0,8 g/ml ; viande et poisson ≈ 1 g/ml ; salade et feuilles crues ≈ 0,2 g/ml ; aliments frits et aérés ≈ 0,5 g/ml.
+
+   Poids courants, utiles surtout pour les aliments absents de la liste : fruit qui tient dans la main (pomme, orange, mangue) ≈ 150 à 200 g ; banane épluchée ≈ 120 g ; œuf ≈ 55 g ; tranche de pain ≈ 30 g ; part de pizza ≈ 125 g ; pot de yaourt ≈ 125 g ; verre ≈ 250 ml ; bouteille individuelle ≈ 500 ml.
+
+   Quand l'aliment figure dans la liste, ses repères de portion priment sur tout ce qui précède. Une portion dépasse rarement ${LIMITS.maxGrams} g.
 
 5. N'invente pas. Si un élément important est incertain (aliment caché, sauce ambiguë, quantité impossible à juger), baisse sa confidence et pose au plus ${LIMITS.maxQuestions} questions courtes, chacune avec 2 à 4 réponses possibles, uniquement si la réponse change nettement les calories. Exemple : « Sauce à l'huile de palme ou à la tomate ? ». Si tout est clair, ne pose aucune question.
 

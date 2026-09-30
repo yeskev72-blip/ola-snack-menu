@@ -56,6 +56,16 @@ test('prompt système : la liste ne doit pas brider les aliments reconnus', () =
   assert.ok(prompt.trimEnd().endsWith("qu'un food_key de la liste posé sur le mauvais aliment."), 'le prompt finit par la consigne');
 });
 
+// L'estimation du poids est la principale source d'erreur sur les calories : le prompt doit donner
+// une méthode (échelle → volume → densité), et des poids courants pour les aliments hors liste.
+test('prompt système : méthode d’estimation des portions', () => {
+  const prompt = buildSystemPrompt(FOODS);
+  assert.ok(prompt.includes("Trouve l'échelle"), 'étape de mise à l’échelle');
+  assert.ok(prompt.includes('Juge le volume'), 'volume plutôt que surface');
+  assert.ok(prompt.includes('g/ml'), 'densités fournies');
+  assert.ok(/pomme, orange, mangue/.test(prompt), 'poids courants hors liste');
+});
+
 test('texte utilisateur : indice et réponses', () => {
   assert.match(buildUserText({ hint: null, answers: [] }), /pas donné d'indice/);
   const text = buildUserText({ hint: 'riz', answers: [{ question: 'Sauce ?', answer: 'Graine' }] });
