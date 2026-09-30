@@ -3,6 +3,10 @@ name: Publier une mise à jour à distance
 # Envoie le code JavaScript courant aux téléphones déjà équipés : la correction s'installe
 # au lancement suivant, sans nouvel APK. Ne couvre pas les changements natifs (module,
 # permission, icône) : ceux-là demandent « Construire l'APK ».
+#
+# Le canal sert aussi de nom d'environnement EAS (--environment) : c'est ce qui injecte
+# EXPO_PUBLIC_SUPABASE_URL et EXPO_PUBLIC_SUPABASE_ANON_KEY, déclarées sur expo.dev, dans
+# le bundle. Sans cette option, la mise à jour part sans configuration et l'app ne démarre plus.
 
 on:
   workflow_dispatch:
@@ -39,12 +43,26 @@ jobs:
       - run: npx tsc --noEmit
       - run: npm test
 
+      # Les EXPO_PUBLIC_* sont figées dans le bundle au moment de sa construction. Si elles
+      # manquent ici, la mise à jour part sans l'URL Supabase et l'app affiche « Configuration
+      # manquante » sur tous les téléphones. C'est arrivé : ce contrôle est là pour que ça ne
+      # reparte jamais en silence. Les valeurs ne sont pas affichées, seulement leur présence.
+      - name: Vérifier les variables de l'environnement ${{ inputs.channel }}
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          npx --yes eas-cli@latest env:exec "${{ inputs.channel }}" \
+            '[ -n "$EXPO_PUBLIC_SUPABASE_URL" ] && [ -n "$EXPO_PUBLIC_SUPABASE_ANON_KEY" ]' \
+            --non-interactive \
+          || { echo "::error::EXPO_PUBLIC_SUPABASE_URL ou EXPO_PUBLIC_SUPABASE_ANON_KEY absente de l'environnement « ${{ inputs.channel }} » sur expo.dev. Publier maintenant casserait l'app."; exit 1; }
+
       - name: Publier sur le canal ${{ inputs.channel }}
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           npx --yes eas-cli@latest update \
             --channel "${{ inputs.channel }}" \
+            --environment "${{ inputs.channel }}" \
             --message "${{ inputs.message }}" \
             --non-interactive --json > update.json
           cat update.json
