@@ -16,12 +16,15 @@ import { formatInput, formatNumber, round1 } from '@/lib/format';
 import { useFoods } from '@/lib/foods';
 import { itemNutrition } from '@/lib/nutrition';
 import { gramsHint, unitLabel } from '@/lib/portionLabels';
-import { unitsFor } from '@/lib/portions';
+import { sizeChoices, unitsFor } from '@/lib/portions';
 import { parseNumber } from '@/lib/validation';
 import { useScanDraft } from '@/state/scanDraft';
 import { colors, fontFamily, radius, shadow, spacing } from '@/theme';
 
 const GRAMS = 'g';
+
+/** Libellés des trois tailles : correspondance explicite, pour rester vérifiée par le typage. */
+const SIZE_LABELS = { small: 'item.sizeSmall', medium: 'item.sizeMedium', large: 'item.sizeLarge' } as const;
 
 export default function ItemEditor() {
   const { key } = useLocalSearchParams<{ key: string }>();
@@ -37,6 +40,8 @@ export default function ItemEditor() {
   const [unit, setUnit] = useState<string>(GRAMS);
   const [count, setCount] = useState(1);
   const [gramsText, setGramsText] = useState(item ? formatInput(item.grams) : '');
+  // Figée au montage : les tailles restent celles de l'estimation de l'IA, même après correction.
+  const [estimatedGrams] = useState(item?.grams ?? 0);
   const [error, setError] = useState<string | null>(null);
 
   if (!item) return null;
@@ -55,6 +60,12 @@ export default function ItemEditor() {
     } else {
       setCount((c) => Math.max(0.5, c + delta * 0.5));
     }
+  };
+
+  const sizes = sizeChoices(estimatedGrams);
+  const chooseSize = (chosen: number) => {
+    setUnit(GRAMS);
+    setGramsText(formatInput(chosen));
   };
 
   const chooseUnit = (name: string) => {
@@ -104,6 +115,23 @@ export default function ItemEditor() {
         </View>
         <AppText style={styles.change}>{t('item.changeFood')}</AppText>
       </Pressable>
+
+      {sizes.length > 0 ? (
+        <View style={styles.sizes}>
+          <AppText variant="small">{t('item.size')}</AppText>
+          <View style={styles.wrap}>
+            {sizes.map((s) => (
+              <Chip
+                key={s.name}
+                label={`${t(SIZE_LABELS[s.name])} · ${formatNumber(s.grams)} g`}
+                selected={unit === GRAMS && grams === s.grams}
+                onPress={() => chooseSize(s.grams)}
+              />
+            ))}
+          </View>
+          <AppText variant="small">{t('item.sizeHint')}</AppText>
+        </View>
+      ) : null}
 
       {units.length > 0 ? (
         <Segmented
@@ -190,6 +218,7 @@ const styles = StyleSheet.create({
   foodPressed: { backgroundColor: colors.surfaceAlt },
   foodName: { fontWeight: '700' },
   change: { fontWeight: '700', color: colors.accent },
+  sizes: { gap: spacing.xs },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   qtyCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: spacing.md, borderRadius: radius.lg, backgroundColor: colors.surface, ...shadow.card },
   stepMinus: { width: 56, height: 56, borderRadius: 28, backgroundColor: colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
