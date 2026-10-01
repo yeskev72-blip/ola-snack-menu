@@ -36,6 +36,8 @@ export default function Scan() {
   /** Numéro de l'analyse en cours : « Annuler » ignore simplement la réponse qui arrivera. */
   const attempt = useRef(0);
   const pending = usePendingScans();
+  /** Photo de la file en cours d'analyse : retirée seulement une fois l'analyse aboutie. */
+  const resumed = useRef<string | null>(null);
 
   // Quota restant et table des plats (pour le calcul) rafraîchis à chaque ouverture de l'onglet ;
   // barre d'état claire sur le viseur sombre.
@@ -59,6 +61,7 @@ export default function Scan() {
       setError(null);
       try {
         const photo = await preparePhoto(asset.uri, asset.width, asset.height);
+        resumed.current = null;
         draft.reset();
         draft.setPhoto(photo);
       } catch {
@@ -92,20 +95,29 @@ export default function Scan() {
   /** Garde la photo du moment pour l'analyser au retour du réseau. */
   const keep = async () => {
     if (!draft.photo) return;
-    await keepForLater({ id: randomUUID(), base64: draft.photo.base64, hint: draft.hint.trim() || null, createdAt: new Date().toISOString() });
+    // Réutilise l'identifiant de la photo reprise : addPending remplace alors au lieu d'ajouter.
+    await keepForLater({
+      id: resumed.current ?? randomUUID(),
+      base64: draft.photo.base64,
+      hint: draft.hint.trim() || null,
+      createdAt: new Date().toISOString(),
+    });
+    resumed.current = null;
     setFailure(null);
     draft.reset();
     ToastAndroid.show(t('scan.kept'), ToastAndroid.SHORT);
   };
 
-  /** Reprend une photo gardée hors ligne : elle redevient la photo courante du brouillon. */
-  const resumePending = async (scan: PendingScan) => {
+  /**
+   * Reprend une photo gardée hors ligne : elle redevient la photo courante du brouillon, mais
+   * reste dans la file tant que l'analyse n'a pas abouti. La retirer plus tôt la perdrait si
+   * Android fermait l'app, ou si l'utilisateur quittait l'onglet sans lancer l'analyse.
+   */
+  const resumePending = (scan: PendingScan) => {
     draft.reset();
     draft.setPhoto({ uri: pendingPhotoUri(scan), base64: scan.base64 });
-    if (scan.hint) draft.setHint(scan.hint);
-    // Retirée de la file dès la reprise : si le réseau manque encore, « Garder pour plus tard »
-    // la remet. Elle n'est jamais en double.
-    await dropPendingScan(scan.id);
+    draft.setHint(scan.hint ?? '');
+    resumed.current = scan.id;
   };
 
   const analyze = async () => {
@@ -126,6 +138,11 @@ export default function Scan() {
     }
     if (result.data.quota) setQuota(result.data.quota);
     if (result.data.not_food) return setError(t('scan.notFood'));
+    // L'analyse a abouti : la photo de la file a joué son rôle.
+    if (resumed.current) {
+      await dropPendingScan(resumed.current);
+      resumed.current = null;
+    }
     draft.applyAnalysis(result.data);
     router.push('/result');
   };
@@ -206,7 +223,7 @@ export default function Scan() {
             </AppText>
             <Pressable
               accessibilityRole="button"
-              onPress={() => void resumePending(pending[0]!)}
+              onPress={() => resumePending(pending[0]!)}
               style={({ pressed }) => [styles.pendingAction, pressed && styles.pendingActionPressed]}>
               <AppText style={styles.pendingActionText}>{t('scan.pendingAnalyze')}</AppText>
             </Pressable>

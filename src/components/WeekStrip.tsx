@@ -1,10 +1,12 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
+import { dateLocale } from '@/i18n';
 import { dayKey, parseDayKey } from '@/lib/days';
 import { colors, radius } from '@/theme';
 
-const WEEKDAYS = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
+/** Abrégé du jour dans la langue servie, plutôt qu'un tableau figé en français. */
+const weekday = (date: Date) => date.toLocaleDateString(dateLocale(), { weekday: 'short' });
 
 /** Les 7 jours de la semaine en cours (lundi → dimanche) pour une journée donnée. */
 export function weekOf(today: string): string[] {
@@ -34,11 +36,11 @@ export function WeekStrip({ today, selected, filled, onSelect }: Props) {
             key={day}
             accessibilityRole="tab"
             accessibilityState={{ selected: active, disabled: future }}
-            accessibilityLabel={date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            accessibilityLabel={date.toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}
             disabled={future}
             onPress={() => onSelect(day)}
             style={[styles.day, active && styles.dayActive, future && styles.future]}>
-            <AppText style={[styles.weekday, active && styles.onDark]}>{WEEKDAYS[date.getDay()]}</AppText>
+            <AppText style={[styles.weekday, active && styles.onDark]}>{weekday(date)}</AppText>
             <View style={[styles.date, active ? styles.dateActive : future ? null : filled.has(day) ? styles.dateFilled : styles.dateEmpty]}>
               <AppText style={[styles.num, active && styles.numActive]}>{date.getDate()}</AppText>
             </View>

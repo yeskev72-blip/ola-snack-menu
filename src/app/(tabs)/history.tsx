@@ -9,7 +9,7 @@ import { Icon } from '@/components/Icon';
 import { MACROS } from '@/components/Macros';
 import { Screen } from '@/components/Screen';
 import { Segmented } from '@/components/Segmented';
-import { t } from '@/i18n';
+import { dateLocale, t } from '@/i18n';
 import { averageKcal, type DayTotals, parseDayKey } from '@/lib/days';
 import { formatNumber } from '@/lib/format';
 import { syncMeals, todayKey, useDailyTotals } from '@/lib/meals';
@@ -98,7 +98,7 @@ function DayCard({ day, target, compact }: { day: DayTotals; target: number | nu
       onPress={() => router.push({ pathname: '/day/[day]', params: { day: day.day } })}
       style={({ pressed }) => [styles.day, pressed && styles.pressed]}>
       <View style={styles.dayHead}>
-        <AppText style={styles.dayLabel}>{parseDayKey(day.day).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</AppText>
+        <AppText style={styles.dayLabel}>{parseDayKey(day.day).toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}</AppText>
         <Icon name="chevron" size={18} color={colors.textMuted} />
       </View>
       <View style={styles.dayKcalRow}>

@@ -14,12 +14,23 @@ import { REMINDERS, remindersAreValid } from '@/lib/reminders';
  * jeton d'appareil, ni donnée envoyée à qui que ce soit.
  */
 
+/**
+ * Sans gestionnaire déclaré, expo-notifications n'affiche rien quand l'app est au premier plan :
+ * le rappel serait perdu en silence pour qui a Calbasse ouverte à l'heure du repas. Déclaré au
+ * chargement du module, avant toute programmation.
+ */
+Notifications.setNotificationHandler({
+  handleNotification: () =>
+    Promise.resolve({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: true, shouldSetBadge: false }),
+});
+
 const KEY = 'reminders:enabled:v1';
 /** Mémorise qu'on a déjà proposé les rappels, pour ne le faire qu'une fois. */
 const ASKED_KEY = 'reminders:asked:v1';
 const CHANNEL = 'rappels';
 
 let memory: boolean | null = null;
+let loading: Promise<boolean> | null = null;
 const listeners = new Set<(on: boolean) => void>();
 
 function publish(on: boolean): void {
@@ -27,17 +38,22 @@ function publish(on: boolean): void {
   for (const listener of listeners) listener(on);
 }
 
-export async function loadRemindersEnabled(): Promise<boolean> {
-  if (memory !== null) return memory;
-  let raw: string | null = null;
-  try {
-    raw = await Storage.getItem(KEY);
-  } catch {
-    // Stockage indisponible : les rappels sont simplement considérés comme éteints.
-  }
-  const on = raw === '1';
-  publish(on);
-  return on;
+/** Une seule lecture à la fois, pour les mêmes raisons que la file des photos en attente. */
+export function loadRemindersEnabled(): Promise<boolean> {
+  if (memory !== null) return Promise.resolve(memory);
+  loading ??= (async () => {
+    let raw: string | null = null;
+    try {
+      raw = await Storage.getItem(KEY);
+    } catch {
+      // Stockage indisponible : les rappels sont simplement considérés comme éteints.
+    }
+    const on = memory ?? raw === '1';
+    publish(on);
+    loading = null;
+    return on;
+  })();
+  return loading;
 }
 
 /**
@@ -85,15 +101,21 @@ async function schedule(): Promise<void> {
  */
 export async function setRemindersEnabled(on: boolean): Promise<boolean> {
   let active = false;
-  if (on) {
-    const { granted, canAskAgain } = await Notifications.getPermissionsAsync();
-    const allowed = granted || (canAskAgain && (await Notifications.requestPermissionsAsync()).granted);
-    if (allowed) {
-      await schedule();
-      active = true;
+  try {
+    if (on) {
+      const { granted, canAskAgain } = await Notifications.getPermissionsAsync();
+      const allowed = granted || (canAskAgain && (await Notifications.requestPermissionsAsync()).granted);
+      if (allowed) {
+        await schedule();
+        active = true;
+      }
+    } else {
+      await cancelAll();
     }
-  } else {
-    await cancelAll();
+  } catch {
+    // Le système a refusé la programmation : l'interrupteur revient sur « éteint » plutôt que
+    // de promettre des rappels qui n'arriveront pas.
+    active = false;
   }
   publish(active);
   try {
@@ -110,10 +132,14 @@ export async function setRemindersEnabled(on: boolean): Promise<boolean> {
  * disparaîtraient en silence et l'utilisateur croirait les avoir encore.
  */
 export async function restoreReminders(): Promise<void> {
-  if (!(await loadRemindersEnabled())) return;
-  const { granted } = await Notifications.getPermissionsAsync();
-  if (granted) await schedule();
-  else await setRemindersEnabled(false);
+  try {
+    if (!(await loadRemindersEnabled())) return;
+    const { granted } = await Notifications.getPermissionsAsync();
+    if (granted) await schedule();
+    else await setRemindersEnabled(false);
+  } catch {
+    // Appelée au démarrage : une erreur ici ne doit jamais empêcher l'app de s'ouvrir.
+  }
 }
 
 /**
