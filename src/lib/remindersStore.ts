@@ -15,6 +15,8 @@ import { REMINDERS, remindersAreValid } from '@/lib/reminders';
  */
 
 const KEY = 'reminders:enabled:v1';
+/** Mémorise qu'on a déjà proposé les rappels, pour ne le faire qu'une fois. */
+const ASKED_KEY = 'reminders:asked:v1';
 const CHANNEL = 'rappels';
 
 let memory: boolean | null = null;
@@ -112,6 +114,29 @@ export async function restoreReminders(): Promise<void> {
   const { granted } = await Notifications.getPermissionsAsync();
   if (granted) await schedule();
   else await setRemindersEnabled(false);
+}
+
+/**
+ * Android ne permet de demander l'autorisation qu'une seule fois : un refus est définitif.
+ * On propose donc d'abord dans l'app, en expliquant à quoi servent les rappels, et on ne
+ * déclenche la demande système que sur un « oui ». La proposition n'est faite qu'une fois,
+ * répondue ou écartée : une app qui redemande à chaque ouverture se fait désinstaller.
+ */
+export async function hasAskedReminders(): Promise<boolean> {
+  try {
+    return (await Storage.getItem(ASKED_KEY)) === '1';
+  } catch {
+    // Dans le doute, considérer que la question a été posée : mieux vaut ne pas insister.
+    return true;
+  }
+}
+
+export async function markRemindersAsked(): Promise<void> {
+  try {
+    await Storage.setItem(ASKED_KEY, '1');
+  } catch {
+    // Non mémorisé : la proposition réapparaîtra, sans conséquence.
+  }
 }
 
 export function useRemindersEnabled(): boolean {

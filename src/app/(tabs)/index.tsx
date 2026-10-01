@@ -9,6 +9,7 @@ import { DayMeals } from '@/components/DayMeals';
 import { Icon } from '@/components/Icon';
 import { Logo } from '@/components/Logo';
 import { MacroCards } from '@/components/Macros';
+import { RemindersPrompt } from '@/components/RemindersPrompt';
 import { Notice } from '@/components/Notice';
 import { Ring } from '@/components/Ring';
 import { Screen } from '@/components/Screen';
@@ -93,6 +94,8 @@ export default function Journal() {
       ) : pending > 0 ? (
         <Notice tone="info" message={t('journal.pending', { count: pending })} />
       ) : null}
+
+      <RemindersPrompt />
 
       <WeekStrip today={today} selected={selected} filled={filled} onSelect={setSelected} />
 

@@ -232,6 +232,10 @@ export const fr = {
     dinner: 'Dernier repas de la journée : note-le avant de dormir.',
     setting: 'Rappels de repas',
     settingHint: 'Trois rappels par jour pour penser à noter tes repas.',
+    askTitle: 'On te rappelle de noter tes repas ?',
+    askBody: 'Trois rappels par jour, à l’heure des repas. Tu peux les couper à tout moment depuis ton profil.',
+    askYes: 'Oui, me rappeler',
+    askNo: 'Non merci',
     denied: 'Autorise les notifications dans les réglages d’Android pour recevoir les rappels.',
   },
   item: {
