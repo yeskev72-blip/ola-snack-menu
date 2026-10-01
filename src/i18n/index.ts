@@ -1,7 +1,8 @@
+import { en } from './en';
 import { fr, type Messages } from './fr';
 import { DEFAULT_LOCALE, deviceLanguages, pickLocale } from './pickLocale';
 
-export const locales = { fr } satisfies Record<string, Messages>;
+export const locales = { fr, en } satisfies Record<string, Messages>;
 export type Locale = keyof typeof locales;
 
 const availableLocales = Object.keys(locales) as Locale[];

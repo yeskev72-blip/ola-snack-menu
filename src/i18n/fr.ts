@@ -338,7 +338,7 @@ export const fr = {
       'Désactivé par défaut. Si tu l’actives, les photos de tes scans peuvent être conservées pour vérifier et améliorer la table des plats.',
     language: 'Langue',
     languageName: 'Français',
-    languageSoon: 'D’autres langues arriveront plus tard.',
+    languageSoon: 'L’app suit la langue de ton téléphone.',
     signOut: 'Se déconnecter',
     signOutGuestTitle: 'Se déconnecter du mode invité ?',
     signOutGuestBody: 'Sans compte, ton journal sera définitivement perdu.',
