@@ -376,6 +376,11 @@ var LIMITS = {
   maxPortions: 4,
   maxPortionLabelLength: 40
 };
+var LANGS = [
+  "fr",
+  "en"
+];
+var DEFAULT_LANG = "fr";
 var UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 var isRecord = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
 var isFiniteNumber = (v) => typeof v === "number" && Number.isFinite(v);
@@ -437,13 +442,15 @@ function parseRequest(body) {
       error: "answers exige scan_id."
     };
   }
+  const lang = LANGS.find((l) => l === body.lang) ?? DEFAULT_LANG;
   return {
     ok: true,
     value: {
       imageBase64: image,
       hint,
       scanId,
-      answers
+      answers,
+      lang
     }
   };
 }
@@ -456,7 +463,11 @@ function foodLine(f) {
   const reperes = Object.entries(f.portion_reperes).map(([name, grams]) => `${name} \u2248 ${grams} g`).join(", ");
   return `- ${f.food_key} : ${f.label_fr}${aliases}${reperes ? ` [${reperes}]` : ""}`;
 }
-function buildSystemPrompt(foods) {
+var OUTPUT_LANGUAGE = {
+  fr: "en fran\xE7ais simple",
+  en: "en anglais simple (l'utilisateur lit l'application en anglais)"
+};
+function buildSystemPrompt(foods, lang = DEFAULT_LANG) {
   return `Tu es un assistant nutritionniste. Tu reconnais les aliments et les plats du monde entier \u2014 cuisine africaine, europ\xE9enne, asiatique, am\xE9ricaine, produits industriels, fruits et l\xE9gumes de toutes origines \u2014 et tu connais particuli\xE8rement bien la cuisine d'Afrique de l'Ouest (B\xE9nin, Togo, C\xF4te d'Ivoire, S\xE9n\xE9gal, Nigeria, Ghana). Tu analyses la photo d'un repas pour identifier chaque \xE9l\xE9ment et estimer sa quantit\xE9 en grammes.
 
 R\xC8GLES
@@ -496,7 +507,7 @@ R\xC8GLES
 
 7. Si la photo ne montre pas de nourriture, renvoie not_food = true, sans \xE9l\xE9ments ni questions.
 
-8. R\xE9ponds uniquement avec un objet JSON de cette forme exacte, sans texte autour. Libell\xE9s et questions en fran\xE7ais simple.
+8. R\xE9ponds uniquement avec un objet JSON de cette forme exacte, sans texte autour. Les libell\xE9s, les portions nomm\xE9es et les questions sont \xE9crits ${OUTPUT_LANGUAGE[lang]} : c'est le seul texte que l'utilisateur lit. Les noms de plats locaux (atti\xE9k\xE9, amiwo, gari, alloco) ne se traduisent pas, quelle que soit la langue.
 {"not_food": false, "items": [{"food_key": "<cl\xE9 de la liste ou ${OTHER_FOOD_KEY}>", "label": "<libell\xE9>", "grams": <nombre>, "confidence": <0 \xE0 1>, "estimate_100g": null ou {"kcal": <nombre>, "proteines": <nombre>, "glucides": <nombre>, "lipides": <nombre>}}], "questions": [{"id": "<identifiant court>", "text": "<question>", "options": ["<r\xE9ponse>", "<r\xE9ponse>"]}], "confidence_globale": <0 \xE0 1>}
 Au plus ${LIMITS.maxItems} \xE9l\xE9ments.
 
@@ -925,7 +936,7 @@ function createHandler(deps) {
       const foods = await deps.loadFoods();
       const knownKeys = new Set(foods.map((f) => f.food_key));
       const geminiRequest = {
-        systemPrompt: buildSystemPrompt(foods),
+        systemPrompt: buildSystemPrompt(foods, request.lang),
         userText: buildUserText(request),
         imageBase64: request.imageBase64,
         responseSchema: buildResponseSchema([
