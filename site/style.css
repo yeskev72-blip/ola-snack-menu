@@ -188,6 +188,42 @@ section {
   gap: 16px;
 }
 
+.heads-up {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-block: 4px 18px;
+}
+
+/* Le bandeau vit sur le fond sombre du haut de page : fond translucide plutôt que blanc,
+   pour prévenir sans crier ni casser l'ambiance de l'en-tête. */
+.heads-up p {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--ink-on-night);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.heads-up a {
+  color: var(--or);
+  white-space: nowrap;
+}
+
+.heads-up-icon {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--or);
+  color: var(--night);
+  font-family: var(--display);
+  font-weight: 800;
+  line-height: 1;
+}
+
 .brand {
   display: inline-flex;
   align-items: center;
