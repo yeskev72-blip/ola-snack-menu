@@ -21,10 +21,26 @@ ouvrir le fichier dans un navigateur et faire une capture de chaque carré.
 ## Nom affiché
 
 Le champ « nom » est indexé par la recherche des deux plateformes, pas le pseudo.
-Il doit donc contenir les mots que les gens tapent.
+Il doit donc contenir les mots que les gens tapent — mais il est **limité à 30 caractères
+des deux côtés**, et au-delà la fin est coupée sans avertissement.
 
-- Instagram, champ *Nom* : `Calbasse · Calories des plats africains`
-- TikTok, champ *Nom* : `Calbasse · Calories de nos plats`
+Le même des deux côtés, 27 caractères :
+
+```
+Calbasse · Calories Afrique
+```
+
+Il garde les deux mots qui comptent pour la recherche, « calories » et « Afrique », avec
+trois caractères de marge. Autres possibilités tenant dans la limite, à recompter après
+toute modification :
+
+| Nom | Caractères |
+| --- | --- |
+| `Calbasse · Calories Afrique` | 27 |
+| `Calbasse · Calories en photo` | 28 |
+| `Calbasse · Calories des plats` | 29 |
+| `Calbasse · Calories du maquis` | 29 |
+| `Calbasse · Calories africaines` | 30, sans marge |
 
 ## Pseudo
 

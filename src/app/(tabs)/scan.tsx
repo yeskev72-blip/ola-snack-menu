@@ -1,8 +1,9 @@
+import { randomUUID } from 'expo-crypto';
 import * as ImagePicker from 'expo-image-picker';
 import { router, useFocusEffect } from 'expo-router';
 import { setStatusBarStyle } from 'expo-status-bar';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Image, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Image, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, TextInput, ToastAndroid, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/AppText';
@@ -12,6 +13,8 @@ import { AnalyzingView, StatusView } from '@/components/ScanStates';
 import { t } from '@/i18n';
 import { analyzeMeal, type AnalyzeError, fetchScanStatus, preparePhoto, type QuotaInfo } from '@/lib/analyze';
 import { loadFoods } from '@/lib/foods';
+import { pendingPhotoUri, type PendingScan } from '@/lib/pendingScans';
+import { dropPendingScan, keepForLater, usePendingScans } from '@/lib/pendingScansStore';
 import { useScanDraft } from '@/state/scanDraft';
 import { colors, fontFamily, radius, spacing } from '@/theme';
 
@@ -32,6 +35,7 @@ export default function Scan() {
   const [quotaExhausted, setQuotaExhausted] = useState(false);
   /** Numéro de l'analyse en cours : « Annuler » ignore simplement la réponse qui arrivera. */
   const attempt = useRef(0);
+  const pending = usePendingScans();
 
   // Quota restant et table des plats (pour le calcul) rafraîchis à chaque ouverture de l'onglet ;
   // barre d'état claire sur le viseur sombre.
@@ -83,6 +87,25 @@ export default function Scan() {
 
   const pickFromGallery = async () => {
     await handlePicked(await ImagePicker.launchImageLibraryAsync(PICKER_OPTIONS));
+  };
+
+  /** Garde la photo du moment pour l'analyser au retour du réseau. */
+  const keep = async () => {
+    if (!draft.photo) return;
+    await keepForLater({ id: randomUUID(), base64: draft.photo.base64, hint: draft.hint.trim() || null, createdAt: new Date().toISOString() });
+    setFailure(null);
+    draft.reset();
+    ToastAndroid.show(t('scan.kept'), ToastAndroid.SHORT);
+  };
+
+  /** Reprend une photo gardée hors ligne : elle redevient la photo courante du brouillon. */
+  const resumePending = async (scan: PendingScan) => {
+    draft.reset();
+    draft.setPhoto({ uri: pendingPhotoUri(scan), base64: scan.base64 });
+    if (scan.hint) draft.setHint(scan.hint);
+    // Retirée de la file dès la reprise : si le réseau manque encore, « Garder pour plus tard »
+    // la remet. Elle n'est jamais en double.
+    await dropPendingScan(scan.id);
   };
 
   const analyze = async () => {
@@ -156,7 +179,7 @@ export default function Scan() {
         body={network ? t('scan.offlineBody') : failure.message}
         notCounted
         primary={{ label: t('common.retry'), icon: 'refresh', onPress: () => void analyze() }}
-        secondary={{ label: t('scan.manualShort'), onPress: manual }}
+        secondary={network ? { label: t('scan.keepForLater'), onPress: () => void keep() } : { label: t('scan.manualShort'), onPress: manual }}
         onClose={close}
       />
     );
@@ -172,6 +195,30 @@ export default function Scan() {
             <AppText style={styles.pillText}>{quotaText}</AppText>
           </View>
         </View>
+
+        {/* Photos prises sans réseau : proposées dès le retour sur l'écran, jamais analysées
+            toutes seules — un repas n'est enregistré qu'après validation de l'utilisateur. */}
+        {pending.length > 0 && !draft.photo ? (
+          <View style={styles.pending}>
+            <Image source={{ uri: pendingPhotoUri(pending[0]!) }} style={styles.pendingThumb} accessibilityIgnoresInvertColors />
+            <AppText style={styles.pendingText}>
+              {pending.length === 1 ? t('scan.pendingOne') : t('scan.pendingMany', { count: pending.length })}
+            </AppText>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => void resumePending(pending[0]!)}
+              style={({ pressed }) => [styles.pendingAction, pressed && styles.pendingActionPressed]}>
+              <AppText style={styles.pendingActionText}>{t('scan.pendingAnalyze')}</AppText>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('scan.pendingDrop')}
+              onPress={() => void dropPendingScan(pending[0]!.id)}
+              hitSlop={8}>
+              <Icon name="close" size={18} color={DARK.muted} />
+            </Pressable>
+          </View>
+        ) : null}
 
         <View style={styles.viewfinder}>
           {draft.photo ? (
@@ -279,6 +326,21 @@ function DarkButton({ icon, label, onPress, disabled }: { icon: IconName; label:
 
 const CORNER = 44;
 const styles = StyleSheet.create({
+  pending: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.sm,
+    padding: 10,
+    borderRadius: radius.md,
+    backgroundColor: DARK.field,
+  },
+  pendingThumb: { width: 36, height: 36, borderRadius: radius.sm },
+  pendingText: { flex: 1, color: DARK.soft, fontSize: 13, lineHeight: 18 },
+  pendingAction: { paddingHorizontal: spacing.sm, paddingVertical: 6, borderRadius: radius.pill, backgroundColor: DARK.button },
+  pendingActionPressed: { opacity: 0.7 },
+  pendingActionText: { color: DARK.text, fontSize: 13, fontWeight: '700' },
   dark: { flex: 1, backgroundColor: DARK.bg },
   flex: { flex: 1 },
   top: { flexDirection: 'row', justifyContent: 'center', paddingHorizontal: spacing.md, paddingTop: spacing.md },
