@@ -1,12 +1,22 @@
-# Table des plats : valeurs à vérifier
+# Table des plats : origine des valeurs
 
-Les valeurs nutritionnelles de `supabase/seed/foods.json` sont des **approximations** rédigées pour démarrer le projet.
-Elles ne sont **pas officielles** et ne doivent pas être présentées comme telles dans l'app ni ailleurs.
-Toutes les entrées ont `verified = false`.
+Les valeurs nutritionnelles de `supabase/seed/foods.json` sont des **estimations internes**,
+rédigées pour démarrer le projet et cohérentes entre elles, mais **jamais confrontées à une
+table de composition officielle**.
 
-Depuis octobre 2026, l'app l'affiche : un marqueur **« à confirmer »** accompagne ces plats dans la
-liste, dans le résultat d'un scan, dans l'éditeur et dans le détail d'un repas enregistré. Passer une
-ligne à `verified = true` fait disparaître le marqueur pour ce plat, sans autre changement de code.
+Le 1er octobre 2026, l'éditeur a choisi de les valider en l'état : les 69 lignes portent
+`verified = true`, et le marqueur « à confirmer » ne s'affiche donc plus dans l'app. Le champ
+`source` dit exactement ce qu'il en est — « Estimation interne Calbasse, validée par l'éditeur
+[…]. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS,
+2019). » — pour que personne ne les prenne plus tard pour des valeurs officielles.
+
+**`verified = true` signifie donc ici « validé par l'éditeur », et non « vérifié sur une table
+de référence ».** C'est une nuance à garder en tête avant de s'appuyer sur ce champ.
+
+La vérification sur la table FAO reste souhaitable, et `docs/FOODS_FECULENTS.md` garde la
+fiche de relevé prête pour les 22 féculents. Quatre contrôles automatiques
+(`src/lib/foodsSeed.test.mjs`) protègent toute future saisie : bornes physiques, unicité des
+clés, concordance entre les kcal et les macros à 15 % près, et obligation de citer une source.
 
 ## Source à utiliser
 

@@ -16,8 +16,8 @@
       "bol": 200,
       "assiette": 300
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "riz_jollof",
@@ -37,8 +37,8 @@
       "bol": 220,
       "assiette": 330
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "atassi",
@@ -57,8 +57,8 @@
       "bol": 220,
       "assiette": 350
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "attieke",
@@ -77,8 +77,8 @@
       "bol": 180,
       "assiette": 250
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "pate_mais",
@@ -100,8 +100,8 @@
       "boule": 300,
       "assiette": 400
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "amiwo",
@@ -119,8 +119,8 @@
       "boule": 300,
       "assiette": 400
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "akassa",
@@ -138,8 +138,8 @@
     "portion_reperes": {
       "unite": 150
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "igname_pilee",
@@ -159,8 +159,8 @@
     "portion_reperes": {
       "boule": 350
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "foufou_manioc",
@@ -178,8 +178,8 @@
     "portion_reperes": {
       "boule": 300
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "gari",
@@ -197,8 +197,8 @@
       "cuillere": 12,
       "bol": 120
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "eba",
@@ -215,8 +215,8 @@
     "portion_reperes": {
       "boule": 300
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "haricots_niebe",
@@ -236,8 +236,8 @@
       "louche": 150,
       "bol": 200
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "alloco",
@@ -256,8 +256,8 @@
       "morceau": 15,
       "assiette": 200
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "plantain_bouilli",
@@ -274,8 +274,8 @@
     "portion_reperes": {
       "unite": 180
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "igname_bouillie",
@@ -291,8 +291,8 @@
     "portion_reperes": {
       "morceau": 100
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "igname_frite",
@@ -310,8 +310,8 @@
       "morceau": 40,
       "assiette": 200
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "manioc_bouilli",
@@ -329,8 +329,8 @@
     "portion_reperes": {
       "morceau": 100
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "pain",
@@ -348,8 +348,8 @@
       "morceau": 60,
       "unite": 250
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "spaghetti",
@@ -367,8 +367,8 @@
     "portion_reperes": {
       "assiette": 250
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "couscous_mil",
@@ -387,8 +387,8 @@
       "bol": 200,
       "assiette": 300
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "bouillie_mil",
@@ -408,8 +408,8 @@
     "portion_reperes": {
       "bol": 300
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "bouillie_mais",
@@ -427,8 +427,8 @@
     "portion_reperes": {
       "bol": 300
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "thieboudienne",
@@ -446,8 +446,8 @@
     "portion_reperes": {
       "assiette": 450
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "poulet_dg",
@@ -463,8 +463,8 @@
     "portion_reperes": {
       "assiette": 350
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "yassa_poulet",
@@ -481,8 +481,8 @@
       "louche": 150,
       "assiette": 250
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "degue",
@@ -500,8 +500,8 @@
     "portion_reperes": {
       "bol": 250
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "sauce_graine",
@@ -519,8 +519,8 @@
     "portion_reperes": {
       "louche": 120
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "sauce_arachide",
@@ -539,8 +539,8 @@
     "portion_reperes": {
       "louche": 120
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "sauce_tomate",
@@ -558,8 +558,8 @@
     "portion_reperes": {
       "louche": 100
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "sauce_feuilles",
@@ -578,8 +578,8 @@
     "portion_reperes": {
       "louche": 120
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "sauce_gombo",
@@ -598,8 +598,8 @@
     "portion_reperes": {
       "louche": 120
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "sauce_crincrin",
@@ -617,8 +617,8 @@
     "portion_reperes": {
       "louche": 120
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "sauce_pistache",
@@ -636,8 +636,8 @@
     "portion_reperes": {
       "louche": 120
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "sauce_claire",
@@ -655,8 +655,8 @@
     "portion_reperes": {
       "louche": 150
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "ndole",
@@ -672,8 +672,8 @@
     "portion_reperes": {
       "louche": 150
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "sauce_feuille_manioc",
@@ -692,8 +692,8 @@
     "portion_reperes": {
       "louche": 120
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "poulet_braise",
@@ -711,8 +711,8 @@
     "portion_reperes": {
       "morceau": 120
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "poulet_frit",
@@ -728,8 +728,8 @@
     "portion_reperes": {
       "morceau": 120
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "poisson_braise",
@@ -748,8 +748,8 @@
       "unite": 300,
       "morceau": 100
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "poisson_frit",
@@ -768,8 +768,8 @@
       "morceau": 80,
       "unite": 150
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "poisson_fume",
@@ -787,8 +787,8 @@
     "portion_reperes": {
       "morceau": 30
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "crevettes_sechees",
@@ -805,8 +805,8 @@
     "portion_reperes": {
       "cuillere": 8
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "viande_boeuf",
@@ -824,8 +824,8 @@
     "portion_reperes": {
       "morceau": 40
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "viande_chevre",
@@ -844,8 +844,8 @@
     "portion_reperes": {
       "morceau": 40
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "suya",
@@ -864,8 +864,8 @@
     "portion_reperes": {
       "unite": 60
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "oeuf_dur",
@@ -882,8 +882,8 @@
     "portion_reperes": {
       "unite": 50
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "omelette",
@@ -900,8 +900,8 @@
     "portion_reperes": {
       "unite": 90
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "wagashi",
@@ -919,8 +919,8 @@
     "portion_reperes": {
       "morceau": 60
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "wagashi_frit",
@@ -936,8 +936,8 @@
     "portion_reperes": {
       "morceau": 60
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "fromage_soja",
@@ -955,8 +955,8 @@
     "portion_reperes": {
       "morceau": 50
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "beignets_haricot",
@@ -975,8 +975,8 @@
     "portion_reperes": {
       "unite": 25
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "crudites",
@@ -993,8 +993,8 @@
     "portion_reperes": {
       "assiette": 100
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "avocat",
@@ -1010,8 +1010,8 @@
     "portion_reperes": {
       "unite": 150
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "banane_douce",
@@ -1027,8 +1027,8 @@
     "portion_reperes": {
       "unite": 120
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "mangue",
@@ -1044,8 +1044,8 @@
     "portion_reperes": {
       "unite": 250
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "ananas",
@@ -1061,8 +1061,8 @@
     "portion_reperes": {
       "morceau": 80
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "orange",
@@ -1078,8 +1078,8 @@
     "portion_reperes": {
       "unite": 150
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "papaye",
@@ -1095,8 +1095,8 @@
     "portion_reperes": {
       "morceau": 150
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "huile_palme",
@@ -1113,8 +1113,8 @@
     "portion_reperes": {
       "cuillere": 13
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "huile_vegetale",
@@ -1131,8 +1131,8 @@
     "portion_reperes": {
       "cuillere": 13
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "mayonnaise",
@@ -1148,8 +1148,8 @@
     "portion_reperes": {
       "cuillere": 15
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "arachides_grillees",
@@ -1167,8 +1167,8 @@
     "portion_reperes": {
       "poignee": 30
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "beignet_farine",
@@ -1187,8 +1187,8 @@
     "portion_reperes": {
       "unite": 40
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "chips_plantain",
@@ -1205,8 +1205,8 @@
     "portion_reperes": {
       "sachet": 50
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "bissap",
@@ -1224,8 +1224,8 @@
     "portion_reperes": {
       "verre": 250
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "jus_gingembre",
@@ -1242,8 +1242,8 @@
     "portion_reperes": {
       "verre": 250
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "soda",
@@ -1262,8 +1262,8 @@
       "canette": 330,
       "bouteille": 500
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "lait_concentre",
@@ -1280,8 +1280,8 @@
     "portion_reperes": {
       "cuillere": 20
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   },
   {
     "food_key": "sucre",
@@ -1299,7 +1299,7 @@
       "cuillere": 5,
       "morceau": 5
     },
-    "source": "Estimation à vérifier – cible : Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019)",
-    "verified": false
+    "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
+    "verified": true
   }
 ]
