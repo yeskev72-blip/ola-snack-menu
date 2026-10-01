@@ -1,9 +1,18 @@
+import { en } from './en';
 import { fr, type Messages } from './fr';
+import { DEFAULT_LOCALE, deviceLanguages, pickLocale } from './pickLocale';
 
-export const locales = { fr } satisfies Record<string, Messages>;
+export const locales = { fr, en } satisfies Record<string, Messages>;
 export type Locale = keyof typeof locales;
 
-let current: Locale = 'fr';
+const availableLocales = Object.keys(locales) as Locale[];
+
+/**
+ * L'app suit la langue du téléphone, et retombe sur le français — le marché visé est
+ * francophone — quand cette langue n'est pas traduite. Résolu une fois au chargement : la
+ * langue du système ne change pas sans redémarrage de l'app.
+ */
+let current: Locale = pickLocale(deviceLanguages(), availableLocales, DEFAULT_LOCALE as Locale);
 
 export function setLocale(locale: Locale) {
   current = locale;
