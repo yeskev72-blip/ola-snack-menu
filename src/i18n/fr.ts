@@ -191,7 +191,7 @@ export const fr = {
     pendingMany: '{count} photos attendent d’être analysées.',
     pendingAnalyze: 'Analyser',
     pendingDrop: 'Abandonner',
-    offlineBody: "L'analyse a besoin d'internet. Ta photo reste ici : réessaie quand le réseau revient, ou ajoute ton plat à la main.",
+    offlineBody: "L'analyse a besoin d'internet. Réessaie maintenant, ou garde la photo : on te la reproposera dès que le réseau sera revenu.",
     busyTitle: 'Beaucoup de monde en ce moment',
     quotaTitle: 'Tes {count} scans du jour sont utilisés',
     quotaTitleOne: 'Ton scan du jour est utilisé',

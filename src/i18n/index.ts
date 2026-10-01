@@ -18,6 +18,14 @@ export function setLocale(locale: Locale) {
   current = locale;
 }
 
+/**
+ * Étiquette à passer à toLocaleDateString : les dates doivent suivre la langue servie, pas la
+ * langue du téléphone — l'app peut tourner en français sur un téléphone réglé en haoussa.
+ */
+export function dateLocale(): string {
+  return current === 'fr' ? 'fr-FR' : 'en-GB';
+}
+
 export function getLocale(): Locale {
   return current;
 }

@@ -199,7 +199,7 @@ export const en: Messages = {
     pendingMany: '{count} photos are waiting to be analysed.',
     pendingAnalyze: 'Analyse',
     pendingDrop: 'Discard',
-    offlineBody: 'Analysis needs internet. Your photo stays here: try again when the network is back, or add your plate by hand.',
+    offlineBody: 'Analysis needs internet. Try again now, or keep the photo: we will offer it again as soon as the network is back.',
     busyTitle: 'Busy right now',
     quotaTitle: 'Your {count} scans for today are used',
     quotaTitleOne: 'Your scan for today is used',

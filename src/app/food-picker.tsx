@@ -13,7 +13,7 @@ export default function FoodPicker() {
 
   const choose = (food: LocalFood) => {
     if (replace) {
-      draft.updateItem(replace, { food_key: food.food_key, label: food.label_fr, estimate_100g: null });
+      draft.updateItem(replace, { food_key: food.food_key, label: food.label_fr, estimate_100g: null, portions: undefined });
       router.back();
       return;
     }

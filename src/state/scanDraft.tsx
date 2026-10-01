@@ -18,6 +18,11 @@ export type DraftItem = {
   estimate_100g: Per100g | null;
   /** Portions nommées de l'IA, hors table uniquement. Absent pour un plat ajouté à la main. */
   portions?: NamedPortion[];
+  /**
+   * Poids estimé par l'IA, figé. Les tailles proposées dans l'éditeur s'y ancrent : sans lui,
+   * elles se recalculeraient sur la valeur corrigée et dériveraient à chaque réouverture.
+   */
+  aiGrams?: number;
 };
 
 export type ScanInfo = {
@@ -72,6 +77,7 @@ function toDraftItem(item: AnalyzedItem): DraftItem {
     confidence: item.confidence,
     estimate_100g: other ? item.estimate_100g : null,
     portions: other ? item.portions : undefined,
+    aiGrams: item.grams,
   };
 }
 

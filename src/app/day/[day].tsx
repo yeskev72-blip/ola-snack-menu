@@ -6,7 +6,7 @@ import { Icon } from '@/components/Icon';
 import { MACROS } from '@/components/Macros';
 import { Ring } from '@/components/Ring';
 import { Screen } from '@/components/Screen';
-import { t } from '@/i18n';
+import { dateLocale, t } from '@/i18n';
 import { macroTargets } from '@/lib/calories';
 import { parseDayKey } from '@/lib/days';
 import { formatNumber } from '@/lib/format';
@@ -16,7 +16,7 @@ import type { Nutrients } from '@/lib/nutrition';
 import { useSession } from '@/state/session';
 import { colors, radius, shadow, spacing } from '@/theme';
 
-const time = (iso: string) => new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+const time = (iso: string) => new Date(iso).toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' });
 
 export default function DayDetail() {
   const { day } = useLocalSearchParams<{ day: string }>();
@@ -35,7 +35,7 @@ export default function DayDetail() {
   const targets = macroTargets(target);
   const diff = Math.round(total.kcal - target);
   const onTarget = target > 0 && Math.abs(diff) <= target * 0.1;
-  const date = parseDayKey(day).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  const date = parseDayKey(day).toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' });
   const title = date.charAt(0).toUpperCase() + date.slice(1);
 
   return (

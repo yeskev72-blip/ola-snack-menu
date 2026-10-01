@@ -41,8 +41,10 @@ export default function ItemEditor() {
   const [unit, setUnit] = useState<string>(GRAMS);
   const [count, setCount] = useState(1);
   const [gramsText, setGramsText] = useState(item ? formatInput(item.grams) : '');
-  // Figée au montage : les tailles restent celles de l'estimation de l'IA, même après correction.
-  const [estimatedGrams] = useState(item?.grams ?? 0);
+  // Ancrée sur l'estimation de l'IA quand elle existe, pour que les tailles proposées ne
+  // dérivent pas à chaque réouverture ; sinon figée au montage, pour un aliment ajouté à la main.
+  const [mountedGrams] = useState(item?.grams ?? 0);
+  const estimatedGrams = item?.aiGrams ?? mountedGrams;
   const [error, setError] = useState<string | null>(null);
 
   if (!item) return null;

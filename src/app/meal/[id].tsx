@@ -7,7 +7,7 @@ import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import { Macros } from '@/components/Macros';
 import { Screen } from '@/components/Screen';
-import { t } from '@/i18n';
+import { dateLocale, t } from '@/i18n';
 import { isUnverified } from '@/lib/foodStatus';
 import { useFoods } from '@/lib/foods';
 import { formatNumber } from '@/lib/format';
@@ -55,7 +55,7 @@ export default function MealDetail() {
   };
 
   const date = new Date(meal.eaten_at);
-  const when = `${date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })} · ${date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+  const when = `${date.toLocaleDateString(dateLocale(), { weekday: 'short', day: 'numeric', month: 'short' })} · ${date.toLocaleTimeString(dateLocale(), { hour: '2-digit', minute: '2-digit' })}`;
 
   return (
     <Screen

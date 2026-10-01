@@ -11,6 +11,7 @@ import { addPending, parsePending, type PendingScan, removePending } from '@/lib
 const KEY = 'pendingScans:v1';
 
 let memory: PendingScan[] | null = null;
+let loading: Promise<PendingScan[]> | null = null;
 const listeners = new Set<(scans: PendingScan[]) => void>();
 
 function publish(scans: PendingScan[]): void {
@@ -18,17 +19,26 @@ function publish(scans: PendingScan[]): void {
   for (const listener of listeners) listener(scans);
 }
 
-export async function loadPendingScans(): Promise<PendingScan[]> {
-  if (memory) return memory;
-  let raw: string | null = null;
-  try {
-    raw = await Storage.getItem(KEY);
-  } catch {
-    // Stockage indisponible : on repart d'une file vide plutôt que d'empêcher le scan.
-  }
-  const scans = parsePending(raw);
-  publish(scans);
-  return scans;
+/**
+ * Une seule lecture à la fois : deux écrans montés en même temps déclenchaient deux lectures,
+ * et la plus lente pouvait publier une file périmée par-dessus une photo tout juste gardée.
+ */
+export function loadPendingScans(): Promise<PendingScan[]> {
+  if (memory) return Promise.resolve(memory);
+  loading ??= (async () => {
+    let raw: string | null = null;
+    try {
+      raw = await Storage.getItem(KEY);
+    } catch {
+      // Stockage indisponible : on repart d'une file vide plutôt que d'empêcher le scan.
+    }
+    // Une écriture a pu aboutir pendant la lecture : elle fait foi.
+    const scans = memory ?? parsePending(raw);
+    publish(scans);
+    loading = null;
+    return scans;
+  })();
+  return loading;
 }
 
 async function write(scans: PendingScan[]): Promise<void> {
