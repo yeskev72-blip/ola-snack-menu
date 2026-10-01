@@ -296,6 +296,7 @@ export const fr = {
     onTarget: 'objectif tenu',
   },
   mealDetail: {
+    repeat: 'Refaire ce repas',
     notFound: "Ce repas n'existe plus.",
     delete: 'Supprimer',
     deleteTitle: 'Supprimer ce repas ?',

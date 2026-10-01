@@ -3,7 +3,8 @@ import { createContext, useContext, useMemo, useState, type ReactNode } from 're
 
 import type { AnalysisResponse, AnalyzedItem, NamedPortion, PreparedPhoto, Question } from '@/lib/analyze';
 import type { TypeRepas } from '@/lib/database.types';
-import type { Per100g } from '@/lib/nutrition';
+import type { LocalMeal } from '@/lib/meals';
+import { per100gFromPortion, type Per100g } from '@/lib/nutrition';
 
 /** Élément du repas en cours d'édition. */
 export type DraftItem = {
@@ -44,6 +45,8 @@ type Ctx = Draft & {
   updateItem: (key: string, patch: Partial<Omit<DraftItem, 'key'>>) => void;
   removeItem: (key: string) => void;
   addItem: (item: Omit<DraftItem, 'key'>) => string;
+  /** Recharge un repas déjà enregistré dans le brouillon, pour le refaire sans rescanner. */
+  repeatMeal: (meal: Pick<LocalMeal, 'items' | 'type_repas'>) => void;
   /** Nouveau repas : saisie manuelle (sans photo) ou nouveau scan. */
   reset: () => void;
 };
@@ -106,6 +109,24 @@ export function ScanDraftProvider({ children }: { children: ReactNode }) {
         setDraft((d) => ({ ...d, items: [...d.items, { ...item, key }] }));
         return key;
       },
+      // Ni photo ni scan : l'enregistrement n'envoie donc ni correction, ni confiance, ni photo,
+      // et l'écran de résultat n'affiche pas de questions de clarification. Aucun appel à l'IA.
+      repeatMeal: (meal) =>
+        setDraft({
+          ...emptyDraft(),
+          typeRepas: meal.type_repas,
+          items: meal.items.map((it) => ({
+            key: randomUUID(),
+            food_key: it.food_key,
+            label: it.label,
+            grams: it.grams,
+            confidence: null,
+            // Un aliment hors table garde les valeurs retenues ce jour-là : les recalculer
+            // demanderait un nouvel appel à l'IA, et donnerait un autre résultat. Le repas
+            // enregistre les valeurs de la PORTION : il faut les ramener à 100 g.
+            estimate_100g: it.food_key ? null : per100gFromPortion(it),
+          })),
+        }),
       reset: () => setDraft(emptyDraft()),
     }),
     [draft],

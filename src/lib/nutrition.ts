@@ -63,6 +63,23 @@ export function itemNutrition(item: NutritionItem, foods: ReadonlyMap<string, Fo
   };
 }
 
+/**
+ * Opération inverse de itemNutrition : retrouve les valeurs pour 100 g à partir de celles d'une
+ * portion déjà enregistrée. Sert à refaire un repas sans rappeler l'IA pour un aliment hors
+ * table, dont les valeurs n'existent nulle part ailleurs que dans le repas d'origine.
+ * Renvoie null si la portion est nulle, auquel cas la division n'aurait pas de sens.
+ */
+export function per100gFromPortion(portion: Nutrients & { grams: number }): Per100g | null {
+  if (!(portion.grams > 0)) return null;
+  const factor = 100 / portion.grams;
+  return {
+    kcal: round1(portion.kcal * factor),
+    proteines: round1(portion.proteines * factor),
+    glucides: round1(portion.glucides * factor),
+    lipides: round1(portion.lipides * factor),
+  };
+}
+
 /** Marge relative de la fourchette selon la confiance : 10 % au seuil, jusqu'à 35 %. */
 export function rangeMargin(confidence: number): number {
   return Math.min(0.35, 0.1 + (RANGE_THRESHOLD - confidence) * 0.5);

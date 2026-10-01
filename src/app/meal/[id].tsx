@@ -13,6 +13,7 @@ import { useFoods } from '@/lib/foods';
 import { formatNumber } from '@/lib/format';
 import { deleteMeal, useMeal } from '@/lib/meals';
 import { mealTypeLabel } from '@/lib/mealTypes';
+import { useScanDraft } from '@/state/scanDraft';
 import { useSession } from '@/state/session';
 import { colors, radius, shadow, spacing } from '@/theme';
 
@@ -21,6 +22,7 @@ export default function MealDetail() {
   const { user } = useSession();
   const meal = useMeal(user?.id ?? null, id);
   const { byKey } = useFoods();
+  const draft = useScanDraft();
 
   if (meal === undefined) return null;
   if (meal === null) {
@@ -45,11 +47,25 @@ export default function MealDetail() {
       },
     ]);
 
+  // Refaire un repas ne rappelle pas l'IA : on recharge les aliments dans le brouillon et on
+  // ouvre l'écran de validation, où les quantités et le type de repas restent modifiables.
+  const repeat = () => {
+    draft.repeatMeal(meal);
+    router.push('/result');
+  };
+
   const date = new Date(meal.eaten_at);
   const when = `${date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })} · ${date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
 
   return (
-    <Screen back="back" footer={<Button label={t('mealDetail.delete')} variant="danger" icon="trash" onPress={confirmDelete} />}>
+    <Screen
+      back="back"
+      footer={
+        <>
+          <Button label={t('mealDetail.repeat')} icon="plus" onPress={repeat} />
+          <Button label={t('mealDetail.delete')} variant="danger" icon="trash" onPress={confirmDelete} />
+        </>
+      }>
       <View style={styles.titles}>
         <AppText style={styles.type}>
           {t(mealTypeLabel(meal.type_repas))} · {when}
