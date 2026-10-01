@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
+import { codeBoxCount } from '@/lib/validation';
 import { colors, radius } from '@/theme';
 
 type Props = {
@@ -9,7 +10,7 @@ type Props = {
   onChange: (value: string) => void;
   onSubmit: () => void;
   label: string;
-  /** Nombre de cases affichées au départ ; on en ajoute si le code est plus long. */
+  /** Cases affichées au départ ; le champ s'allonge si le code tapé dépasse cette longueur. */
   minLength: number;
   maxLength: number;
 };
@@ -18,7 +19,7 @@ type Props = {
 export function CodeInput({ value, onChange, onSubmit, label, minLength, maxLength }: Props) {
   const input = useRef<TextInput>(null);
   const [focused, setFocused] = useState(false);
-  const boxes = Math.min(maxLength, Math.max(minLength, value.length + (value.length >= minLength && value.length < maxLength ? 1 : 0)));
+  const boxes = codeBoxCount(value.length, minLength, maxLength);
   return (
     <Pressable onPress={() => input.current?.focus()} accessible={false}>
       <View style={styles.row}>
