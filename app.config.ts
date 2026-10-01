@@ -31,11 +31,16 @@ const config: ExpoConfig = {
     // Seule la caméra est demandée ; la galerie passe par le sélecteur système
     // (stockage seulement sur Android 12 et moins). Les permissions inutiles ajoutées
     // par le modèle Expo sont retirées du manifeste.
-    permissions: ['android.permission.CAMERA'],
+    permissions: [
+      'android.permission.CAMERA',
+      // Déclarées explicitement plutôt que laissées au plugin : sans POST_NOTIFICATIONS
+      // (Android 13+) aucun rappel n'arrive, et sans VIBRATE le rappel passe inaperçu.
+      'android.permission.POST_NOTIFICATIONS',
+      'android.permission.VIBRATE',
+    ],
     blockedPermissions: [
       'android.permission.RECORD_AUDIO',
       'android.permission.SYSTEM_ALERT_WINDOW',
-      'android.permission.VIBRATE',
     ],
     predictiveBackGestureEnabled: false,
   },
@@ -49,6 +54,9 @@ const config: ExpoConfig = {
         ),
       },
     ],
+    // Rappels quotidiens, programmés localement : aucune notification distante, donc pas de
+    // compte Firebase ni de jeton d'appareil. Ajoute POST_NOTIFICATIONS, requis depuis Android 13.
+    'expo-notifications',
     'expo-router',
     [
       'expo-image-picker',
