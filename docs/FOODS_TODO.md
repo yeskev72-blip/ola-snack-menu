@@ -4,6 +4,10 @@ Les valeurs nutritionnelles de `supabase/seed/foods.json` sont des **approximati
 Elles ne sont **pas officielles** et ne doivent pas être présentées comme telles dans l'app ni ailleurs.
 Toutes les entrées ont `verified = false`.
 
+Depuis octobre 2026, l'app l'affiche : un marqueur **« à confirmer »** accompagne ces plats dans la
+liste, dans le résultat d'un scan, dans l'éditeur et dans le détail d'un repas enregistré. Passer une
+ligne à `verified = true` fait disparaître le marqueur pour ce plat, sans autre changement de code.
+
 ## Source à utiliser
 
 - **Table de composition des aliments d'Afrique de l'Ouest** (West African Food Composition Table), FAO / INFOODS, 2019.
