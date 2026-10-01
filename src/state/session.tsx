@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 
 import type { Profile, ProfileUpdate } from '@/lib/database.types';
 import { clearLocalData } from '@/lib/meals';
+import { clearPendingScans } from '@/lib/pendingScansStore';
 import { supabase } from '@/lib/supabase';
 
 type Status = 'loading' | 'signedOut' | 'signedIn';
@@ -149,6 +150,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         if (user) {
           await clearLocalData(user.id);
           await Storage.removeItem(profileCacheKey(user.id));
+          // Les photos gardées hors ligne appartiennent au compte qui les a prises.
+          await clearPendingScans();
         }
         // scope local : fonctionne même hors ligne.
         await supabase.auth.signOut({ scope: 'local' });
@@ -159,6 +162,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         if (error) throw error;
         await clearLocalData(user.id);
         await Storage.removeItem(profileCacheKey(user.id));
+        await clearPendingScans();
         await supabase.auth.signOut({ scope: 'local' });
       },
     }),
