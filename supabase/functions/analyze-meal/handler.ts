@@ -145,7 +145,7 @@ export function createHandler(deps: Deps) {
       const foods = await deps.loadFoods();
       const knownKeys = new Set(foods.map((f) => f.food_key));
       const geminiRequest: GeminiRequest = {
-        systemPrompt: buildSystemPrompt(foods),
+        systemPrompt: buildSystemPrompt(foods, request.lang),
         userText: buildUserText(request),
         imageBase64: request.imageBase64,
         responseSchema: buildResponseSchema([...knownKeys]),

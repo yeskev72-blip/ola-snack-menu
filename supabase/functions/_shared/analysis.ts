@@ -28,6 +28,15 @@ export type FoodRef = {
   portion_reperes: Record<string, number>;
 };
 
+/**
+ * Langue de la réponse du modèle. L'app peut tourner en anglais : les libellés d'aliments, les
+ * portions nommées et les questions doivent suivre, sinon l'utilisateur anglophone lit
+ * « grosse pomme · 220 g » sous un titre « Size ».
+ */
+export const LANGS = ['fr', 'en'] as const;
+export type Lang = (typeof LANGS)[number];
+export const DEFAULT_LANG: Lang = 'fr';
+
 export type Answer = { question: string; answer: string };
 
 export type AnalyzeRequest = {
@@ -36,6 +45,8 @@ export type AnalyzeRequest = {
   /** Présents uniquement pour la relance après questions de clarification. */
   scanId: string | null;
   answers: Answer[];
+  /** Langue attendue pour les libellés, les portions et les questions. */
+  lang: Lang;
 };
 
 export type Estimate100g = { kcal: number; proteines: number; glucides: number; lipides: number };
@@ -113,7 +124,11 @@ export function parseRequest(body: unknown): Result<AnalyzeRequest> {
     return { ok: false, error: 'answers exige scan_id.' };
   }
 
-  return { ok: true, value: { imageBase64: image, hint, scanId, answers } };
+  // Une langue absente ou inconnue retombe sur le français : un scan ne doit pas échouer parce
+  // qu'une version de l'app envoie une étiquette que le serveur ne connaît pas encore.
+  const lang = LANGS.find((l) => l === body.lang) ?? DEFAULT_LANG;
+
+  return { ok: true, value: { imageBase64: image, hint, scanId, answers, lang } };
 }
 
 /** Empreinte SHA-256 (hex) de la photo telle qu'envoyée, pour lier la relance au même scan. */
@@ -134,7 +149,16 @@ function foodLine(f: FoodRef): string {
   return `- ${f.food_key} : ${f.label_fr}${aliases}${reperes ? ` [${reperes}]` : ''}`;
 }
 
-export function buildSystemPrompt(foods: FoodRef[]): string {
+/**
+ * Consigne de langue pour la sortie. Le prompt reste rédigé en français — le modèle le comprend
+ * aussi bien — mais ce que lit l'utilisateur doit suivre la langue de l'app.
+ */
+const OUTPUT_LANGUAGE: Record<Lang, string> = {
+  fr: 'en français simple',
+  en: "en anglais simple (l'utilisateur lit l'application en anglais)",
+};
+
+export function buildSystemPrompt(foods: FoodRef[], lang: Lang = DEFAULT_LANG): string {
   return `Tu es un assistant nutritionniste. Tu reconnais les aliments et les plats du monde entier — cuisine africaine, européenne, asiatique, américaine, produits industriels, fruits et légumes de toutes origines — et tu connais particulièrement bien la cuisine d'Afrique de l'Ouest (Bénin, Togo, Côte d'Ivoire, Sénégal, Nigeria, Ghana). Tu analyses la photo d'un repas pour identifier chaque élément et estimer sa quantité en grammes.
 
 RÈGLES
@@ -174,7 +198,7 @@ RÈGLES
 
 7. Si la photo ne montre pas de nourriture, renvoie not_food = true, sans éléments ni questions.
 
-8. Réponds uniquement avec un objet JSON de cette forme exacte, sans texte autour. Libellés et questions en français simple.
+8. Réponds uniquement avec un objet JSON de cette forme exacte, sans texte autour. Les libellés, les portions nommées et les questions sont écrits ${OUTPUT_LANGUAGE[lang]} : c'est le seul texte que l'utilisateur lit. Les noms de plats locaux (attiéké, amiwo, gari, alloco) ne se traduisent pas, quelle que soit la langue.
 {"not_food": false, "items": [{"food_key": "<clé de la liste ou ${OTHER_FOOD_KEY}>", "label": "<libellé>", "grams": <nombre>, "confidence": <0 à 1>, "estimate_100g": null ou {"kcal": <nombre>, "proteines": <nombre>, "glucides": <nombre>, "lipides": <nombre>}}], "questions": [{"id": "<identifiant court>", "text": "<question>", "options": ["<réponse>", "<réponse>"]}], "confidence_globale": <0 à 1>}
 Au plus ${LIMITS.maxItems} éléments.
 

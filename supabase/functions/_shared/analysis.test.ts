@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { buildResponseSchema, buildSystemPrompt, buildUserText, LIMITS, OTHER_FOOD_KEY, parseRequest, validateModelOutput } from './analysis.ts';
+import { DEFAULT_LANG, LIMITS, OTHER_FOOD_KEY, buildResponseSchema, buildSystemPrompt, buildUserText, parseRequest, validateModelOutput } from './analysis.ts';
 import { FOODS, JPEG_B64, KEYS, VALID_OUTPUT } from './fixtures.ts';
 
 test('parseRequest : scan simple avec indice', () => {
@@ -141,6 +141,31 @@ test('validation : portions ignorées pour un plat de la table', () => {
   const r = validateModelOutput(JSON.stringify(out), KEYS, { allowQuestions: true });
   assert.ok(r.ok);
   assert.deepEqual(r.value.items[0]!.portions, []);
+});
+
+// L'app peut tourner en anglais : sans consigne, l'utilisateur anglophone lirait
+// « grosse pomme · 220 g » sous un titre « Size ».
+test('prompt système : la langue de sortie suit celle de l’app', () => {
+  assert.match(buildSystemPrompt(FOODS, 'fr'), /écrits en français simple/);
+  assert.match(buildSystemPrompt(FOODS, 'en'), /écrits en anglais simple/);
+  assert.equal(buildSystemPrompt(FOODS), buildSystemPrompt(FOODS, DEFAULT_LANG), 'français par défaut');
+  // Les noms de plats locaux sont des noms propres, dans les deux langues.
+  for (const lang of ['fr', 'en'] as const) {
+    assert.match(buildSystemPrompt(FOODS, lang), /ne se traduisent pas/);
+  }
+});
+
+test('parseRequest : langue validée, jamais bloquante', () => {
+  const avec = (lang: unknown) => parseRequest({ image_base64: JPEG_B64, lang });
+  assert.equal((avec('en') as { value: { lang: string } }).value.lang, 'en');
+  assert.equal((avec('fr') as { value: { lang: string } }).value.lang, 'fr');
+  // Une étiquette inconnue ne doit pas faire échouer le scan : une version de l'app peut en
+  // envoyer une que le serveur ne connaît pas encore.
+  for (const douteux of [undefined, null, 'wo', 'EN', 42, {}, 'fr-CI']) {
+    const r = avec(douteux);
+    assert.ok(r.ok, String(douteux));
+    assert.equal(r.value.lang, DEFAULT_LANG, String(douteux));
+  }
 });
 
 test('texte utilisateur : indice et réponses', () => {

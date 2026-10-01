@@ -3,7 +3,7 @@ import { FunctionsFetchError, FunctionsHttpError } from '@supabase/supabase-js';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 
 import { PHOTO } from '@/config';
-import { t } from '@/i18n';
+import { getLocale, t } from '@/i18n';
 import type { Per100g } from '@/lib/nutrition';
 import { supabase } from '@/lib/supabase';
 
@@ -71,6 +71,9 @@ export async function analyzeMeal(input: AnalyzeInput): Promise<{ ok: true; data
   const body = {
     image_base64: input.photo.base64,
     hint: input.hint.trim() || null,
+    // Les libellés, portions et questions que renvoie le modèle sont lus par l'utilisateur :
+    // ils doivent être écrits dans la langue de l'app, pas dans celle du prompt.
+    lang: getLocale(),
     ...(input.followUp ? { scan_id: input.followUp.scanId, answers: input.followUp.answers } : {}),
   };
 
