@@ -18,11 +18,14 @@ import { pendingCount, syncMeals } from '@/lib/meals';
 import { daysLeft, formatDate, planStatus } from '@/lib/plan';
 import { ACTIVITIES, activityFromFactor, GOALS } from '@/lib/profileOptions';
 import { useAction } from '@/lib/useAction';
+import { setRemindersEnabled, useRemindersEnabled } from '@/lib/remindersStore';
 import { useSession } from '@/state/session';
 import { colors, radius, shadow, spacing } from '@/theme';
 
 export default function Profile() {
   const { user, profile, signOut, deleteAccount, updateProfile } = useSession();
+  const remindersOn = useRemindersEnabled();
+  const [remindersDenied, setRemindersDenied] = useState(false);
   const isGuest = user?.isAnonymous ?? false;
   const [error, setError] = useState<string | null>(null);
   const toggleSharing = useAction((value: boolean) => updateProfile({ partage_photos: value }));
@@ -191,6 +194,25 @@ export default function Profile() {
             />
           </View>
         ) : null}
+        <View style={[styles.switchRow, styles.border]}>
+          <View style={styles.flex}>
+            <AppText style={styles.bold}>{t('reminders.setting')}</AppText>
+            <AppText variant="small">{t('reminders.settingHint')}</AppText>
+            <Notice message={remindersDenied ? t('reminders.denied') : null} tone="info" />
+          </View>
+          <Switch
+            value={remindersOn}
+            onValueChange={(value) => {
+              setRemindersDenied(false);
+              // L'interrupteur suit l'état réellement obtenu : si l'autorisation est refusée,
+              // il revient sur « éteint » au lieu de promettre des rappels qui n'arriveront pas.
+              void setRemindersEnabled(value).then((active) => setRemindersDenied(value && !active));
+            }}
+            trackColor={{ true: colors.accent, false: colors.border }}
+            thumbColor={colors.surface}
+            accessibilityLabel={t('reminders.setting')}
+          />
+        </View>
         <View style={styles.row}>
           <AppText>{t('profile.language')}</AppText>
           <AppText style={styles.bold}>{t('profile.languageName')}</AppText>

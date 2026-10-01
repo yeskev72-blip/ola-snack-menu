@@ -8,6 +8,7 @@ import { AppText } from '@/components/AppText';
 import { Screen } from '@/components/Screen';
 import { t } from '@/i18n';
 import { startAutoSync } from '@/lib/meals';
+import { restoreReminders } from '@/lib/remindersStore';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { ScanDraftProvider } from '@/state/scanDraft';
 import { SessionProvider, useSession } from '@/state/session';
@@ -22,6 +23,12 @@ function RootNavigator() {
 
   // Envoie les repas en attente maintenant et à chaque retour du réseau.
   useEffect(() => (userId ? startAutoSync(userId) : undefined), [userId]);
+
+  // Android efface les notifications programmées après une mise à jour de l'app ou un
+  // redémarrage du téléphone : sans cela les rappels disparaîtraient sans prévenir.
+  useEffect(() => {
+    if (userId) void restoreReminders();
+  }, [userId]);
 
   useEffect(() => {
     if (status !== 'loading') SplashScreen.hideAsync();

@@ -224,6 +224,16 @@ export const fr = {
     disclaimer: 'Valeurs indicatives, pas un avis médical.',
     edit: 'Modifier',
   },
+  reminders: {
+    title: 'Calbasse',
+    channel: 'Rappels de repas',
+    breakfast: 'Tu as pris ton petit-déjeuner ? Note-le en une photo.',
+    lunch: 'Et le déjeuner ? Une photo suffit.',
+    dinner: 'Dernier repas de la journée : note-le avant de dormir.',
+    setting: 'Rappels de repas',
+    settingHint: 'Trois rappels par jour pour penser à noter tes repas.',
+    denied: 'Autorise les notifications dans les réglages d’Android pour recevoir les rappels.',
+  },
   item: {
     title: "Modifier l'aliment",
     name: 'Nom',
