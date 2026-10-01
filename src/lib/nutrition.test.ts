@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { itemNutrition, mealNutrition, rangeMargin, type FoodValues } from './nutrition.ts';
+import { itemNutrition, mealNutrition, per100gFromPortion, rangeMargin, type FoodValues } from './nutrition.ts';
 import { describeGrams, roundHalf, unitsFor } from './portions.ts';
 
 const foods = new Map<string, FoodValues>([
@@ -88,4 +88,18 @@ test('repère de portion', () => {
   const units = unitsFor({ louche: 120 });
   assert.deepEqual(describeGrams(250, units), { unit: { name: 'louche', grams: 120 }, count: 2 });
   assert.equal(describeGrams(2000, units), null);
+});
+
+// « Refaire un repas » relit les valeurs d'une portion enregistrée : elles doivent repasser
+// pour 100 g, sinon un aliment hors table voit ses calories multipliées par grams / 100.
+test('per100gFromPortion : inverse exactement itemNutrition', () => {
+  const per100 = { kcal: 52, proteines: 0.3, glucides: 14, lipides: 0.2 };
+  const portion = itemNutrition({ food_key: null, grams: 150, estimate_100g: per100, confidence: 0.5 }, new Map());
+  assert.deepEqual(per100gFromPortion({ ...portion, grams: 150 }), per100);
+});
+
+test('per100gFromPortion : portion nulle refusée', () => {
+  const vide = { kcal: 0, proteines: 0, glucides: 0, lipides: 0 };
+  assert.equal(per100gFromPortion({ ...vide, grams: 0 }), null);
+  assert.equal(per100gFromPortion({ ...vide, grams: -5 }), null);
 });
