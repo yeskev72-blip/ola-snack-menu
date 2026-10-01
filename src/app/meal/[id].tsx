@@ -2,11 +2,14 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Alert, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
+import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { Icon } from '@/components/Icon';
 import { Macros } from '@/components/Macros';
 import { Screen } from '@/components/Screen';
 import { t } from '@/i18n';
+import { isUnverified } from '@/lib/foodStatus';
+import { useFoods } from '@/lib/foods';
 import { formatNumber } from '@/lib/format';
 import { deleteMeal, useMeal } from '@/lib/meals';
 import { mealTypeLabel } from '@/lib/mealTypes';
@@ -17,6 +20,7 @@ export default function MealDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useSession();
   const meal = useMeal(user?.id ?? null, id);
+  const { byKey } = useFoods();
 
   if (meal === undefined) return null;
   if (meal === null) {
@@ -68,11 +72,8 @@ export default function MealDetail() {
             <View style={styles.flex}>
               <View style={styles.itemTitle}>
                 <AppText style={styles.label}>{item.label}</AppText>
-                {item.estimated ? (
-                  <View style={styles.badge}>
-                    <AppText style={styles.badgeText}>{t('result.estimated')}</AppText>
-                  </View>
-                ) : null}
+                {item.estimated ? <Badge label={t('result.estimated')} /> : null}
+                {isUnverified(item.food_key ? byKey.get(item.food_key) : undefined) ? <Badge label={t('result.unverified')} /> : null}
               </View>
               <AppText variant="small">
                 {formatNumber(item.grams)} {t('common.grams')}
@@ -109,7 +110,5 @@ const styles = StyleSheet.create({
   itemTitle: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: spacing.sm },
   label: { fontWeight: '700', flexShrink: 1 },
   itemKcal: { fontWeight: '700' },
-  badge: { paddingHorizontal: spacing.sm, paddingVertical: 2, borderRadius: radius.pill, backgroundColor: '#FBEBC4' },
-  badgeText: { fontSize: 11, lineHeight: 14, fontWeight: '700', color: '#7A5200' },
   pending: { flexDirection: 'row', alignItems: 'center', gap: 6 },
 });

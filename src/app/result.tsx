@@ -8,6 +8,7 @@ import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
 import { Macros } from '@/components/Macros';
+import { Badge } from '@/components/Badge';
 import { Notice } from '@/components/Notice';
 import { Icon } from '@/components/Icon';
 import { RoundButton } from '@/components/Screen';
@@ -15,6 +16,7 @@ import { t } from '@/i18n';
 import { formatNumber } from '@/lib/format';
 import { analyzeMeal, isOnline } from '@/lib/analyze';
 import { buildCorrection } from '@/lib/corrections';
+import { isUnverified } from '@/lib/foodStatus';
 import { useFoods } from '@/lib/foods';
 import { MEAL_TYPES, mealTypeLabel } from '@/lib/mealTypes';
 import { saveMeal } from '@/lib/meals';
@@ -181,11 +183,8 @@ export default function Result() {
                         <AppText style={styles.itemLabel} numberOfLines={2}>
                           {item.label}
                         </AppText>
-                        {n.estimated ? (
-                          <View style={styles.badge}>
-                            <AppText style={styles.badgeText}>{t('result.estimated')}</AppText>
-                          </View>
-                        ) : null}
+                        {n.estimated ? <Badge label={t('result.estimated')} /> : null}
+                        {isUnverified(food) ? <Badge label={t('result.unverified')} /> : null}
                       </View>
                       <AppText variant="small">
                         {hint ? `${hint} · ` : ''}
@@ -210,6 +209,9 @@ export default function Result() {
           </View>
 
           <Notice message={save.error} />
+          {draft.items.some((it) => isUnverified(it.food_key ? byKey.get(it.food_key) : undefined)) ? (
+            <AppText variant="small">{t('result.unverifiedNote')}</AppText>
+          ) : null}
           <AppText variant="small">{t('result.disclaimer')}</AppText>
         </View>
       </ScrollView>
@@ -259,8 +261,6 @@ const styles = StyleSheet.create({
   itemTitle: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: spacing.sm },
   itemLabel: { fontWeight: '700', flexShrink: 1 },
   itemKcal: { fontWeight: '700' },
-  badge: { paddingHorizontal: spacing.sm, paddingVertical: 2, borderRadius: radius.pill, backgroundColor: '#FBEBC4' },
-  badgeText: { fontSize: 11, lineHeight: 14, fontWeight: '700', color: '#7A5200' },
   footer: {
     flexDirection: 'row',
     gap: 10,

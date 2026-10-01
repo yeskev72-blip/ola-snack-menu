@@ -204,6 +204,9 @@ export const fr = {
     followUpExpired: 'Cette analyse ne peut plus être précisée. Corrige les éléments à la main.',
     items: 'Aliments détectés',
     estimated: 'estimé',
+    unverified: 'à confirmer',
+    unverifiedNote:
+      'Les plats marqués « à confirmer » ont des valeurs de départ, pas encore vérifiées sur la table de composition des aliments d’Afrique de l’Ouest. Compte une marge d’erreur.',
     addItem: 'Ajouter un aliment',
     rangeAnswer: 'Fourchette : réponds ci-dessous pour préciser',
     dontKnow: 'Je ne sais pas',

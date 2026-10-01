@@ -2,10 +2,12 @@ import { useMemo, useState } from 'react';
 import { FlatList, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
+import { Badge } from '@/components/Badge';
 import { Chip } from '@/components/Chip';
 import { Icon } from '@/components/Icon';
 import { t } from '@/i18n';
 import { formatNumber } from '@/lib/format';
+import { isUnverified } from '@/lib/foodStatus';
 import { type LocalFood, searchFoods, useFoods } from '@/lib/foods';
 import { unitLabel } from '@/lib/portionLabels';
 import { unitsFor } from '@/lib/portions';
@@ -76,11 +78,14 @@ export function FoodList({ onChoose, autoFocus }: { onChoose: (food: LocalFood) 
         renderItem={({ item, index }) => (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`${item.label_fr}, ${t('picker.per100', { kcal: formatNumber(item.kcal_100g) })}`}
+            accessibilityLabel={`${item.label_fr}, ${t('picker.per100', { kcal: formatNumber(item.kcal_100g) })}${isUnverified(item) ? `, ${t('result.unverified')}` : ''}`}
             onPress={() => onChoose(item)}
             style={({ pressed }) => [styles.row, index === 0 && styles.rowFirst, index === results.length - 1 && styles.rowLast, pressed && styles.rowPressed]}>
             <View style={styles.rowText}>
-              <AppText style={styles.name}>{item.label_fr}</AppText>
+              <View style={styles.nameRow}>
+                <AppText style={styles.name}>{item.label_fr}</AppText>
+                {isUnverified(item) ? <Badge label={t('result.unverified')} /> : null}
+              </View>
               {portionHint(item) ? <AppText variant="small">{portionHint(item)}</AppText> : null}
             </View>
             <AppText style={styles.kcal}>{formatNumber(item.kcal_100g)}</AppText>
@@ -126,6 +131,7 @@ const styles = StyleSheet.create({
   rowLast: { borderBottomLeftRadius: radius.card, borderBottomRightRadius: radius.card, borderBottomWidth: 0 },
   rowPressed: { backgroundColor: colors.surfaceAlt },
   rowText: { flex: 1, gap: 2 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
   name: { fontWeight: '700' },
   kcal: { fontWeight: '800' },
   add: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },

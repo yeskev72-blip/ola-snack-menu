@@ -13,6 +13,7 @@ import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
 import { t } from '@/i18n';
 import { formatInput, formatNumber, round1 } from '@/lib/format';
+import { isUnverified } from '@/lib/foodStatus';
 import { useFoods } from '@/lib/foods';
 import { itemNutrition } from '@/lib/nutrition';
 import { gramsHint, unitLabel } from '@/lib/portionLabels';
@@ -194,6 +195,7 @@ export default function ItemEditor() {
           <AppText style={styles.per100}>{t('item.per100', { kcal: formatNumber(per100.kcal) })}</AppText>
         </View>
         {preview?.estimated ? <AppText style={styles.per100}>{t('item.notInTable')}</AppText> : null}
+        {isUnverified(food) ? <AppText style={styles.per100}>{t('result.unverifiedNote')}</AppText> : null}
         <View style={styles.kcalMacros}>
           {MACROS.map((m) => (
             <View key={m.key} style={styles.kcalMacro}>
