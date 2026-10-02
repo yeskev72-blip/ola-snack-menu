@@ -7,6 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppText } from '@/components/AppText';
 import { Screen } from '@/components/Screen';
 import { t } from '@/i18n';
+import { useAppFonts } from '@/lib/appFonts';
 import { startAutoSync } from '@/lib/meals';
 import { restoreReminders } from '@/lib/remindersStore';
 import { isSupabaseConfigured } from '@/lib/supabase';
@@ -77,6 +78,12 @@ function MissingConfig() {
 }
 
 export default function RootLayout() {
+  // Sur le web la police doit être chargée par le navigateur avant le premier rendu, sinon
+  // l'app s'affiche brièvement dans la police système. Sur Android, elle est déjà dans l'APK
+  // et ce crochet renvoie true tout de suite.
+  const fontsReady = useAppFonts();
+  if (!fontsReady) return null;
+
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" />

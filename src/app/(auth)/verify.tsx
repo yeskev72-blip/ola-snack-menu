@@ -73,6 +73,7 @@ export default function Verify() {
         maxLength={CODE_LENGTH.max}
       />
       <AppText variant="small">{t('auth.spamHint')}</AppText>
+      <AppText variant="small">{t('auth.latestOnly')}</AppText>
       <Notice message={verify.error ?? resend.error} />
       <Notice message={info} tone="info" />
     </Screen>
