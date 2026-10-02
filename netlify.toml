@@ -1,0 +1,54 @@
+# Déploiement Netlify de l'APPLICATION WEB (racine du dépôt).
+#
+# La vitrine est un second site Netlify, configuré avec « site » comme base directory : elle lit
+# site/netlify.toml et n'est pas concernée par ce fichier. Les deux sont séparés exprès —
+# les en-têtes d'isolation éventuellement nécessaires ici casseraient les polices Google de la
+# vitrine, et une construction web ratée ne doit pas emporter la page de téléchargement.
+#
+# Variables à déclarer dans Netlify (Site settings > Environment variables) :
+#   EXPO_PUBLIC_SUPABASE_URL        https://<ref>.supabase.co
+#   EXPO_PUBLIC_SUPABASE_ANON_KEY   clé anon (publique par nature, faite pour vivre dans un client)
+
+[build]
+  command = "npx expo export --platform web --output-dir dist"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Les routes dynamiques sortent de l'export en fichiers littéraux « [id].html » : sans ces
+# réécritures, /meal/<identifiant> renverrait une 404 au lieu d'ouvrir le repas.
+[[redirects]]
+  from = "/meal/*"
+  to = "/meal/[id].html"
+  status = 200
+
+[[redirects]]
+  from = "/day/*"
+  to = "/day/[day].html"
+  status = 200
+
+# Dernier recours : toute autre adresse rend l'app, qui décide elle-même quoi afficher.
+# Netlify sert d'abord les fichiers existants, donc cette règle ne masque aucune page.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Le service worker ne doit jamais être servi depuis un cache : c'est lui qui porte la stratégie
+# de mise à jour. Mis en cache, il figerait l'app sur une vieille version sans recours.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+# Les fichiers générés portent une empreinte dans leur nom : ils peuvent être gardés longtemps.
+[[headers]]
+  for = "/_expo/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
