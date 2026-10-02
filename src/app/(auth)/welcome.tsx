@@ -33,7 +33,9 @@ export default function Welcome() {
         <View style={styles.art}>
           <View style={styles.ring} />
           <View style={styles.disc} />
-          <Logo size={128} />
+          <View style={styles.logo}>
+            <Logo size={128} />
+          </View>
           <View style={[styles.tag, styles.tagTop]}>
             <AppText style={styles.tagText}>{t('auth.sampleA')}</AppText>
           </View>
@@ -58,6 +60,10 @@ const styles = StyleSheet.create({
   art: { width: 240, height: 240, alignItems: 'center', justifyContent: 'center' },
   ring: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderRadius: 120, borderWidth: 1.5, borderStyle: 'dashed', borderColor: '#E1CFB6' },
   disc: { position: 'absolute', top: 34, left: 34, right: 34, bottom: 34, borderRadius: 86, backgroundColor: colors.accentSoft },
+  // Le disque et l'anneau sont positionnés en absolu : sur le web, un élément positionné est
+  // peint par-dessus un élément statique quel que soit l'ordre du code, et le logo disparaissait
+  // sous le disque. zIndex le remet devant, sans rien changer sur Android.
+  logo: { zIndex: 1 },
   tag: { position: 'absolute', paddingHorizontal: 12, paddingVertical: 6, borderRadius: radius.pill, backgroundColor: colors.surface, ...shadow.card },
   tagTop: { top: 8, right: 0 },
   tagBottom: { bottom: 14, left: 0 },
