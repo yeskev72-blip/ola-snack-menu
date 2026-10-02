@@ -19,10 +19,19 @@ import { REMINDERS, remindersAreValid } from '@/lib/reminders';
  * le rappel serait perdu en silence pour qui a Calbasse ouverte à l'heure du repas. Déclaré au
  * chargement du module, avant toute programmation.
  */
-Notifications.setNotificationHandler({
-  handleNotification: () =>
-    Promise.resolve({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: true, shouldSetBadge: false }),
-});
+/**
+ * Les rappels n'existent pas sur le web : expo-notifications n'y fournit aucun planificateur,
+ * son module ne contient que des fonctions vides. Mieux vaut ne rien promettre que de laisser
+ * un interrupteur qui ne déclenche rien.
+ */
+export const REMINDERS_SUPPORTED = Platform.OS !== 'web';
+
+if (REMINDERS_SUPPORTED) {
+  Notifications.setNotificationHandler({
+    handleNotification: () =>
+      Promise.resolve({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: true, shouldSetBadge: false }),
+  });
+}
 
 const KEY = 'reminders:enabled:v1';
 /** Mémorise qu'on a déjà proposé les rappels, pour ne le faire qu'une fois. */
@@ -100,6 +109,7 @@ async function schedule(): Promise<void> {
  * prétendre que des rappels arriveront.
  */
 export async function setRemindersEnabled(on: boolean): Promise<boolean> {
+  if (!REMINDERS_SUPPORTED) return false;
   let active = false;
   try {
     if (on) {
@@ -132,6 +142,7 @@ export async function setRemindersEnabled(on: boolean): Promise<boolean> {
  * disparaîtraient en silence et l'utilisateur croirait les avoir encore.
  */
 export async function restoreReminders(): Promise<void> {
+  if (!REMINDERS_SUPPORTED) return;
   try {
     if (!(await loadRemindersEnabled())) return;
     const { granted } = await Notifications.getPermissionsAsync();
@@ -149,6 +160,7 @@ export async function restoreReminders(): Promise<void> {
  * répondue ou écartée : une app qui redemande à chaque ouverture se fait désinstaller.
  */
 export async function hasAskedReminders(): Promise<boolean> {
+  if (!REMINDERS_SUPPORTED) return true;
   try {
     return (await Storage.getItem(ASKED_KEY)) === '1';
   } catch {
