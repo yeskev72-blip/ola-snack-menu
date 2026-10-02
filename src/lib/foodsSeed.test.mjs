@@ -71,3 +71,19 @@ test('table des plats : une ligne vérifiée cite sa source', () => {
     );
   }
 });
+
+// Le télibo était un alias d'igname_pilee alors que c'est un autre plat : le modèle hésitait
+// entre deux clés avec la même preuve. Aucun nom ne doit désigner deux plats.
+test('table des plats : aucun nom porté par deux plats', () => {
+  const porte = new Map();
+  for (const f of foods) {
+    for (const nom of [f.food_key, f.label_fr, ...f.aliases]) {
+      const bas = nom.trim().toLowerCase();
+      porte.set(bas, [...(porte.get(bas) ?? []), f.food_key]);
+    }
+  }
+  const partages = [...porte.entries()]
+    .filter(([, cles]) => new Set(cles).size > 1)
+    .map(([nom, cles]) => `« ${nom} » revendiqué par ${[...new Set(cles)].join(', ')}`);
+  assert.deepEqual(partages, []);
+});
