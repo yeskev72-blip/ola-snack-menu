@@ -20,7 +20,11 @@ const config: ExpoConfig = {
   orientation: 'portrait',
   icon: './assets/images/icon.png',
   userInterfaceStyle: 'light',
-  platforms: ['android'],
+  // Le web sert de vitrine d'essai : on scanne un repas sans rien installer, puis « Ajouter à
+  // l'écran d'accueil » transforme le site en application autonome. L'APK reste la version
+  // complète — les rappels quotidiens n'existent pas sur le web.
+  platforms: ['android', 'web'],
+  web: { output: 'static', favicon: './assets/images/icon.png' },
   android: {
     package: ANDROID_PACKAGE,
     adaptiveIcon: {

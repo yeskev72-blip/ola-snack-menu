@@ -18,7 +18,7 @@ import { pendingCount, syncMeals } from '@/lib/meals';
 import { daysLeft, formatDate, planStatus } from '@/lib/plan';
 import { ACTIVITIES, activityFromFactor, GOALS } from '@/lib/profileOptions';
 import { useAction } from '@/lib/useAction';
-import { setRemindersEnabled, useRemindersEnabled } from '@/lib/remindersStore';
+import { REMINDERS_SUPPORTED, setRemindersEnabled, useRemindersEnabled } from '@/lib/remindersStore';
 import { useSession } from '@/state/session';
 import { colors, radius, shadow, spacing } from '@/theme';
 
@@ -194,6 +194,7 @@ export default function Profile() {
             />
           </View>
         ) : null}
+        {REMINDERS_SUPPORTED ? (
         <View style={[styles.switchRow, styles.border]}>
           <View style={styles.flex}>
             <AppText style={styles.bold}>{t('reminders.setting')}</AppText>
@@ -213,6 +214,7 @@ export default function Profile() {
             accessibilityLabel={t('reminders.setting')}
           />
         </View>
+        ) : null}
         <View style={styles.row}>
           <AppText>{t('profile.language')}</AppText>
           <AppText style={styles.bold}>{t('profile.languageName')}</AppText>
