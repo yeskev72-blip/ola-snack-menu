@@ -65,6 +65,7 @@ export default function LinkAccount() {
           maxLength={CODE_LENGTH.max}
         />
         <AppText variant="small">{t('auth.spamHint')}</AppText>
+        <AppText variant="small">{t('auth.latestOnly')}</AppText>
         <Notice message={confirm.error ?? send.error} />
       </Screen>
     );
