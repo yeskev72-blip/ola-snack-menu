@@ -25,7 +25,13 @@
     "aliases": [
       "jollof",
       "riz au gras",
-      "riz gras"
+      "riz gras",
+      "riogla beninwa",
+      "riz-o-gras",
+      "zaamè",
+      "benachin",
+      "riz wolof",
+      "bènn tchin"
     ],
     "categorie": "feculent",
     "kcal_100g": 170,
@@ -46,7 +52,12 @@
     "aliases": [
       "watchi",
       "waakye",
-      "riz haricot"
+      "riz haricot",
+      "watché",
+      "waké",
+      "ayimolou",
+      "ayimonlou",
+      "irèsi ati ewa"
     ],
     "categorie": "feculent",
     "kcal_100g": 150,
@@ -65,7 +76,9 @@
     "label_fr": "Attiéké",
     "aliases": [
       "atieke",
-      "acheke"
+      "acheke",
+      "attoukpou",
+      "garba"
     ],
     "categorie": "feculent",
     "kcal_100g": 157,
@@ -89,7 +102,8 @@
       "pâte blanche",
       "akoumé",
       "tô",
-      "ugali"
+      "ugali",
+      "wɔ̌"
     ],
     "categorie": "feculent",
     "kcal_100g": 110,
@@ -108,7 +122,9 @@
     "label_fr": "Amiwo (pâte rouge)",
     "aliases": [
       "pâte rouge",
-      "djenkoumé"
+      "djenkoumé",
+      "djèwô",
+      "djèwɔ̌"
     ],
     "categorie": "feculent",
     "kcal_100g": 150,
@@ -128,7 +144,18 @@
     "aliases": [
       "agidi",
       "eko",
-      "ablo"
+      "ablo",
+      "gui",
+      "kannan",
+      "èkò",
+      "aguidi",
+      "komu",
+      "kafa",
+      "akasan",
+      "akpan",
+      "makumè",
+      "lio",
+      "kom"
     ],
     "categorie": "feculent",
     "kcal_100g": 80,
@@ -148,7 +175,10 @@
       "foufou",
       "fufu",
       "agou",
-      "pounded yam"
+      "pounded yam",
+      "agoun",
+      "tchokourou",
+      "iyan"
     ],
     "categorie": "feculent",
     "kcal_100g": 130,
@@ -206,7 +236,9 @@
     "label_fr": "Gari sec (semoule de manioc)",
     "aliases": [
       "garri",
-      "tapioca gari"
+      "tapioca gari",
+      "gali",
+      "couac"
     ],
     "categorie": "feculent",
     "kcal_100g": 360,
@@ -225,7 +257,10 @@
     "label_fr": "Eba / piron (gari à l'eau chaude)",
     "aliases": [
       "piron",
-      "eba"
+      "eba",
+      "pinon",
+      "pilon",
+      "piron jaune ou rouge"
     ],
     "categorie": "feculent",
     "kcal_100g": 150,
@@ -245,7 +280,10 @@
       "haricot",
       "niébé",
       "ayikoun",
-      "beans"
+      "beans",
+      "abodo",
+      "cornille",
+      "haricot à œil noir"
     ],
     "categorie": "feculent",
     "kcal_100g": 116,
@@ -265,7 +303,14 @@
     "aliases": [
       "aloko",
       "dodo",
-      "plantain frit"
+      "plantain frit",
+      "amanda",
+      "missolè",
+      "misolé",
+      "makemba",
+      "kelewele",
+      "loco",
+      "claclo"
     ],
     "categorie": "feculent",
     "kcal_100g": 260,
@@ -357,7 +402,11 @@
     "food_key": "manioc_bouilli",
     "label_fr": "Manioc bouilli",
     "aliases": [
-      "manioc cuit"
+      "manioc cuit",
+      "chikwangue",
+      "bobolo",
+      "miondo",
+      "kwanga"
     ],
     "categorie": "feculent",
     "kcal_100g": 125,
@@ -375,7 +424,8 @@
     "label_fr": "Pain (baguette)",
     "aliases": [
       "baguette",
-      "pain blanc"
+      "pain blanc",
+      "pain"
     ],
     "categorie": "feculent",
     "kcal_100g": 270,
@@ -414,7 +464,12 @@
     "aliases": [
       "thiéré",
       "cere",
-      "couscous"
+      "couscous",
+      "saay",
+      "saac",
+      "futo",
+      "lacciri",
+      "basi"
     ],
     "categorie": "feculent",
     "kcal_100g": 140,
@@ -436,7 +491,11 @@
       "hausa koko",
       "bouillie",
       "lakh",
-      "ogi"
+      "ogi",
+      "coco baka",
+      "fondé",
+      "moni",
+      "koko goudaji"
     ],
     "categorie": "feculent",
     "kcal_100g": 67,
@@ -474,7 +533,11 @@
     "aliases": [
       "ceebu jën",
       "tieb",
-      "riz au poisson"
+      "riz au poisson",
+      "thieb",
+      "thiep",
+      "thiebou guinar",
+      "thiebou wekh"
     ],
     "categorie": "plat_complet",
     "kcal_100g": 160,
@@ -491,7 +554,8 @@
     "food_key": "poulet_dg",
     "label_fr": "Poulet DG",
     "aliases": [
-      "poulet directeur général"
+      "poulet directeur général",
+      "PDG"
     ],
     "categorie": "plat_complet",
     "kcal_100g": 190,
@@ -528,7 +592,8 @@
     "aliases": [
       "dèguè",
       "thiakry",
-      "dégué"
+      "dégué",
+      "déguê"
     ],
     "categorie": "plat_complet",
     "kcal_100g": 150,
@@ -547,7 +612,8 @@
     "aliases": [
       "banga",
       "sauce palmiste",
-      "abenkwan"
+      "abenkwan",
+      "dékoun"
     ],
     "categorie": "sauce",
     "kcal_100g": 180,
@@ -567,7 +633,8 @@
       "mafé",
       "maafe",
       "groundnut soup",
-      "azindessi"
+      "azindessi",
+      "tigadèguènan"
     ],
     "categorie": "sauce",
     "kcal_100g": 173,
@@ -586,7 +653,14 @@
     "aliases": [
       "sauce rouge",
       "stew",
-      "sauce tomate"
+      "sauce tomate",
+      "dja",
+      "friture de tomate",
+      "jus",
+      "tomato stew",
+      "m'gbagba",
+      "nougbagba",
+      "amivôvô dja"
     ],
     "categorie": "sauce",
     "kcal_100g": 93,
@@ -606,7 +680,13 @@
       "gboma dessi",
       "sauce feuille",
       "efo riro",
-      "sauce épinard"
+      "sauce épinard",
+      "mantindjan",
+      "shoko",
+      "gboman",
+      "fonman",
+      "tchiayo",
+      "amanvivè"
     ],
     "categorie": "sauce",
     "kcal_100g": 113,
@@ -626,7 +706,14 @@
       "gombo",
       "okra",
       "févi",
-      "fetri"
+      "fetri",
+      "fevi",
+      "abémon",
+      "fetri dessi",
+      "kopé",
+      "okro stew",
+      "gan-nah",
+      "soupoukandja"
     ],
     "categorie": "sauce",
     "kcal_100g": 70,
@@ -645,7 +732,12 @@
     "aliases": [
       "crincrin",
       "ewedu",
-      "adémè"
+      "adémè",
+      "ninnouwi",
+      "craincrain",
+      "kplala",
+      "fakouhoy",
+      "mouloukhia"
     ],
     "categorie": "sauce",
     "kcal_100g": 44,
@@ -664,7 +756,11 @@
     "aliases": [
       "egusi",
       "agoussi",
-      "sauce pistache"
+      "sauce pistache",
+      "egousi",
+      "egoussi dessi",
+      "pistache africaine",
+      "met de pistache"
     ],
     "categorie": "sauce",
     "kcal_100g": 200,
@@ -683,7 +779,10 @@
     "aliases": [
       "pepper soup",
       "light soup",
-      "sauce claire"
+      "sauce claire",
+      "omi ôbè",
+      "n'sounou ssin",
+      "bouillon de machoiron"
     ],
     "categorie": "sauce",
     "kcal_100g": 46,
@@ -700,7 +799,8 @@
     "food_key": "ndole",
     "label_fr": "Ndolé",
     "aliases": [
-      "ndole"
+      "ndole",
+      "ndolè"
     ],
     "categorie": "sauce",
     "kcal_100g": 150,
@@ -720,7 +820,11 @@
       "saka saka",
       "pondu",
       "pondou",
-      "sauce feuille manioc"
+      "sauce feuille manioc",
+      "saka-saka",
+      "mpondu",
+      "madaba",
+      "sauce feuilles de manioc"
     ],
     "categorie": "sauce",
     "kcal_100g": 121,
@@ -815,7 +919,8 @@
     "aliases": [
       "poisson sec",
       "kpanla fumé",
-      "akpavi"
+      "akpavi",
+      "poisson salé séché"
     ],
     "categorie": "proteine",
     "kcal_100g": 280,
@@ -833,7 +938,9 @@
     "label_fr": "Crevettes séchées",
     "aliases": [
       "crevettes",
-      "ablo crevette"
+      "ablo crevette",
+      "crevettes fumées",
+      "poudre de crevette"
     ],
     "categorie": "proteine",
     "kcal_100g": 280,
@@ -892,7 +999,11 @@
       "choukouya",
       "brochette",
       "kilichi",
-      "dibi"
+      "dibi",
+      "dibi haoussa",
+      "tsiré",
+      "kilishi",
+      "tankora"
     ],
     "categorie": "proteine",
     "kcal_100g": 249,
@@ -928,7 +1039,8 @@
     "label_fr": "Omelette",
     "aliases": [
       "oeuf frit",
-      "omelette pain"
+      "omelette pain",
+      "œuf frit"
     ],
     "categorie": "proteine",
     "kcal_100g": 189,
@@ -947,7 +1059,12 @@
     "aliases": [
       "wagasi",
       "fromage peul",
-      "waragashi"
+      "waragashi",
+      "amon",
+      "wangashi",
+      "wara",
+      "walagach",
+      "warankasi"
     ],
     "categorie": "proteine",
     "kcal_100g": 202,
@@ -964,7 +1081,8 @@
     "food_key": "wagashi_frit",
     "label_fr": "Wagashi frit",
     "aliases": [
-      "fromage peul frit"
+      "fromage peul frit",
+      "amon frit"
     ],
     "categorie": "proteine",
     "kcal_100g": 300,
@@ -983,7 +1101,11 @@
     "aliases": [
       "tofu",
       "soja frit",
-      "fromage de soja"
+      "fromage de soja",
+      "amon soja",
+      "amonsoja",
+      "awara",
+      "viande des pauvres"
     ],
     "categorie": "proteine",
     "kcal_100g": 280,
@@ -1003,7 +1125,11 @@
       "ata",
       "akara",
       "accra",
-      "klaklou haricot"
+      "klaklou haricot",
+      "àkàrà",
+      "kosai",
+      "koose",
+      "acarajé"
     ],
     "categorie": "proteine",
     "kcal_100g": 290,
@@ -1021,7 +1147,8 @@
     "label_fr": "Crudités (salade, tomate, oignon, sans sauce)",
     "aliases": [
       "salade",
-      "tomate oignon"
+      "tomate oignon",
+      "tomate-oignon"
     ],
     "categorie": "legume",
     "kcal_100g": 20,
@@ -1141,7 +1268,11 @@
     "label_fr": "Huile de palme (rouge)",
     "aliases": [
       "zomi",
-      "huile rouge"
+      "huile rouge",
+      "banga oil",
+      "té toulou",
+      "diw tiir",
+      "kolo"
     ],
     "categorie": "matiere_grasse",
     "kcal_100g": 884,
@@ -1159,7 +1290,9 @@
     "label_fr": "Huile végétale (arachide, soja, tournesol)",
     "aliases": [
       "huile",
-      "huile d'arachide"
+      "huile d'arachide",
+      "huile de tournesol",
+      "huile de soja"
     ],
     "categorie": "matiere_grasse",
     "kcal_100g": 884,
@@ -1215,7 +1348,17 @@
       "botokoin",
       "puff puff",
       "gaou",
-      "beignet"
+      "beignet",
+      "dôko",
+      "yovodoko",
+      "puff-puff",
+      "bofrot",
+      "boflot",
+      "gbofloto",
+      "bofloto",
+      "kala",
+      "mikaté",
+      "makara"
     ],
     "categorie": "snack",
     "kcal_100g": 340,
@@ -1233,7 +1376,8 @@
     "label_fr": "Chips de plantain",
     "aliases": [
       "chips banane",
-      "plantain chips"
+      "plantain chips",
+      "chips d'alloco"
     ],
     "categorie": "snack",
     "kcal_100g": 528,
@@ -1252,7 +1396,11 @@
     "aliases": [
       "jus d'oseille",
       "zobo",
-      "foléré"
+      "foléré",
+      "karkadé",
+      "sobolo",
+      "dah",
+      "bissap blanc"
     ],
     "categorie": "boisson",
     "kcal_100g": 45,
@@ -1270,7 +1418,8 @@
     "label_fr": "Jus de gingembre sucré",
     "aliases": [
       "gingembre",
-      "ginger"
+      "ginger",
+      "niamakou dji"
     ],
     "categorie": "boisson",
     "kcal_100g": 50,
