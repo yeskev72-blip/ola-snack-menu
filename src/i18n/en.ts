@@ -58,6 +58,8 @@ export const en: Messages = {
     invalidEmail: 'Invalid email address.',
     shortPassword: 'Your password must be at least 8 characters.',
     invalidCode: 'Enter the code you received by email (6 to 10 digits).',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
     linkTitle: 'Create my account',
     linkBody: 'Your journal and settings will be kept. You will be able to sign in from another phone.',
     linkDone: 'Account created. Your data is saved.',

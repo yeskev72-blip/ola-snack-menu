@@ -50,6 +50,8 @@ export const fr = {
     invalidEmail: 'Adresse e-mail invalide.',
     shortPassword: 'Le mot de passe doit faire au moins 8 caractères.',
     invalidCode: 'Saisis le code reçu par e-mail (6 à 10 chiffres).',
+    showPassword: 'Afficher le mot de passe',
+    hidePassword: 'Masquer le mot de passe',
     linkTitle: 'Créer mon compte',
     linkBody: 'Ton journal et tes réglages seront conservés. Tu pourras te reconnecter sur un autre téléphone.',
     linkDone: 'Compte créé. Tes données sont sauvegardées.',
