@@ -298,6 +298,26 @@
     "verified": true
   },
   {
+    "food_key": "foutou",
+    "label_fr": "Foutou (banane plantain et manioc pilés)",
+    "aliases": [
+      "foutou",
+      "foutou banane",
+      "futu",
+      "foutou de banane"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 124,
+    "proteines_100g": 0.9,
+    "glucides_100g": 30.6,
+    "lipides_100g": 0.2,
+    "portion_reperes": {
+      "boule": 300
+    },
+    "source": "Estimation interne Calbasse à vérifier. Calculée comme un mélange à parts égales de banane plantain bouillie et de manioc bouilli, les deux composants déjà présents dans cette table ; le pilage ne change pas la composition. Aspect à confirmer par l'éditeur.",
+    "verified": false
+  },
+  {
     "food_key": "igname_bouillie",
     "label_fr": "Igname bouillie",
     "aliases": [

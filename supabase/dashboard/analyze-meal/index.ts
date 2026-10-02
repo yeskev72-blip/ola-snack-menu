@@ -362,6 +362,15 @@ async function callGatewayResilient(configs, req, options) {
 
 // supabase/functions/_shared/aspects.ts
 var FOOD_ASPECTS = {
+  foutou: {
+    aspect: "P\xE2te de banane plantain et de manioc pil\xE9s ensemble, beige \xE0 gris-jaune, lisse et \xE9lastique, servie en boule. Teinte plus jaune que les p\xE2tes de c\xE9r\xE9ales.",
+    confusions: [
+      "igname_pilee \u2014 l'igname pil\xE9e est blanche ; le foutou tire sur le beige jaune.",
+      "pate_mais \u2014 la p\xE2te de ma\xEFs est blanche et mate ; le foutou est plus jaune et plus \xE9lastique.",
+      "foufou_manioc \u2014 manioc seul, blanc ; le foutou contient de la banane plantain et tire sur le jaune.",
+      "telibo \u2014 le t\xE9libo est brun fonc\xE9 \xE0 noir ; le foutou est clair."
+    ]
+  },
   telibo: {
     aspect: "P\xE2te brun fonc\xE9 \xE0 presque noire, lisse et \xE9lastique, servie en boule ou en portion fa\xE7onn\xE9e \xE0 la main. La couleur sombre vient de la farine de cossettes d'igname s\xE9ch\xE9e.",
     confusions: [

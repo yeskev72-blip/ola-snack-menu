@@ -15,6 +15,7 @@
 export type FoodAspect = { aspect: string; confusions: string[] };
 
 export const FOOD_ASPECTS: Record<string, FoodAspect> = {
+  foutou: { aspect: 'Pâte de banane plantain et de manioc pilés ensemble, beige à gris-jaune, lisse et élastique, servie en boule. Teinte plus jaune que les pâtes de céréales.', confusions: ['igname_pilee — l\'igname pilée est blanche ; le foutou tire sur le beige jaune.', 'pate_mais — la pâte de maïs est blanche et mate ; le foutou est plus jaune et plus élastique.', 'foufou_manioc — manioc seul, blanc ; le foutou contient de la banane plantain et tire sur le jaune.', 'telibo — le télibo est brun foncé à noir ; le foutou est clair.'] },
   telibo: { aspect: 'Pâte brun foncé à presque noire, lisse et élastique, servie en boule ou en portion façonnée à la main. La couleur sombre vient de la farine de cossettes d\'igname séchée.', confusions: ['pate_mais — la pâte de maïs est blanche ou crème ; le télibo est brun foncé à noir.', 'igname_pilee — l\'igname pilée fraîche est blanche et brillante ; le télibo est sombre et plus mat.', 'amiwo — l\'amiwo est rouge-orangé (huile, tomate) ; le télibo tire sur le brun-noir.', 'eba — l\'eba est crème à jaune et granuleuse ; le télibo est sombre et lisse.'] },
   bissap: { aspect: 'Liquide rouge profond à rubis, translucide, servi froid en verre, bouteille ou carafe. Pas de gaz visible.', confusions: [] },
   jus_gingembre: { aspect: 'Liquide jaune pâle à beige, souvent trouble, servi froid. Description non vérifiée sur photo.', confusions: [] },
