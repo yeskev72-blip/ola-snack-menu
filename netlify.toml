@@ -35,6 +35,25 @@
   to = "/index.html"
   status = 200
 
+# Isolation inter-origines, obligatoire pour que le journal fonctionne.
+#
+# Sur le web, expo-sqlite exécute SQLite dans un worker et rend ses appels synchrones
+# (openDatabaseSync, execSync, withTransactionSync — tout ce qu'utilise src/lib/meals.ts) au
+# moyen d'un SharedArrayBuffer. Les navigateurs ne l'exposent que sur une page « cross-origin
+# isolated ». Sans ces deux en-têtes, SharedArrayBuffer vaut undefined, la base ne s'ouvre pas,
+# et enregistrer un repas échoue — l'app s'affiche parfaitement mais ne retient rien.
+#
+# require-corp bloquerait une ressource externe chargée sans CORS. L'app n'en charge aucune :
+# les photos affichées sont des URI locales (sélecteur d'images), la police est servie depuis
+# ce domaine, et les appels à Supabase passent par fetch en mode CORS, que l'isolation
+# autorise. Si un jour une image venait du stockage Supabase par une URL signée, il faudrait
+# le vérifier ici.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Embedder-Policy = "require-corp"
+
 # Le service worker ne doit jamais être servi depuis un cache : c'est lui qui porte la stratégie
 # de mise à jour. Mis en cache, il figerait l'app sur une vieille version sans recours.
 [[headers]]
