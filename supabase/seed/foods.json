@@ -148,8 +148,7 @@
       "foufou",
       "fufu",
       "agou",
-      "pounded yam",
-      "télibo"
+      "pounded yam"
     ],
     "categorie": "feculent",
     "kcal_100g": 130,
@@ -161,6 +160,27 @@
     },
     "source": "Estimation interne Calbasse, validée par l'éditeur le 2026-10-01. Non confrontée à la Table de composition des aliments d'Afrique de l'Ouest (FAO/INFOODS, 2019).",
     "verified": true
+  },
+  {
+    "food_key": "telibo",
+    "label_fr": "Télibo (pâte noire d'igname)",
+    "aliases": [
+      "télibo",
+      "telibo",
+      "pâte noire",
+      "amala",
+      "libo"
+    ],
+    "categorie": "feculent",
+    "kcal_100g": 135,
+    "proteines_100g": 1.6,
+    "glucides_100g": 32,
+    "lipides_100g": 0.2,
+    "portion_reperes": {
+      "boule": 300
+    },
+    "source": "Estimation interne Calbasse à vérifier. Pâte de farine de cossettes d'igname, valeurs rapprochées de l'igname pilée et de la pâte de maïs.",
+    "verified": false
   },
   {
     "food_key": "foufou_manioc",
@@ -317,9 +337,7 @@
     "food_key": "manioc_bouilli",
     "label_fr": "Manioc bouilli",
     "aliases": [
-      "manioc cuit",
-      "bâton de manioc",
-      "chikwangue"
+      "manioc cuit"
     ],
     "categorie": "feculent",
     "kcal_100g": 125,

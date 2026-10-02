@@ -4,6 +4,8 @@
  * Aucun import Deno ni réseau : testé avec `node --test` (voir analysis.test.ts).
  */
 
+import { FOOD_ASPECTS } from './aspects.ts';
+
 export const OTHER_FOOD_KEY = 'autre';
 
 export const LIMITS = {
@@ -146,7 +148,13 @@ function foodLine(f: FoodRef): string {
   const reperes = Object.entries(f.portion_reperes)
     .map(([name, grams]) => `${name} ≈ ${grams} g`)
     .join(', ');
-  return `- ${f.food_key} : ${f.label_fr}${aliases}${reperes ? ` [${reperes}]` : ''}`;
+  const tete = `- ${f.food_key} : ${f.label_fr}${aliases}${reperes ? ` [${reperes}]` : ''}`;
+  // Sans l'aspect, le modèle ne peut pas départager deux plats qui portent des noms différents
+  // mais se ressemblent sur une photo. C'est le seul moyen qu'il a de regarder plutôt que deviner.
+  const vu = FOOD_ASPECTS[f.food_key];
+  if (!vu) return tete;
+  const conf = vu.confusions.length ? `\n  À ne pas confondre : ${vu.confusions.join(' ; ')}` : '';
+  return `${tete}\n  Aspect : ${vu.aspect}${conf}`;
 }
 
 /**
@@ -163,7 +171,7 @@ export function buildSystemPrompt(foods: FoodRef[], lang: Lang = DEFAULT_LANG): 
 
 RÈGLES
 
-1. Identifie d'abord, classe ensuite. Nomme ce que tu vois réellement, quel que soit le pays d'origine de l'aliment. Ensuite seulement, regarde la liste ci-dessous : c'est la liste des aliments dont l'application connaît déjà les valeurs nutritionnelles (clé : libellé, autres noms, [repères de portion]).
+1. Identifie d'abord, classe ensuite. Chaque plat de la liste est décrit par son aspect, et parfois par ce qui le distingue de ses sosies : compare ce que montre la photo à ces descriptions avant de choisir une clé. Couleur, texture et grain priment sur le nom : une pâte brun foncé n'est pas une pâte blanche, même si les deux s'appellent « pâte ». Nomme ce que tu vois réellement, quel que soit le pays d'origine de l'aliment. Ensuite seulement, regarde la liste ci-dessous : c'est la liste des aliments dont l'application connaît déjà les valeurs nutritionnelles (clé : libellé, autres noms, [repères de portion]).
    - Si l'aliment que tu as identifié EST un aliment de la liste, donne son food_key, et estimate_100g vaut null : l'application calcule les calories avec sa propre table.
    - Sinon, donne food_key = « ${OTHER_FOOD_KEY} », un libellé précis, et ta propre estimation pour 100 g dans estimate_100g.
    La liste n'est pas une contrainte : elle ne couvre qu'une petite partie des aliments existants. Tu dois pouvoir traiter n'importe quel aliment, même absent de la liste.
