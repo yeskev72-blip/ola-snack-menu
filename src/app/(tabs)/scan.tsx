@@ -13,6 +13,7 @@ import { AnalyzingView, StatusView } from '@/components/ScanStates';
 import { t } from '@/i18n';
 import { showToast } from '@/lib/toast';
 import { analyzeMeal, type AnalyzeError, fetchScanStatus, preparePhoto, type QuotaInfo } from '@/lib/analyze';
+import { errorDetail } from '@/lib/errorDetail';
 import { loadFoods } from '@/lib/foods';
 import { pendingPhotoUri, type PendingScan } from '@/lib/pendingScans';
 import { dropPendingScan, keepForLater, usePendingScans } from '@/lib/pendingScansStore';
@@ -65,8 +66,10 @@ export default function Scan() {
         resumed.current = null;
         draft.reset();
         draft.setPhoto(photo);
-      } catch {
-        setError(t('scan.photoError'));
+      } catch (cause) {
+        // La cause réelle est ajoutée au message : sans elle, une mémoire saturée, un format
+        // refusé par le navigateur et un fichier illisible donnent le même écran.
+        setError(t('scan.photoError') + errorDetail(cause));
       } finally {
         setBusy(null);
       }
