@@ -12,8 +12,10 @@ import { Icon, type IconName } from '@/components/Icon';
 import { AnalyzingView, StatusView } from '@/components/ScanStates';
 import { t } from '@/i18n';
 import { showToast } from '@/lib/toast';
-import { analyzeMeal, type AnalyzeError, fetchScanStatus, preparePhoto, type QuotaInfo } from '@/lib/analyze';
+import { analyzeMeal, type AnalyzeError, fetchScanStatus, type QuotaInfo } from '@/lib/analyze';
 import { errorDetail } from '@/lib/errorDetail';
+import { PhotoError } from '@/lib/photoError';
+import { preparePhoto } from '@/lib/preparePhoto';
 import { loadFoods } from '@/lib/foods';
 import { pendingPhotoUri, type PendingScan } from '@/lib/pendingScans';
 import { dropPendingScan, keepForLater, usePendingScans } from '@/lib/pendingScansStore';
@@ -67,9 +69,10 @@ export default function Scan() {
         draft.reset();
         draft.setPhoto(photo);
       } catch (cause) {
-        // La cause réelle est ajoutée au message : sans elle, une mémoire saturée, un format
-        // refusé par le navigateur et un fichier illisible donnent le même écran.
-        setError(t('scan.photoError') + errorDetail(cause));
+        // Une PhotoError sait pourquoi elle échoue et le dit à sa façon : l'afficher telle
+        // quelle, plutôt que derrière un « Réessaie » qui ne mène nulle part. Pour tout le
+        // reste, le message général garde la cause entre parenthèses.
+        setError(cause instanceof PhotoError ? cause.message : t('scan.photoError') + errorDetail(cause));
       } finally {
         setBusy(null);
       }

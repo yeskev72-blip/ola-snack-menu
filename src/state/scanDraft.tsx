@@ -1,7 +1,8 @@
 import { randomUUID } from 'expo-crypto';
 import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
 
-import type { AnalysisResponse, AnalyzedItem, NamedPortion, PreparedPhoto, Question } from '@/lib/analyze';
+import type { AnalysisResponse, AnalyzedItem, NamedPortion, Question } from '@/lib/analyze';
+import type { PreparedPhoto } from '@/lib/preparePhoto';
 import type { TypeRepas } from '@/lib/database.types';
 import type { LocalMeal } from '@/lib/meals';
 import { per100gFromPortion, type Per100g } from '@/lib/nutrition';
