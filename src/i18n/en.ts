@@ -74,6 +74,7 @@ export const en: Messages = {
     tooManyRequests: 'Too many attempts. Try again in a few minutes.',
     guestDisabled: 'Guest mode is turned off on the server.',
     invalidEmail: 'Invalid email address.',
+    server: 'The server hit a failure. This is not your fault: try again in a few minutes.',
     network: 'No internet connection. Check your network and try again.',
     unknown: 'Something went wrong. Try again.',
   },

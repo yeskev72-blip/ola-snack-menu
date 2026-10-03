@@ -66,6 +66,7 @@ export const fr = {
     tooManyRequests: 'Trop de tentatives. Réessaie dans quelques minutes.',
     guestDisabled: 'Le mode invité est désactivé sur le serveur.',
     invalidEmail: 'Adresse e-mail invalide.',
+    server: 'Le serveur a rencontré une panne. Ce n’est pas ta faute : réessaie dans quelques minutes.',
     network: 'Pas de connexion internet. Vérifie ton réseau et réessaie.',
     unknown: 'Une erreur est survenue. Réessaie.',
   },
