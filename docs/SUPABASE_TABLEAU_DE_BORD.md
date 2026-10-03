@@ -55,10 +55,16 @@ Menu de gauche : **Authentication**.
    > Avec une adresse Gmail/Yahoo comme expéditeur, les e-mails risquent d'arriver en spam chez les autres :
    > avant la diffusion, utilise une adresse sur ton propre nom de domaine (vérifié dans Brevo).
 3. **Emails** → **Templates** (débloqué par le SMTP) : l'app demande un **code** (6 à 10 chiffres ; Supabase en envoie 6 ou 8 selon le réglage *Email OTP Length* du fournisseur Email).
-   - **Confirm signup** : sujet `Ton code Calbasse`, corps = contenu de
+   - **Confirm signup** : sujet `Calbasse — {{ .Token }}`, corps = contenu de
      [`supabase/templates/confirmation.html`](../supabase/templates/confirmation.html) → **Save**.
-   - **Change email address** : sujet `Ton code Calbasse`, corps = contenu de
+   - **Change email address** : sujet `Calbasse — {{ .Token }}`, corps = contenu de
      [`supabase/templates/email_change.html`](../supabase/templates/email_change.html) → **Save**.
+
+   > Les deux modèles ne contiennent presque aucun texte : l'e-mail ignore la langue du
+   > téléphone et serait forcément dans la mauvaise pour une partie des gens, alors que l'app,
+   > elle, la connaît. L'e-mail ne porte donc que le code, et c'est l'écran de saisie qui
+   > explique quoi en faire. Le code est aussi dans le sujet : il est alors lisible depuis la
+   > notification, sans ouvrir le message.
    - Les deux corps contiennent `{{ .Token }}` : c'est ce qui affiche le code. Ne le retire pas.
 
 ## Étape 4 — Clé Gemini et secrets (5 min)

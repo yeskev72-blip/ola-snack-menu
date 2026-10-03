@@ -39,7 +39,7 @@ export const fr = {
     noAccount: 'Pas encore de compte ? Créer un compte',
     haveAccount: 'Déjà un compte ? Se connecter',
     codeTitle: 'Vérifie ta boîte mail',
-    codeBody: 'Entre le code envoyé à',
+    codeBody: 'Ouvre le message de Calbasse et recopie les chiffres. Envoyé à',
     spamHint: 'Pas reçu ? Regarde dans les spams.',
     latestOnly: 'Un nouveau code annule le précédent : utilise toujours le dernier e-mail reçu.',
     validate: 'Valider',

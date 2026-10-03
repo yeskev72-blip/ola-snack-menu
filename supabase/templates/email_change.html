@@ -1,5 +1,26 @@
-<h2>Calbasse : confirme ton adresse</h2>
-<p>Voici ton code pour relier cette adresse à ton compte :</p>
-<p style="font-size:32px;font-weight:bold;letter-spacing:6px">{{ .Token }}</p>
-<p>Saisis-le dans l'application. Il expire dans une heure.</p>
-<p>Si tu n'as pas demandé ce code, ignore cet e-mail.</p>
+<!--
+  Modèle « Change email address » — à coller dans Supabase : Authentication > Emails > Templates.
+  Sujet conseillé :  Calbasse — {{ .Token }}
+
+  Volontairement presque sans mots. L'explication est dans l'application, qui connaît la langue
+  du téléphone ; l'e-mail, lui, ne la connaît pas et serait forcément dans la mauvaise langue
+  pour une partie des gens. Il ne porte donc qu'une chose : le code.
+
+  Les deux lignes qui restent sont là pour les filtres anti-spam, qui se méfient d'un message
+  sans texte, et pour la personne qui reçoit ce code sans l'avoir demandé.
+-->
+<div style="font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;max-width:420px;margin:0 auto;padding:32px 24px;text-align:center;color:#1B1511">
+  <div style="font-size:14px;font-weight:700;letter-spacing:3px;color:#9C4A1E;text-transform:uppercase">Calbasse</div>
+
+  <div style="font-size:40px;font-weight:800;letter-spacing:10px;margin:28px 0;padding:20px 8px;background:#F6E6D3;border-radius:14px">{{ .Token }}</div>
+
+  <div style="font-size:13px;line-height:20px;color:#685A4D">
+    Copie ce code dans l’application.<br />
+    Copy this code into the app.
+  </div>
+
+  <div style="font-size:12px;line-height:18px;color:#8A7B6D;margin-top:20px">
+    Tu n’as rien demandé ? Ignore ce message.<br />
+    Didn’t ask for this? Ignore this message.
+  </div>
+</div>

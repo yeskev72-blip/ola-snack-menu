@@ -1,5 +1,5 @@
 import NetInfo from '@react-native-community/netinfo';
-import { openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite';
+import { openDatabaseAsync, type SQLiteDatabase } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
 import { AppState } from 'react-native';
 
@@ -83,22 +83,39 @@ const MIGRATIONS = [
 ];
 
 let database: SQLiteDatabase | null = null;
+let opening: Promise<SQLiteDatabase> | null = null;
 
-/** Base locale ouverte à la première utilisation, migrée jusqu'à la dernière version. */
-function db(): SQLiteDatabase {
-  if (database) return database;
-  const opened = openDatabaseSync('calbasse.db');
-  opened.execSync('PRAGMA journal_mode = WAL;');
-  const version = opened.getFirstSync<{ user_version: number }>('PRAGMA user_version')?.user_version ?? 0;
-  // Les installations de la phase 4 ont déjà la table sans user_version : v1 est idempotente.
-  for (let v = version; v < MIGRATIONS.length; v++) {
-    opened.withTransactionSync(() => {
-      opened.execSync(MIGRATIONS[v]!);
-      opened.execSync(`PRAGMA user_version = ${v + 1}`);
-    });
-  }
-  database = opened;
-  return opened;
+/**
+ * Base locale ouverte à la première utilisation, migrée jusqu'à la dernière version.
+ *
+ * Tout passe par l'API asynchrone, y compris l'ouverture et les migrations. Sur le web,
+ * expo-sqlite rend ses appels synchrones au moyen d'un SharedArrayBuffer, que le navigateur
+ * n'expose qu'à une page isolée entre origines : la moindre version synchrone ici rendrait le
+ * journal dépendant d'une configuration de serveur, et le ferait disparaître partout où elle
+ * n'est pas en place. L'API asynchrone n'a pas cette contrainte, sur aucune plateforme.
+ *
+ * Une seule ouverture à la fois : sans ce garde, deux écrans qui démarrent ensemble lanceraient
+ * deux migrations en parallèle sur la même base.
+ */
+function db(): Promise<SQLiteDatabase> {
+  if (database) return Promise.resolve(database);
+  opening ??= (async () => {
+    const opened = await openDatabaseAsync('calbasse.db');
+    await opened.execAsync('PRAGMA journal_mode = WAL;');
+    const row = await opened.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
+    const version = row?.user_version ?? 0;
+    // Les installations de la phase 4 ont déjà la table sans user_version : v1 est idempotente.
+    for (let v = version; v < MIGRATIONS.length; v++) {
+      await opened.withTransactionAsync(async () => {
+        await opened.execAsync(MIGRATIONS[v]!);
+        await opened.execAsync(`PRAGMA user_version = ${v + 1}`);
+      });
+    }
+    database = opened;
+    opening = null;
+    return opened;
+  })();
+  return opening;
 }
 
 function fromRow(row: Row): LocalMeal {
@@ -151,7 +168,7 @@ function useLocalQuery<T>(load: (() => Promise<T>) | null, initial: T, deps: unk
 // ---------------------------------------------------------------------------
 
 export async function saveMeal(meal: Omit<LocalMeal, 'synced'>): Promise<void> {
-  await db().runAsync(
+  await (await db()).runAsync(
     `INSERT OR REPLACE INTO meals (id, user_id, eaten_at, type_repas, items_json, total_json, confidence, photo_path, correction_json, synced, deleted)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0)`,
     meal.id,
@@ -170,7 +187,7 @@ export async function saveMeal(meal: Omit<LocalMeal, 'synced'>): Promise<void> {
 
 /** Masque le repas tout de suite ; la suppression part au serveur à la prochaine synchro. */
 export async function deleteMeal(userId: string, id: string): Promise<void> {
-  await db().runAsync('UPDATE meals SET deleted = 1, synced = 0 WHERE id = ? AND user_id = ?', id, userId);
+  await (await db()).runAsync('UPDATE meals SET deleted = 1, synced = 0 WHERE id = ? AND user_id = ?', id, userId);
   notify();
   void syncMeals(userId);
 }
@@ -184,7 +201,7 @@ export function dayBounds(date: Date): { start: string; end: string } {
 }
 
 export async function mealsBetween(userId: string, start: string, end: string): Promise<LocalMeal[]> {
-  const rows = await db().getAllAsync<Row>(
+  const rows = await (await db()).getAllAsync<Row>(
     'SELECT * FROM meals WHERE user_id = ? AND deleted = 0 AND eaten_at >= ? AND eaten_at < ? ORDER BY eaten_at',
     userId,
     start,
@@ -194,12 +211,12 @@ export async function mealsBetween(userId: string, start: string, end: string): 
 }
 
 export async function getMeal(userId: string, id: string): Promise<LocalMeal | null> {
-  const row = await db().getFirstAsync<Row>('SELECT * FROM meals WHERE id = ? AND user_id = ? AND deleted = 0', id, userId);
+  const row = await (await db()).getFirstAsync<Row>('SELECT * FROM meals WHERE id = ? AND user_id = ? AND deleted = 0', id, userId);
   return row ? fromRow(row) : null;
 }
 
 export async function pendingCount(userId: string): Promise<number> {
-  const row = await db().getFirstAsync<{ n: number }>('SELECT COUNT(*) AS n FROM meals WHERE user_id = ? AND synced = 0', userId);
+  const row = await (await db()).getFirstAsync<{ n: number }>('SELECT COUNT(*) AS n FROM meals WHERE user_id = ? AND synced = 0', userId);
   return row?.n ?? 0;
 }
 
@@ -245,7 +262,7 @@ export function usePendingCount(userId: string | null): number {
 
 /** Efface les données locales d'un utilisateur (déconnexion, suppression du compte). */
 export async function clearLocalData(userId: string): Promise<void> {
-  await db().runAsync('DELETE FROM meals WHERE user_id = ?', userId);
+  await (await db()).runAsync('DELETE FROM meals WHERE user_id = ?', userId);
   lastPull.delete(userId);
   notify();
 }
@@ -315,17 +332,17 @@ async function pushMeal(meal: LocalMeal): Promise<void> {
 }
 
 async function pushPending(userId: string): Promise<boolean> {
-  const rows = await db().getAllAsync<Row>('SELECT * FROM meals WHERE user_id = ? AND synced = 0 ORDER BY eaten_at', userId);
+  const rows = await (await db()).getAllAsync<Row>('SELECT * FROM meals WHERE user_id = ? AND synced = 0 ORDER BY eaten_at', userId);
   for (const row of rows) {
     try {
       if (row.deleted) {
         // Supprime aussi les éléments et corrections (cascade côté serveur).
         const { error } = await supabase.from('meals').delete().eq('id', row.id);
         if (error) throw error;
-        await db().runAsync('DELETE FROM meals WHERE id = ?', row.id);
+        await (await db()).runAsync('DELETE FROM meals WHERE id = ?', row.id);
       } else {
         await pushMeal(fromRow(row));
-        await db().runAsync('UPDATE meals SET synced = 1 WHERE id = ? AND synced = 0', row.id);
+        await (await db()).runAsync('UPDATE meals SET synced = 1 WHERE id = ? AND synced = 0', row.id);
       }
     } catch {
       // Réseau coupé ou erreur serveur : on réessaiera à la prochaine occasion.
@@ -368,7 +385,7 @@ async function pullRecent(userId: string): Promise<boolean> {
     }
   }
 
-  const local = db();
+  const local = await db();
   await local.withTransactionAsync(async () => {
     for (const m of meals) {
       // INSERT OR IGNORE puis mise à jour seulement si la ligne locale est déjà synchronisée.
