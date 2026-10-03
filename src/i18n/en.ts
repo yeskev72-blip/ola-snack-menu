@@ -7,6 +7,13 @@ import type { Messages } from './fr';
  * Le typage impose les mêmes clés que le français : une clé oubliée ou en trop ne compile pas.
  */
 export const en: Messages = {
+  install: {
+    title: 'Install Calbasse',
+    body: 'One tap and Calbasse joins your home screen. It then opens like a real app, and works without a network.',
+    bodyIOS: 'Tap the Share button at the bottom of Safari, then “Add to Home Screen”. Calbasse will open like a real app.',
+    action: 'Install',
+    later: 'Later',
+  },
   common: {
     continue: 'Continue',
     save: 'Save',

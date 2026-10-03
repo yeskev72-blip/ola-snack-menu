@@ -1,4 +1,11 @@
 export const fr = {
+  install: {
+    title: 'Installer Calbasse',
+    body: 'Un appui, et Calbasse s’ajoute à ton écran d’accueil. Elle s’ouvre alors comme une vraie application, et marche même sans réseau.',
+    bodyIOS: 'Touche le bouton Partager en bas de Safari, puis « Sur l’écran d’accueil ». Calbasse s’ouvrira comme une vraie application.',
+    action: 'Installer',
+    later: 'Plus tard',
+  },
   common: {
     continue: 'Continuer',
     save: 'Enregistrer',
