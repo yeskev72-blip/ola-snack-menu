@@ -47,7 +47,7 @@ export const en: Messages = {
     noAccount: 'No account yet? Create one',
     haveAccount: 'Already have an account? Sign in',
     codeTitle: 'Check your inbox',
-    codeBody: 'Enter the code sent to',
+    codeBody: 'Open the message from Calbasse and copy the digits. Sent to',
     spamHint: 'Not there? Check your spam folder.',
     latestOnly: 'A new code cancels the previous one: always use the most recent email.',
     validate: 'Confirm',
