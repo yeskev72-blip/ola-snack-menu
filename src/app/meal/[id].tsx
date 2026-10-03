@@ -1,9 +1,10 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { Alert, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
+import { useConfirm } from '@/components/ConfirmProvider';
 import { Icon } from '@/components/Icon';
 import { Macros } from '@/components/Macros';
 import { Screen } from '@/components/Screen';
@@ -20,6 +21,7 @@ import { colors, radius, shadow, spacing } from '@/theme';
 export default function MealDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useSession();
+  const confirm = useConfirm();
   const meal = useMeal(user?.id ?? null, id);
   const { byKey } = useFoods();
   const draft = useScanDraft();
@@ -33,19 +35,18 @@ export default function MealDetail() {
     );
   }
 
-  const confirmDelete = () =>
-    Alert.alert(t('mealDetail.deleteTitle'), t('mealDetail.deleteBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('mealDetail.delete'),
-        style: 'destructive',
-        onPress: () => {
-          if (!user) return;
-          void deleteMeal(user.id, meal.id);
-          router.back();
-        },
-      },
-    ]);
+  const confirmDelete = async () => {
+    if (!user) return;
+    const ok = await confirm({
+      title: t('mealDetail.deleteTitle'),
+      body: t('mealDetail.deleteBody'),
+      confirmLabel: t('mealDetail.delete'),
+      destructive: true,
+    });
+    if (!ok) return;
+    await deleteMeal(user.id, meal.id);
+    router.back();
+  };
 
   // Refaire un repas ne rappelle pas l'IA : on recharge les aliments dans le brouillon et on
   // ouvre l'écran de validation, où les quantités et le type de repas restent modifiables.

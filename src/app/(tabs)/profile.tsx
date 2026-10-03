@@ -1,10 +1,11 @@
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Switch, View } from 'react-native';
+import { Pressable, StyleSheet, Switch, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
+import { useConfirm } from '@/components/ConfirmProvider';
 import { Card } from '@/components/Card';
 import { Icon } from '@/components/Icon';
 import { MACROS } from '@/components/Macros';
@@ -28,6 +29,7 @@ export default function Profile() {
   const [remindersDenied, setRemindersDenied] = useState(false);
   const isGuest = user?.isAnonymous ?? false;
   const [error, setError] = useState<string | null>(null);
+  const confirm = useConfirm();
   const toggleSharing = useAction((value: boolean) => updateProfile({ partage_photos: value }));
   const remove = useAction(deleteAccount);
 
@@ -35,36 +37,38 @@ export default function Profile() {
     if (!user) return;
     if (isGuest) {
       // Un invité déconnecté ne peut plus retrouver son compte.
-      return Alert.alert(t('profile.signOutGuestTitle'), t('profile.signOutGuestBody'), [
-        { text: t('common.cancel'), style: 'cancel' },
-        { text: t('profile.signOut'), style: 'destructive', onPress: () => void signOut() },
-      ]);
+      const ok = await confirm({
+        title: t('profile.signOutGuestTitle'),
+        body: t('profile.signOutGuestBody'),
+        confirmLabel: t('profile.signOut'),
+        destructive: true,
+      });
+      return ok ? void signOut() : undefined;
     }
     // Dernière tentative d'envoi ; s'il reste des repas locaux, on prévient avant de les effacer.
     await syncMeals(user.id);
     const pending = await pendingCount(user.id);
     if (pending === 0) return void signOut();
-    Alert.alert(t('profile.signOutPendingTitle'), t('profile.signOutPendingBody', { count: pending }), [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('profile.signOutAnyway'), style: 'destructive', onPress: () => void signOut() },
-    ]);
+    const ok = await confirm({
+      title: t('profile.signOutPendingTitle'),
+      body: t('profile.signOutPendingBody', { count: pending }),
+      confirmLabel: t('profile.signOutAnyway'),
+      destructive: true,
+    });
+    if (ok) await signOut();
   };
 
   const confirmDelete = async () => {
     setError(null);
     if (!(await isOnline())) return setError(t('profile.deleteOffline'));
-    Alert.alert(t('profile.deleteTitle'), t('profile.deleteBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('profile.deleteConfirm'),
-        style: 'destructive',
-        onPress: () => {
-          void remove.run().then((ok) => {
-            if (!ok) setError(t('profile.deleteError'));
-          });
-        },
-      },
-    ]);
+    const ok = await confirm({
+      title: t('profile.deleteTitle'),
+      body: t('profile.deleteBody'),
+      confirmLabel: t('profile.deleteConfirm'),
+      destructive: true,
+    });
+    if (!ok) return;
+    if (!(await remove.run())) setError(t('profile.deleteError'));
   };
 
   const goal = GOALS.find((g) => g.value === profile?.objectif);
