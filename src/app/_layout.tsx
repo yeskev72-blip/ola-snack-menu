@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/AppText';
+import { ConfirmProvider } from '@/components/ConfirmProvider';
 import { Screen } from '@/components/Screen';
 import { t } from '@/i18n';
 import { useAppFonts } from '@/lib/appFonts';
@@ -90,7 +91,9 @@ export default function RootLayout() {
       {isSupabaseConfigured ? (
         <SessionProvider>
           <ScanDraftProvider>
-            <RootNavigator />
+            <ConfirmProvider>
+              <RootNavigator />
+            </ConfirmProvider>
           </ScanDraftProvider>
         </SessionProvider>
       ) : (
