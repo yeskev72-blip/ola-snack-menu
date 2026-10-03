@@ -7,6 +7,7 @@ import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { DayMeals } from '@/components/DayMeals';
 import { Icon } from '@/components/Icon';
+import { InstallBanner } from '@/components/InstallBanner';
 import { Logo } from '@/components/Logo';
 import { MacroCards } from '@/components/Macros';
 import { RemindersPrompt } from '@/components/RemindersPrompt';
@@ -96,6 +97,7 @@ export default function Journal() {
       ) : null}
 
       <RemindersPrompt />
+      <InstallBanner />
 
       <WeekStrip today={today} selected={selected} filled={filled} onSelect={setSelected} />
 
