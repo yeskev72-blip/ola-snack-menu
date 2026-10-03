@@ -6,6 +6,13 @@ export const fr = {
     action: 'Installer',
     later: 'Plus tard',
   },
+  photoErrors: {
+    read: 'La photo n’a pas pu être lue depuis la galerie.',
+    format: 'Ce format de photo n’est pas pris en charge par ton navigateur. Prends-la avec l’appareil, ou choisis une autre image.',
+    size: 'Les dimensions de cette image sont illisibles.',
+    canvas: 'Le navigateur a refusé de préparer l’image.',
+    encode: 'La photo n’a pas pu être compressée. Elle est peut-être trop lourde pour ce téléphone.',
+  },
   common: {
     continue: 'Continuer',
     save: 'Enregistrer',

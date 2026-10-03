@@ -1,10 +1,8 @@
 import NetInfo from '@react-native-community/netinfo';
 import { FunctionsFetchError, FunctionsHttpError } from '@supabase/supabase-js';
-import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
-
-import { PHOTO } from '@/config';
 import { getLocale, t } from '@/i18n';
 import type { Per100g } from '@/lib/nutrition';
+import type { PreparedPhoto } from '@/lib/preparePhoto';
 import { supabase } from '@/lib/supabase';
 
 /** « 1 pomme moyenne » = 150 g : portion nommée proposée par l'IA pour un aliment hors table. */
@@ -38,20 +36,6 @@ export type AnalyzeError = {
   message: string;
   quota?: QuotaInfo;
 };
-
-export type PreparedPhoto = { uri: string; base64: string };
-
-/** Réduit la photo (côté long ~1024 px) et la compresse en JPEG avant envoi. */
-export async function preparePhoto(uri: string, width: number, height: number): Promise<PreparedPhoto> {
-  const context = ImageManipulator.manipulate(uri);
-  if (Math.max(width, height) > PHOTO.maxSide) {
-    context.resize(width >= height ? { width: PHOTO.maxSide } : { height: PHOTO.maxSide });
-  }
-  const image = await context.renderAsync();
-  const result = await image.saveAsync({ base64: true, compress: PHOTO.jpegQuality, format: SaveFormat.JPEG });
-  if (!result.base64) throw new Error('Compression de la photo impossible');
-  return { uri: result.uri, base64: result.base64 };
-}
 
 export async function isOnline(): Promise<boolean> {
   const state = await NetInfo.fetch();

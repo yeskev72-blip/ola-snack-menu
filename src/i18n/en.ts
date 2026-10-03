@@ -14,6 +14,13 @@ export const en: Messages = {
     action: 'Install',
     later: 'Later',
   },
+  photoErrors: {
+    read: 'The photo could not be read from the gallery.',
+    format: 'Your browser does not support this photo format. Take it with the camera, or pick another image.',
+    size: 'The dimensions of this image cannot be read.',
+    canvas: 'The browser refused to prepare the image.',
+    encode: 'The photo could not be compressed. It may be too heavy for this phone.',
+  },
   common: {
     continue: 'Continue',
     save: 'Save',
