@@ -35,19 +35,17 @@
   to = "/index.html"
   status = 200
 
-# Isolation inter-origines, obligatoire pour que le journal fonctionne.
+# Isolation inter-origines. Plus nécessaire, gardée par prudence.
 #
-# Sur le web, expo-sqlite exécute SQLite dans un worker et rend ses appels synchrones
-# (openDatabaseSync, execSync, withTransactionSync — tout ce qu'utilise src/lib/meals.ts) au
-# moyen d'un SharedArrayBuffer. Les navigateurs ne l'exposent que sur une page « cross-origin
-# isolated ». Sans ces deux en-têtes, SharedArrayBuffer vaut undefined, la base ne s'ouvre pas,
-# et enregistrer un repas échoue — l'app s'affiche parfaitement mais ne retient rien.
+# Elle a été ajoutée parce que le journal local utilisait l'API synchrone d'expo-sqlite, qui
+# sur le web passe par un SharedArrayBuffer que seule une page isolée obtient. src/lib/meals.ts
+# est depuis passé à l'API asynchrone, qui n'a pas cette contrainte : le journal fonctionne
+# maintenant avec ou sans ces en-têtes, vérifié dans un navigateur dans les deux cas.
 #
-# require-corp bloquerait une ressource externe chargée sans CORS. L'app n'en charge aucune :
-# les photos affichées sont des URI locales (sélecteur d'images), la police est servie depuis
-# ce domaine, et les appels à Supabase passent par fetch en mode CORS, que l'isolation
-# autorise. Si un jour une image venait du stockage Supabase par une URL signée, il faudrait
-# le vérifier ici.
+# Attention avant d'ajouter une ressource externe : require-corp bloque ce qui est chargé sans
+# CORS. Aujourd'hui l'app n'en charge aucune — photos en URI locales, police servie depuis ce
+# domaine, Supabase par fetch en mode CORS. Une image venant du stockage Supabase par URL
+# signée casserait ; ces deux lignes sont alors à retirer plutôt qu'à contourner.
 [[headers]]
   for = "/*"
   [headers.values]
