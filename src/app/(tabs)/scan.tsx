@@ -3,7 +3,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { router, useFocusEffect } from 'expo-router';
 import { setStatusBarStyle } from 'expo-status-bar';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Image, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, TextInput, ToastAndroid, View } from 'react-native';
+import { ActivityIndicator, Image, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/AppText';
@@ -11,6 +11,7 @@ import { Button } from '@/components/Button';
 import { Icon, type IconName } from '@/components/Icon';
 import { AnalyzingView, StatusView } from '@/components/ScanStates';
 import { t } from '@/i18n';
+import { showToast } from '@/lib/toast';
 import { analyzeMeal, type AnalyzeError, fetchScanStatus, preparePhoto, type QuotaInfo } from '@/lib/analyze';
 import { loadFoods } from '@/lib/foods';
 import { pendingPhotoUri, type PendingScan } from '@/lib/pendingScans';
@@ -105,7 +106,7 @@ export default function Scan() {
     resumed.current = null;
     setFailure(null);
     draft.reset();
-    ToastAndroid.show(t('scan.kept'), ToastAndroid.SHORT);
+    showToast(t('scan.kept'));
   };
 
   /**

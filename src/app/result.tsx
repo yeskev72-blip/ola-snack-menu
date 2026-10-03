@@ -1,7 +1,7 @@
 import { randomUUID } from 'expo-crypto';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, ToastAndroid, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/AppText';
@@ -13,6 +13,7 @@ import { Notice } from '@/components/Notice';
 import { Icon } from '@/components/Icon';
 import { RoundButton } from '@/components/Screen';
 import { t } from '@/i18n';
+import { showToast } from '@/lib/toast';
 import { formatNumber } from '@/lib/format';
 import { analyzeMeal, isOnline } from '@/lib/analyze';
 import { buildCorrection } from '@/lib/corrections';
@@ -81,7 +82,7 @@ export default function Result() {
       photo_path: draft.scan?.photoPath ?? null,
       correction: correction ? { id: randomUUID(), ...correction, photo_path: draft.scan?.photoPath ?? null } : null,
     });
-    ToastAndroid.show((await isOnline()) ? t('result.saved') : t('result.savedOffline'), ToastAndroid.SHORT);
+    showToast((await isOnline()) ? t('result.saved') : t('result.savedOffline'));
     draft.reset();
     router.dismissTo('/');
   });

@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, ToastAndroid } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
@@ -10,6 +10,7 @@ import { Notice } from '@/components/Notice';
 import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
 import { t } from '@/i18n';
+import { showToast } from '@/lib/toast';
 import { useAction } from '@/lib/useAction';
 import { CODE_LENGTH, isValidCode, isValidEmail, MIN_PASSWORD_LENGTH, normalizeCode } from '@/lib/validation';
 import { useSession } from '@/state/session';
@@ -29,7 +30,7 @@ export default function LinkAccount() {
   });
   const confirm = useAction(async () => {
     await finishLinkEmail(email.trim(), code.trim(), password);
-    ToastAndroid.show(t('auth.linkDone'), ToastAndroid.SHORT);
+    showToast(t('auth.linkDone'));
     router.back();
   });
 
