@@ -49,6 +49,34 @@ function toSessionUser(user: User): SessionUser {
   return { id: user.id, email: user.email || null, isAnonymous: user.is_anonymous ?? false };
 }
 
+/**
+ * Efface ce que le compte a laissé sur l'appareil : journal local, profil en cache, photos en
+ * attente.
+ *
+ * Chaque effacement est tenté séparément et ne peut pas interrompre les suivants, ni la
+ * déconnexion qui vient après. Un journal local inaccessible — base verrouillée, stockage plein,
+ * navigateur sans les droits nécessaires — enfermait l'utilisateur dans sa session : la
+ * déconnexion échouait avant même d'être demandée à Supabase, sans aucun moyen d'en sortir.
+ *
+ * Les lignes qui resteraient portent l'identifiant de leur propriétaire et ne sont jamais lues
+ * pour un autre compte : mieux vaut un reliquat invisible qu'une session dont on ne sort pas.
+ */
+async function forgetDevice(userId: string): Promise<void> {
+  const tasks: [string, Promise<unknown>][] = [
+    ['journal local', clearLocalData(userId)],
+    ['profil en cache', Storage.removeItem(profileCacheKey(userId))],
+    // Les photos gardées hors ligne appartiennent au compte qui les a prises.
+    ['photos en attente', clearPendingScans()],
+  ];
+  for (const [quoi, task] of tasks) {
+    try {
+      await task;
+    } catch (error) {
+      console.warn(`Déconnexion : ${quoi} non effacé`, error);
+    }
+  }
+}
+
 /** Lève l'erreur Supabase pour que les écrans l'affichent via authErrorMessage(). */
 function check<T extends { error: unknown }>(result: T): T {
   if (result.error) throw result.error;
@@ -147,12 +175,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         if (user) await loadProfile(user.id);
       },
       signOut: async () => {
-        if (user) {
-          await clearLocalData(user.id);
-          await Storage.removeItem(profileCacheKey(user.id));
-          // Les photos gardées hors ligne appartiennent au compte qui les a prises.
-          await clearPendingScans();
-        }
+        if (user) await forgetDevice(user.id);
         // scope local : fonctionne même hors ligne.
         await supabase.auth.signOut({ scope: 'local' });
       },
@@ -160,9 +183,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         if (!user) return;
         const { error } = await supabase.functions.invoke('delete-account', { body: {}, timeout: 30_000 });
         if (error) throw error;
-        await clearLocalData(user.id);
-        await Storage.removeItem(profileCacheKey(user.id));
-        await clearPendingScans();
+        await forgetDevice(user.id);
         await supabase.auth.signOut({ scope: 'local' });
       },
     }),
