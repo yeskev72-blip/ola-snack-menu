@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, ToastAndroid, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
@@ -10,6 +10,7 @@ import { Notice } from '@/components/Notice';
 import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
 import { t } from '@/i18n';
+import { showToast } from '@/lib/toast';
 import { ACTIVITY_LEVELS, type ActivityLevel, dailyTarget, type Goal, type Sex, TARGET_BOUNDS } from '@/lib/calories';
 import { ACTIVITIES, activityFromFactor, GOALS } from '@/lib/profileOptions';
 import { useAction } from '@/lib/useAction';
@@ -53,7 +54,7 @@ export default function ProfileEdit() {
       objectif: goal,
       calories_cible: parseNumber(targetText),
     });
-    ToastAndroid.show(t('profileEdit.saved'), ToastAndroid.SHORT);
+    showToast(t('profileEdit.saved'));
     router.back();
   });
 

@@ -1,6 +1,6 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState, Linking, Pressable, StyleSheet, ToastAndroid, View } from 'react-native';
+import { AppState, Linking, Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
@@ -10,6 +10,7 @@ import { Notice } from '@/components/Notice';
 import { Screen } from '@/components/Screen';
 import { TextField } from '@/components/TextField';
 import { t } from '@/i18n';
+import { showToast } from '@/lib/toast';
 import { isOnline } from '@/lib/analyze';
 import { formatNumber } from '@/lib/format';
 import { formatDate, planStatus } from '@/lib/plan';
@@ -67,7 +68,7 @@ export default function Premium() {
     if (!waiting) return;
     if (status.kind === 'premium' && (profile?.premium_until ?? null) !== untilBefore.current) {
       setWaiting(false);
-      ToastAndroid.show(t('premium.activated'), ToastAndroid.LONG);
+      showToast(t('premium.activated'), 'long');
     }
   }, [waiting, status.kind, profile?.premium_until]);
 

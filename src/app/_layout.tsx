@@ -7,6 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppText } from '@/components/AppText';
 import { ConfirmProvider } from '@/components/ConfirmProvider';
 import { Screen } from '@/components/Screen';
+import { Toaster } from '@/components/Toaster';
 import { t } from '@/i18n';
 import { useAppFonts } from '@/lib/appFonts';
 import { startAutoSync } from '@/lib/meals';
@@ -93,6 +94,7 @@ export default function RootLayout() {
           <ScanDraftProvider>
             <ConfirmProvider>
               <RootNavigator />
+              <Toaster />
             </ConfirmProvider>
           </ScanDraftProvider>
         </SessionProvider>
