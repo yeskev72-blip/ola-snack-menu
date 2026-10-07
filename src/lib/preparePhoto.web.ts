@@ -1,5 +1,6 @@
 import { PHOTO } from '@/config';
 import { PhotoError } from '@/lib/photoError';
+import { fitWithin, resizeOptions } from '@/lib/photoSize';
 import { t } from '@/i18n';
 
 export type PreparedPhoto = { uri: string; base64: string };
@@ -20,9 +21,12 @@ export type PreparedPhoto = { uri: string; base64: string };
  */
 export async function preparePhoto(uri: string, width: number, height: number): Promise<PreparedPhoto> {
   const blob = await toBlob(uri);
-  const bitmap = await decode(blob);
+  const bitmap = await decode(blob, width, height);
   try {
-    const { w, h } = fit(bitmap.width || width, bitmap.height || height);
+    // Le décodage a déjà pu réduire l'image ; ce second calcul la borne quand il ne l'a pas
+    // fait, faute de connaître ses dimensions d'avance.
+    const { width: w, height: h } = fitWithin(bitmap.width, bitmap.height, PHOTO.maxSide);
+    if (w <= 0 || h <= 0) throw new PhotoError(t('photoErrors.size'));
     const canvas = document.createElement('canvas');
     canvas.width = w;
     canvas.height = h;
@@ -35,14 +39,6 @@ export async function preparePhoto(uri: string, width: number, height: number): 
     // La mémoire du décodage est rendue tout de suite, sans attendre le ramasse-miettes.
     bitmap.close();
   }
-}
-
-/** Côté long ramené à PHOTO.maxSide, proportions gardées. Une petite photo n'est pas agrandie. */
-function fit(width: number, height: number): { w: number; h: number } {
-  const side = Math.max(width, height);
-  if (!Number.isFinite(side) || side <= 0) throw new PhotoError(t('photoErrors.size'));
-  const ratio = Math.min(1, PHOTO.maxSide / side);
-  return { w: Math.max(1, Math.round(width * ratio)), h: Math.max(1, Math.round(height * ratio)) };
 }
 
 async function toBlob(uri: string): Promise<Blob> {
@@ -58,10 +54,10 @@ async function toBlob(uri: string): Promise<Blob> {
  * ignorées par les navigateurs qui ne les connaissent pas : le repli garde alors l'image entière,
  * ce qui reste correct, seulement plus coûteux.
  */
-async function decode(blob: Blob): Promise<ImageBitmap> {
-  const cible = { resizeWidth: PHOTO.maxSide, resizeHeight: PHOTO.maxSide, resizeQuality: 'high' as const };
+async function decode(blob: Blob, width: number, height: number): Promise<ImageBitmap> {
   try {
-    return await createImageBitmap(blob, { ...cible });
+    // Une seule dimension est demandée, jamais les deux : voir resizeOptions.
+    return await createImageBitmap(blob, resizeOptions(width, height, PHOTO.maxSide));
   } catch {
     try {
       return await createImageBitmap(blob);
