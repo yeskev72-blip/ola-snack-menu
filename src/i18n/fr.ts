@@ -189,6 +189,7 @@ export const fr = {
     notFood: "Aucun plat reconnu sur la photo. Reprends la photo, ou saisis ton repas sans photo.",
     cameraDenied: "Autorise l'accès à l'appareil photo dans les réglages du téléphone.",
     photoError: 'Impossible de préparer la photo. Réessaie.',
+    noPhotoPicked: 'Aucune photo n’est revenue de la galerie. Réessaie, ou prends-la avec l’appareil.',
     frameHint: 'Cadre tout le plat, vu de dessus',
     hintShort: "Qu'y a-t-il dans ce plat ?",
     galleryShort: 'Galerie',

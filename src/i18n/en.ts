@@ -197,6 +197,7 @@ export const en: Messages = {
     notFood: 'No food recognised in the photo. Take it again, or enter your meal without a photo.',
     cameraDenied: 'Allow camera access in your phone settings.',
     photoError: 'Could not prepare the photo. Try again.',
+    noPhotoPicked: 'No photo came back from the gallery. Try again, or take it with the camera.',
     frameHint: 'Frame the whole plate, seen from above',
     hintShort: 'What is on this plate?',
     galleryShort: 'Gallery',

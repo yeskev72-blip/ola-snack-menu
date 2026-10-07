@@ -59,8 +59,13 @@ export default function Scan() {
 
   const handlePicked = useCallback(
     async (result: ImagePicker.ImagePickerResult) => {
-      const asset = result.canceled ? null : result.assets[0];
-      if (!asset) return;
+      // Annulation volontaire : rien à dire, la personne sait ce qu'elle a fait.
+      if (result.canceled) return;
+      const asset = result.assets?.[0];
+      // Le sélecteur dit ne pas avoir été annulé mais ne rend aucune photo. Garder le silence
+      // ici, c'est laisser quelqu'un appuyer sur « Galerie » et ne rien voir se passer, sans
+      // jamais apprendre pourquoi. C'est ce qui a rendu cette panne impossible à diagnostiquer.
+      if (!asset) return setError(t('scan.noPhotoPicked'));
       setBusy('photo');
       setError(null);
       try {
