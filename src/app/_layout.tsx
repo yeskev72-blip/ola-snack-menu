@@ -10,6 +10,7 @@ import { Screen } from '@/components/Screen';
 import { Toaster } from '@/components/Toaster';
 import { t } from '@/i18n';
 import { useAppFonts } from '@/lib/appFonts';
+import { hideBootSplash } from '@/lib/bootSplash';
 import { startAutoSync } from '@/lib/meals';
 import { restoreReminders } from '@/lib/remindersStore';
 import { isSupabaseConfigured } from '@/lib/supabase';
@@ -34,7 +35,12 @@ function RootNavigator() {
   }, [userId]);
 
   useEffect(() => {
-    if (status !== 'loading') SplashScreen.hideAsync();
+    if (status !== 'loading') {
+      SplashScreen.hideAsync();
+      // Écran de démarrage du web : retiré au même instant que celui d'Android, pour que les
+      // deux plateformes basculent au même moment de l'attente vers l'app.
+      hideBootSplash();
+    }
   }, [status]);
 
   // L'écran de démarrage reste affiché pendant la lecture de la session locale.
@@ -70,6 +76,9 @@ function RootNavigator() {
 function MissingConfig() {
   useEffect(() => {
     SplashScreen.hideAsync();
+    // Sans cela, l'écran de démarrage resterait par-dessus le message d'aide, et l'app
+    // paraîtrait bloquée au chargement alors qu'elle a quelque chose à dire.
+    hideBootSplash();
   }, []);
   return (
     <Screen>
