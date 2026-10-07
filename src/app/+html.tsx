@@ -32,16 +32,74 @@ export default function Root({ children }: { children: ReactNode }) {
         {/* Sans cela, le défilement de react-native-web se comporte mal sur mobile. */}
         <ScrollViewStyleReset />
 
-        <style dangerouslySetInnerHTML={{ __html: fond }} />
+        <style dangerouslySetInnerHTML={{ __html: fond + demarrageStyles }} />
         <script dangerouslySetInnerHTML={{ __html: enregistrementServiceWorker }} />
       </head>
-      <body>{children}</body>
+      <body>
+        {/*
+          Écrit dans le document, donc peint dès la première image du navigateur — avant que le
+          code de l'application soit chargé. C'est cet intervalle qui paraissait long. Retiré en
+          fondu par hideBootSplash() quand l'app est prête.
+        */}
+        <div id="demarrage" aria-hidden="true">
+          <div className="demarrage-art">
+            <span className="demarrage-anneau" />
+            <svg viewBox="0 0 100 100" width="132" height="132">
+              <circle cx="50" cy="50" r="46" fill="#9C4A1E" />
+              <circle cx="50" cy="50" r="38" fill="#D9A55B" />
+              <circle cx="50" cy="50" r="31" fill="#F3D9A4" />
+              <ellipse cx="39" cy="38" rx="10" ry="6" fill="#FFF6E3" opacity="0.8" transform="rotate(-35 39 38)" />
+            </svg>
+          </div>
+          <div className="demarrage-nom">Calbasse</div>
+        </div>
+        {children}
+      </body>
     </html>
   );
 }
 
 /** Évite le flash blanc avant que l'app ne peigne son propre fond. */
 const fond = `body { background-color: #FBF8F3; }`;
+
+/**
+ * Habillage de l'écran de démarrage.
+ *
+ * Tout est en CSS : l'animation tourne pendant que le code de l'application se télécharge et
+ * s'exécute, sans rien lui disputer. La calebasse respire et son anneau tourne lentement — assez
+ * pour que l'attente paraisse habitée, pas assez pour attirer l'œil.
+ *
+ * Les polices de l'app ne sont pas encore chargées à cet instant : le nom est écrit dans la
+ * police du système, sinon il changerait de dessin sous les yeux au moment du fondu.
+ */
+const demarrageStyles = `
+#demarrage {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px;
+  background: #FBF8F3;
+}
+#demarrage .demarrage-art { position: relative; display: grid; place-items: center; width: 220px; height: 220px; }
+#demarrage .demarrage-anneau {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 2px dashed #E1CFB6;
+  animation: demarrage-tourne 8s linear infinite;
+}
+#demarrage svg { position: relative; animation: demarrage-respire 2.2s ease-in-out infinite; }
+#demarrage .demarrage-nom {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 800; font-size: 15px; letter-spacing: 4px; text-transform: uppercase;
+  color: #9C4A1E;
+  animation: demarrage-pulse 2.2s ease-in-out infinite;
+}
+@keyframes demarrage-tourne { to { transform: rotate(360deg); } }
+@keyframes demarrage-respire { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+@keyframes demarrage-pulse { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+
+/* Un mouvement permanent peut gêner ou rendre malade : on le coupe si le système le demande. */
+@media (prefers-reduced-motion: reduce) {
+  #demarrage .demarrage-anneau, #demarrage svg, #demarrage .demarrage-nom { animation: none; }
+}
+`;
 
 /**
  * Enregistré après le chargement pour ne pas retarder le premier affichage. L'échec est ignoré :

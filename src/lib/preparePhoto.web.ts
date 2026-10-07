@@ -21,23 +21,23 @@ export type PreparedPhoto = { uri: string; base64: string };
  */
 export async function preparePhoto(uri: string, width: number, height: number): Promise<PreparedPhoto> {
   const blob = await toBlob(uri);
-  const bitmap = await decode(blob, width, height);
+  const image = await decode(blob, width, height);
   try {
     // Le décodage a déjà pu réduire l'image ; ce second calcul la borne quand il ne l'a pas
     // fait, faute de connaître ses dimensions d'avance.
-    const { width: w, height: h } = fitWithin(bitmap.width, bitmap.height, PHOTO.maxSide);
+    const { width: w, height: h } = fitWithin(image.width, image.height, PHOTO.maxSide);
     if (w <= 0 || h <= 0) throw new PhotoError(t('photoErrors.size'));
     const canvas = document.createElement('canvas');
     canvas.width = w;
     canvas.height = h;
     const context = canvas.getContext('2d');
     if (!context) throw new PhotoError(t('photoErrors.canvas'));
-    context.drawImage(bitmap, 0, 0, w, h);
+    context.drawImage(image.source, 0, 0, w, h);
     const jpeg = await encode(canvas);
     return { uri: URL.createObjectURL(jpeg), base64: await toBase64(jpeg) };
   } finally {
     // La mémoire du décodage est rendue tout de suite, sans attendre le ramasse-miettes.
-    bitmap.close();
+    image.release();
   }
 }
 
@@ -49,24 +49,54 @@ async function toBlob(uri: string): Promise<Blob> {
   }
 }
 
+/** Image décodée, quel que soit le chemin qui y est parvenu. */
+type Decoded = { source: CanvasImageSource; width: number; height: number; release: () => void };
+
 /**
- * Décodage à taille réduite quand le navigateur le permet. Les options de redimensionnement sont
- * ignorées par les navigateurs qui ne les connaissent pas : le repli garde alors l'image entière,
- * ce qui reste correct, seulement plus coûteux.
+ * Décode la photo, du chemin le plus économe au plus permissif.
+ *
+ * 1. createImageBitmap avec réduction : décode et réduit d'un coup, sans jamais allouer l'image
+ *    entière. C'est ce qui permet d'ouvrir une photo de 108 mégapixels sur un téléphone.
+ * 2. createImageBitmap sans options : pour les navigateurs qui ignorent la réduction.
+ * 3. Une balise <img> : plus coûteuse, mais elle passe par le décodeur d'images du système.
+ *    Android sait y lire des formats que createImageBitmap refuse — le HEIC des appareils
+ *    récents, notamment. Sans ce recours, ces photos étaient simplement refusées.
  */
-async function decode(blob: Blob, width: number, height: number): Promise<ImageBitmap> {
-  try {
-    // Une seule dimension est demandée, jamais les deux : voir resizeOptions.
-    return await createImageBitmap(blob, resizeOptions(width, height, PHOTO.maxSide));
-  } catch {
+async function decode(blob: Blob, width: number, height: number): Promise<Decoded> {
+  for (const tentative of [
+    () => createImageBitmap(blob, resizeOptions(width, height, PHOTO.maxSide)),
+    () => createImageBitmap(blob),
+  ]) {
     try {
-      return await createImageBitmap(blob);
+      const bitmap = await tentative();
+      return { source: bitmap, width: bitmap.width, height: bitmap.height, release: () => bitmap.close() };
     } catch {
-      // HEIC des iPhone et de certains Samsung, fichier abîmé, format exotique : le navigateur
-      // ne sait pas le lire, et aucune nouvelle tentative n'y changera rien.
-      throw new PhotoError(t('photoErrors.format'));
+      // Chemin suivant.
     }
   }
+  return decodeViaElement(blob);
+}
+
+/** Dernier recours : le décodeur du système, atteint par une balise <img>. */
+function decodeViaElement(blob: Blob): Promise<Decoded> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () =>
+      resolve({
+        source: img,
+        width: img.naturalWidth,
+        height: img.naturalHeight,
+        release: () => URL.revokeObjectURL(url),
+      });
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      // Fichier abîmé, ou format qu'aucun décodeur de cet appareil ne connaît : aucune nouvelle
+      // tentative n'y changera rien, et le message doit le dire.
+      reject(new PhotoError(t('photoErrors.format')));
+    };
+    img.src = url;
+  });
 }
 
 function encode(canvas: HTMLCanvasElement): Promise<Blob> {
