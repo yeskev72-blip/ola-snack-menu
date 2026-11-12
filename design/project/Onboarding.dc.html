@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Calbasse · Objectif</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{text-decoration:none;color:inherit}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;overflow:hidden;background:#FBF5EA;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#2B1810">
+  <div style="padding:28px 24px 0;display:flex;flex-direction:column;gap:20px">
+
+    <div style="display:flex;align-items:center;gap:12px">
+      <span style="width:44px;height:44px;border-radius:50%;overflow:hidden;display:block;flex:none"><img src="../assets/logo-calbasse.jpg" alt="Logo Calbasse" style="width:138%;height:138%;margin:-19%;display:block"></span>
+      <span style="font-size:22px;font-weight:800;letter-spacing:-0.02em">Calbasse</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;gap:6px">
+        <span style="flex:1;height:5px;border-radius:5px;background:#B04A1C"></span>
+        <span style="flex:1;height:5px;border-radius:5px;background:#E8DAC0"></span>
+        <span style="flex:1;height:5px;border-radius:5px;background:#E8DAC0"></span>
+      </div>
+      <span style="font-size:12px;font-weight:600;color:#6B5444">Étape 1 sur 3</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <h1 style="margin:0;font-size:32px;line-height:1.1;font-weight:800;letter-spacing:-0.03em">Quel est ton objectif ?</h1>
+      <p style="margin:0;font-size:15px;line-height:1.5;color:#6B5444">On adapte tes protéines et tes calories à ton objectif. Tu pourras le changer quand tu veux.</p>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+
+      <button type="button" onClick="{{ pickMasse }}" style="{{ masseStyle }}">
+        <span style="width:44px;height:44px;border-radius:14px;background:#2B1810;display:flex;align-items:center;justify-content:center;flex:none">
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F3E6CB" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></svg>
+        </span>
+        <span style="flex:1;display:flex;flex-direction:column;gap:3px">
+          <span style="font-size:17px;font-weight:800">Prendre de la masse</span>
+          <span style="font-size:13px;line-height:1.4;color:#6B5444">Savoir si tu atteins tes protéines, même avec le riz sauce de la dame.</span>
+        </span>
+        <span style="{{ masseDot }}">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{ masseCheck }}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+        </span>
+      </button>
+
+      <button type="button" onClick="{{ pickPerte }}" style="{{ perteStyle }}">
+        <span style="width:44px;height:44px;border-radius:14px;background:#2B1810;display:flex;align-items:center;justify-content:center;flex:none">
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F3E6CB" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6" /><polyline points="17 18 23 18 23 12" /></svg>
+        </span>
+        <span style="flex:1;display:flex;flex-direction:column;gap:3px">
+          <span style="font-size:17px;font-weight:800">Perdre du poids</span>
+          <span style="font-size:13px;line-height:1.4;color:#6B5444">Manger le plat de la famille, avec la bonne portion.</span>
+        </span>
+        <span style="{{ perteDot }}">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{ perteCheck }}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+        </span>
+      </button>
+
+      <button type="button" onClick="{{ pickForme }}" style="{{ formeStyle }}">
+        <span style="width:44px;height:44px;border-radius:14px;background:#2B1810;display:flex;align-items:center;justify-content:center;flex:none">
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F3E6CB" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>
+        </span>
+        <span style="flex:1;display:flex;flex-direction:column;gap:3px">
+          <span style="font-size:17px;font-weight:800">Garder la forme</span>
+          <span style="font-size:13px;line-height:1.4;color:#6B5444">Savoir si ton assiette est bonne pour toi, sans culpabiliser.</span>
+        </span>
+        <span style="{{ formeDot }}">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{ formeCheck }}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+        </span>
+      </button>
+
+    </div>
+  </div>
+
+  <div style="position:absolute;left:24px;right:24px;bottom:28px;display:flex;flex-direction:column;gap:14px">
+    <p style="margin:0;text-align:center;font-size:13px;line-height:1.4;color:#6B5444">Attiéké, pâte, riz au gras, sauces, huile : Calbasse connaît tes plats.</p>
+    <a href="Main.dc.html" style="display:flex;align-items:center;justify-content:center;height:56px;border-radius:16px;background:#B04A1C;color:#FFFFFF;font-size:17px;font-weight:700">Continuer</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { goal: 'masse' };
+  }
+  renderVals() {
+    const g = this.state.goal;
+    const base = 'display:flex;align-items:center;gap:14px;text-align:left;width:100%;box-sizing:border-box;padding:16px;border-radius:20px;font-family:inherit;color:#2B1810;cursor:pointer;';
+    const on = 'background:#F8E3D4;border:2px solid #B04A1C;';
+    const off = 'background:#FFFFFF;border:2px solid #E8DAC0;';
+    const dotBase = 'width:24px;height:24px;border-radius:50%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;flex:none;';
+    const dotOn = 'background:#B04A1C;border:2px solid #B04A1C;';
+    const dotOff = 'background:#FFFFFF;border:2px solid #D9C5A0;';
+    return {
+      masseStyle: base + (g === 'masse' ? on : off),
+      perteStyle: base + (g === 'perte' ? on : off),
+      formeStyle: base + (g === 'forme' ? on : off),
+      masseDot: dotBase + (g === 'masse' ? dotOn : dotOff),
+      perteDot: dotBase + (g === 'perte' ? dotOn : dotOff),
+      formeDot: dotBase + (g === 'forme' ? dotOn : dotOff),
+      masseCheck: g === 'masse' ? '#FFFFFF' : 'transparent',
+      perteCheck: g === 'perte' ? '#FFFFFF' : 'transparent',
+      formeCheck: g === 'forme' ? '#FFFFFF' : 'transparent',
+      pickMasse: () => this.setState({ goal: 'masse' }),
+      pickPerte: () => this.setState({ goal: 'perte' }),
+      pickForme: () => this.setState({ goal: 'forme' })
+    };
+  }
+}
+</script>
+</body>
+</html>

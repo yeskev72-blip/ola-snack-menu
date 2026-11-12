@@ -1,0 +1,15 @@
+CALBASSE - Design de l'app (11 planches)
+
+project/   Fondations, Onboarding, Main (Aujourd'hui), Scanner, Resultat, Detail,
+           Bilan, Plats, Premium, CoachClients, CoachCorriger + canvas.json (disposition)
+assets/    logo-calbasse.jpg
+
+Les fichiers .dc.html sont les sources du canevas : ils s'ouvrent dans Claude
+(artefact en ligne). Hors de Claude, ils ne s'affichent pas seuls.
+
+Palette : terre cuite #B04A1C, terre foncee #7A3416, terre douce #F8E3D4,
+feuille #2E6B3E, encre #2B1810, encre 2 #6B5444, sable #F3E6CB, fond #FBF5EA, traits #E8DAC0
+Police : Plus Jakarta Sans (400 a 800)
+
+ATTENTION : toutes les valeurs de calories, proteines et grammes sont illustratives.
+A remplacer par une base sourcee (FAO/INFOODS) validee par un nutritionniste.

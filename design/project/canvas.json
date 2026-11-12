@@ -1,0 +1,39 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-11-11T08:20:00Z" },
+  "title": "Calbasse — Design de l'app",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Fondations.dc.html": { "x": 0, "y": 0, "w": 1280, "h": 960, "title": "Fondations visuelles" },
+    "Onboarding.dc.html": { "x": 0, "y": 1340, "w": 390, "h": 844, "title": "1 · Objectif", "is_interactive": true },
+    "Main.dc.html": { "x": 470, "y": 1340, "w": 390, "h": 844, "title": "2 · Aujourd'hui", "is_interactive": true },
+    "Scanner.dc.html": { "x": 940, "y": 1340, "w": 390, "h": 844, "title": "3 · Scanner", "is_interactive": true },
+    "Resultat.dc.html": { "x": 1410, "y": 1340, "w": 390, "h": 844, "title": "4 · Résultat", "is_interactive": true },
+    "Detail.dc.html": { "x": 1880, "y": 1340, "w": 390, "h": 844, "title": "5 · Détail et sources", "is_interactive": true },
+    "Bilan.dc.html": { "x": 0, "y": 2480, "w": 390, "h": 844, "title": "6 · Bilan de la semaine", "is_interactive": true },
+    "Plats.dc.html": { "x": 470, "y": 2480, "w": 390, "h": 844, "title": "7 · Plats locaux", "is_interactive": true },
+    "Premium.dc.html": { "x": 940, "y": 2480, "w": 390, "h": 844, "title": "8 · Premium", "is_interactive": true },
+    "CoachClients.dc.html": { "x": 1410, "y": 2480, "w": 390, "h": 844, "title": "9 · Coach : clients", "is_interactive": true },
+    "CoachCorriger.dc.html": { "x": 1880, "y": 2480, "w": 390, "h": 844, "title": "10 · Coach : corriger un repas", "is_interactive": true }
+  },
+  "order": [
+    "Fondations.dc.html",
+    "Onboarding.dc.html",
+    "Main.dc.html",
+    "Scanner.dc.html",
+    "Resultat.dc.html",
+    "Detail.dc.html",
+    "Bilan.dc.html",
+    "Plats.dc.html",
+    "Premium.dc.html",
+    "CoachClients.dc.html",
+    "CoachCorriger.dc.html"
+  ],
+  "notes": {
+    "t1": { "x": 0, "y": 1080, "text": "Parcours principal : de l'objectif au repas enregistré", "kind": "title1", "maxW": 2270 },
+    "t2": { "x": 0, "y": 2220, "text": "Suivi, base de plats, abonnement et mode coach", "kind": "title1", "maxW": 2270 },
+    "s1": { "x": 1360, "y": 40, "w": 340, "fill": "orange", "text": "Valeurs d'illustration : toutes les calories, protéines et grammes affichés sont des exemples. À remplacer par ta base sourcée (FAO/INFOODS) validée avec un nutritionniste avant tout test utilisateur." }
+  },
+  "designSystems": []
+}
