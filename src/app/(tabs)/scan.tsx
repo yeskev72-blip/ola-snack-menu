@@ -42,6 +42,8 @@ export default function Scan() {
   const pending = usePendingScans();
   /** Photo de la file en cours d'analyse : retirée seulement une fois l'analyse aboutie. */
   const resumed = useRef<string | null>(null);
+  /** Analyses lancées sur la photo courante, échecs compris : jointes à la mesure du temps de saisie. */
+  const tries = useRef(0);
 
   // Quota restant et table des plats (pour le calcul) rafraîchis à chaque ouverture de l'onglet ;
   // barre d'état claire sur le viseur sombre.
@@ -68,11 +70,14 @@ export default function Scan() {
       if (!asset) return setError(t('scan.noPhotoPicked'));
       setBusy('photo');
       setError(null);
+      // Le chronomètre du temps de saisie part ici : avant, c'est l'appareil photo du système.
+      const pickedAt = Date.now();
       try {
         const photo = await preparePhoto(asset.uri, asset.width, asset.height);
         resumed.current = null;
+        tries.current = 0;
         draft.reset();
-        draft.setPhoto(photo);
+        draft.setPhoto(photo, { pickedAt, preparedAt: Date.now() });
       } catch (cause) {
         // Une PhotoError sait pourquoi elle échoue et le dit à sa façon : l'afficher telle
         // quelle, plutôt que derrière un « Réessaie » qui ne mène nulle part. Pour tout le
@@ -138,7 +143,10 @@ export default function Scan() {
     setBusy('analyze');
     setError(null);
     setFailure(null);
+    tries.current++;
+    const analyzeAt = Date.now();
     const result = await analyzeMeal({ photo: draft.photo, hint: draft.hint });
+    const analyzedAt = Date.now();
     if (id !== attempt.current) return;
     setBusy(null);
     if (!result.ok) {
@@ -155,7 +163,7 @@ export default function Scan() {
       await dropPendingScan(resumed.current);
       resumed.current = null;
     }
-    draft.applyAnalysis(result.data);
+    draft.applyAnalysis(result.data, { analyzeAt, analyzedAt, attempts: tries.current });
     router.push('/result');
   };
 

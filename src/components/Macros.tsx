@@ -4,14 +4,29 @@ import { AppText } from '@/components/AppText';
 import { Icon } from '@/components/Icon';
 import { Ring } from '@/components/Ring';
 import { t } from '@/i18n';
+import type { MetricKey } from '@/lib/focus';
 import { formatNumber } from '@/lib/format';
 import type { Nutrients } from '@/lib/nutrition';
 import { colors, radius, shadow, spacing } from '@/theme';
 
+/**
+ * Les quatre chiffres d'une journée et comment les nommer.
+ *
+ * Les calories y figurent au même titre qu'une macro : selon l'objectif, ce sont elles ou les
+ * protéines qui prennent la grande place, et l'autre descend dans la rangée de cartes.
+ */
+export const METRICS = {
+  kcal: { label: 'journal.calories', left: 'journal.caloriesLeft', over: 'journal.kcalOver', unit: 'common.kcal', short: 'common.kcal', icon: 'flame', color: colors.accent, ink: colors.accent },
+  proteines: { label: 'journal.protein', left: 'journal.proteinLeft', over: 'journal.macroExtra', unit: 'common.grams', short: 'history.protShort', icon: 'protein', color: colors.protein, ink: colors.protein },
+  glucides: { label: 'journal.carbs', left: 'journal.carbsLeft', over: 'journal.macroOver', unit: 'common.grams', short: 'history.carbsShort', icon: 'carbs', color: colors.carbs, ink: '#9A6B06' },
+  lipides: { label: 'journal.fat', left: 'journal.fatLeft', over: 'journal.macroOver', unit: 'common.grams', short: 'history.fatShort', icon: 'fat', color: colors.fat, ink: colors.fat },
+} as const;
+
+/** Les trois macros dans l'ordre, pour les écrans qui n'affichent pas les calories à côté. */
 export const MACROS = [
-  { key: 'proteines', label: 'journal.protein', left: 'journal.proteinLeft', short: 'history.protShort', icon: 'protein', color: colors.protein, ink: colors.protein },
-  { key: 'glucides', label: 'journal.carbs', left: 'journal.carbsLeft', short: 'history.carbsShort', icon: 'carbs', color: colors.carbs, ink: '#9A6B06' },
-  { key: 'lipides', label: 'journal.fat', left: 'journal.fatLeft', short: 'history.fatShort', icon: 'fat', color: colors.fat, ink: colors.fat },
+  { key: 'proteines', ...METRICS.proteines },
+  { key: 'glucides', ...METRICS.glucides },
+  { key: 'lipides', ...METRICS.lipides },
 ] as const;
 
 type MacroValues = Pick<Nutrients, 'proteines' | 'glucides' | 'lipides'>;
@@ -37,28 +52,39 @@ export function Macros({ values }: { values: MacroValues }) {
   );
 }
 
-/** Journal : grammes restants par macro, avec un anneau de ce qui est déjà mangé. */
-export function MacroCards({ eaten, targets }: { eaten: MacroValues; targets: MacroValues }) {
+/**
+ * Journal : ce qui reste sur chaque chiffre de second rang, avec un anneau de ce qui est mangé.
+ *
+ * Dépasser sa ration de protéines n'est pas une faute — c'est même le but en prise de masse — et
+ * le rouge du dépassement ne s'applique donc pas à elles.
+ *
+ * Les calories portent leur unité dans l'étiquette, pas à côté du nombre : « 1 639 kcal » sur
+ * trois cartes côte à côte se faisait couper au milieu, ce qu'une capture d'écran a montré.
+ */
+export function MacroCards({ eaten, targets, keys }: { eaten: Nutrients; targets: Nutrients; keys: readonly MetricKey[] }) {
   return (
     <View style={styles.row}>
-      {MACROS.map((m) => {
-        const left = targets[m.key] - eaten[m.key];
+      {keys.map((key) => {
+        const m = METRICS[key];
+        const left = targets[key] - eaten[key];
         const over = left < 0;
+        const budget = key !== 'proteines';
         return (
           <View
-            key={m.key}
+            key={key}
             style={styles.card}
             accessible
-            accessibilityLabel={`${t(m.label)} : ${formatNumber(Math.abs(left))} ${t('common.grams')} ${over ? t('journal.over') : t('journal.remaining')}`}>
+            accessibilityLabel={`${t(m.label)} : ${formatNumber(Math.abs(left))} ${t(m.unit)} ${over ? t('journal.over') : t('journal.remaining')}`}>
             <View>
-              <AppText style={[styles.cardValue, over && styles.over]}>
-                {formatNumber(Math.abs(left))} {t('common.grams')}
+              <AppText style={[styles.cardValue, over && (budget ? styles.over : styles.reached)]} numberOfLines={1}>
+                {formatNumber(Math.abs(left))}
+                {key === 'kcal' ? '' : ` ${t(m.unit)}`}
               </AppText>
               <AppText variant="small" style={styles.cardLabel} numberOfLines={1}>
-                {over ? t('journal.macroOver') : t(m.left)}
+                {over ? t(m.over) : t(m.left)}
               </AppText>
             </View>
-            <Ring progress={targets[m.key] > 0 ? eaten[m.key] / targets[m.key] : 0} size={48} stroke={6} color={m.color}>
+            <Ring progress={targets[key] > 0 ? eaten[key] / targets[key] : 0} size={48} stroke={6} color={m.color}>
               <Icon name={m.icon} size={16} color={m.ink} strokeWidth={2.2} />
             </Ring>
           </View>
@@ -79,4 +105,5 @@ const styles = StyleSheet.create({
   cardValue: { fontSize: 20, lineHeight: 26, fontWeight: '800' },
   cardLabel: { fontSize: 12, lineHeight: 16, fontWeight: '600' },
   over: { color: colors.danger },
+  reached: { color: colors.success },
 });

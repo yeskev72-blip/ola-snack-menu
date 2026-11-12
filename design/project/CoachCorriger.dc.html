@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Calbasse · Corriger le repas d'un client</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{text-decoration:none;color:inherit}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;overflow:hidden;background:#FBF5EA;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#2B1810">
+
+  <div style="padding:22px 20px 0;display:flex;flex-direction:column;gap:12px">
+
+    <div style="display:flex;align-items:center;gap:12px">
+      <a href="CoachClients.dc.html" aria-label="Retour aux clients" style="width:40px;height:40px;border-radius:50%;background:#F3E6CB;display:flex;align-items:center;justify-content:center;flex:none">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2B1810" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+      </a>
+      <div style="display:flex;flex-direction:column;gap:1px">
+        <span style="font-size:20px;font-weight:800;letter-spacing:-0.01em">Aïcha K.</span>
+        <span style="font-size:12px;color:#6B5444">Déjeuner · photo reçue à 13:10</span>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;align-items:stretch">
+      <div style="position:relative;width:128px;height:128px;border-radius:20px;background:radial-gradient(circle at 50% 50%, #4D3220 0%, #2A1A10 100%);flex:none">
+        <svg aria-hidden="true" viewBox="0 0 100 100" width="108" height="108" style="position:absolute;left:10px;top:10px">
+          <circle cx="50" cy="50" r="48" fill="#EBDDBE" />
+          <circle cx="50" cy="50" r="40" fill="#FFFFFF" />
+          <ellipse cx="38" cy="55" rx="24" ry="20" fill="#F1D9A0" />
+          <path d="M24 58 C28 48 42 44 50 52" stroke="#D9B96C" stroke-width="2.4" fill="none" stroke-linecap="round" />
+          <ellipse cx="68" cy="40" rx="15" ry="10.5" fill="#8A4519" transform="rotate(-28 68 40)" />
+          <ellipse cx="63" cy="68" rx="13" ry="8.5" fill="#C4421C" />
+        </svg>
+      </div>
+      <div style="flex:1;background:#FFFFFF;border:1px solid #E8DAC0;border-radius:20px;padding:12px 14px;display:flex;flex-direction:column;justify-content:center;gap:4px">
+        <span style="font-size:12px;font-weight:700;color:#7A3416">Estimation de l'IA</span>
+        <span style="font-size:15px;font-weight:800;line-height:1.2">Riz au gras, poulet frit</span>
+        <span style="font-size:13px;font-weight:700;color:#6B5444">865 kcal · 39 g prot.</span>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:15px;font-weight:800">Portion</span>
+      <div style="display:flex;gap:4px;background:#F3E6CB;border-radius:15px;padding:4px">
+        <button type="button" onClick="{{ pickS }}" style="{{ sStyle }}">Petite</button>
+        <button type="button" onClick="{{ pickM }}" style="{{ mStyle }}">Moyenne</button>
+        <button type="button" onClick="{{ pickL }}" style="{{ lStyle }}">Grande</button>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:15px;font-weight:800">Huile de cuisson</span>
+      <div style="display:flex;gap:4px;background:#F3E6CB;border-radius:15px;padding:4px">
+        <button type="button" onClick="{{ pickPeu }}" style="{{ peuStyle }}">Peu</button>
+        <button type="button" onClick="{{ pickNormal }}" style="{{ normalStyle }}">Normal</button>
+        <button type="button" onClick="{{ pickBeaucoup }}" style="{{ beaucoupStyle }}">Beaucoup</button>
+      </div>
+    </div>
+
+    <div style="background:#2B1810;color:#F3E6CB;border-radius:20px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <span style="font-size:12px;font-weight:700;color:#E9D3BA">Après ta correction</span>
+        <span style="font-size:26px;line-height:1.05;font-weight:800">{{ kcal }} <span style="font-size:13px;font-weight:700">kcal</span></span>
+        <span style="font-size:13px;font-weight:700;color:#FFC9A6">{{ protein }} g de protéines</span>
+      </div>
+      <span style="background:#F3E6CB;color:#2B1810;border-radius:999px;padding:7px 12px;font-size:13px;font-weight:800">{{ delta }}</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:15px;font-weight:800">Réponse rapide à Aïcha</span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button type="button" style="background:#FFFFFF;border:1.5px solid #E8DAC0;color:#2B1810;border-radius:999px;padding:8px 14px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">Réduis le riz d'un tiers</button>
+        <button type="button" style="background:#FFFFFF;border:1.5px solid #E8DAC0;color:#2B1810;border-radius:999px;padding:8px 14px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">Ajoute 2 œufs</button>
+        <button type="button" aria-label="Enregistrer un vocal" style="display:flex;align-items:center;gap:6px;background:#F8E3D4;border:1.5px solid #B04A1C;color:#7A3416;border-radius:999px;padding:7px 14px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">
+          <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7A3416" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" y1="19" x2="12" y2="23" /></svg>Vocal</button>
+      </div>
+    </div>
+
+    <a href="CoachClients.dc.html" style="display:flex;align-items:center;justify-content:center;gap:8px;height:54px;border-radius:16px;background:#B04A1C;color:#FFFFFF;font-size:16px;font-weight:700">
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>Valider et envoyer</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { portion: 'M', oil: 'beaucoup' };
+  }
+  fmt(n) {
+    if (n >= 1000) {
+      return Math.floor(n / 1000) + ' ' + String(n % 1000).padStart(3, '0');
+    }
+    return String(n);
+  }
+  renderVals() {
+    const p = this.state.portion;
+    const o = this.state.oil;
+    const f = p === 'S' ? 0.7 : p === 'L' ? 1.35 : 1;
+    const oilKcal = o === 'peu' ? -80 : o === 'beaucoup' ? 150 : 0;
+    const kcal = Math.round(535 * f + 330 + oilKcal);
+    const protein = Math.round(10 * f + 29);
+    const diff = kcal - 865;
+    const delta = diff === 0 ? 'Identique' : (diff > 0 ? '+' : '−') + Math.abs(diff) + ' kcal';
+    const base = 'flex:1;height:42px;border:0;border-radius:11px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;';
+    const on = 'background:#2B1810;color:#FFFFFF;';
+    const off = 'background:transparent;color:#2B1810;';
+    return {
+      sStyle: base + (p === 'S' ? on : off),
+      mStyle: base + (p === 'M' ? on : off),
+      lStyle: base + (p === 'L' ? on : off),
+      peuStyle: base + (o === 'peu' ? on : off),
+      normalStyle: base + (o === 'normal' ? on : off),
+      beaucoupStyle: base + (o === 'beaucoup' ? on : off),
+      pickS: () => this.setState({ portion: 'S' }),
+      pickM: () => this.setState({ portion: 'M' }),
+      pickL: () => this.setState({ portion: 'L' }),
+      pickPeu: () => this.setState({ oil: 'peu' }),
+      pickNormal: () => this.setState({ oil: 'normal' }),
+      pickBeaucoup: () => this.setState({ oil: 'beaucoup' }),
+      kcal: this.fmt(kcal),
+      protein: String(protein),
+      delta: delta
+    };
+  }
+}
+</script>
+</body>
+</html>

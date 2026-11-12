@@ -32,7 +32,7 @@ export default function DayDetail() {
     { kcal: 0, proteines: 0, glucides: 0, lipides: 0 },
   );
   const target = profile?.calories_cible ?? 0;
-  const targets = macroTargets(target);
+  const targets = macroTargets(target, profile);
   const diff = Math.round(total.kcal - target);
   const onTarget = target > 0 && Math.abs(diff) <= target * 0.1;
   const date = parseDayKey(day).toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' });

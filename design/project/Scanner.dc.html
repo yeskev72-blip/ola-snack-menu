@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Calbasse · Scanner</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{text-decoration:none;color:inherit}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;overflow:hidden;background:#1E120B;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#F3E6CB">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:22px 20px 0">
+    <a href="Main.dc.html" aria-label="Fermer le scanner" style="width:44px;height:44px;border-radius:50%;background:#3A2619;display:flex;align-items:center;justify-content:center">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F3E6CB" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+    </a>
+    <div style="display:flex;align-items:center;gap:6px;background:#3A2619;border-radius:999px;padding:9px 14px;font-size:13px;font-weight:700">
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F3E6CB" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+      <span>2 scans gratuits aujourd'hui</span>
+    </div>
+    <button type="button" aria-label="Activer le flash" style="width:44px;height:44px;border-radius:50%;background:#3A2619;border:0;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F3E6CB" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
+    </button>
+  </div>
+
+  <div style="display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:22px">
+    <div style="position:relative;width:340px;height:340px;border-radius:26px;background:radial-gradient(circle at 50% 50%, #4D3220 0%, #2A1A10 100%);overflow:hidden">
+      <svg aria-hidden="true" viewBox="0 0 100 100" width="286" height="286" style="position:absolute;left:27px;top:27px">
+        <circle cx="50" cy="50" r="48" fill="#EBDDBE" />
+        <circle cx="50" cy="50" r="40" fill="#FFFFFF" />
+        <ellipse cx="38" cy="55" rx="24" ry="20" fill="#F1D9A0" />
+        <path d="M24 58 C28 48 42 44 50 52" stroke="#D9B96C" stroke-width="2.4" fill="none" stroke-linecap="round" />
+        <path d="M28 66 C34 60 44 60 48 64" stroke="#D9B96C" stroke-width="2.4" fill="none" stroke-linecap="round" />
+        <ellipse cx="68" cy="40" rx="15" ry="10.5" fill="#8A4519" transform="rotate(-28 68 40)" />
+        <ellipse cx="66" cy="36" rx="7" ry="3.5" fill="#A8602B" transform="rotate(-28 66 36)" />
+        <ellipse cx="63" cy="68" rx="13" ry="8.5" fill="#C4421C" />
+        <circle cx="60" cy="66" r="1.6" fill="#E2683F" />
+        <circle cx="67" cy="70" r="1.6" fill="#E2683F" />
+      </svg>
+      <div style="position:absolute;left:12px;top:12px;width:44px;height:44px;box-sizing:border-box;border-top:4px solid #F3E6CB;border-left:4px solid #F3E6CB;border-top-left-radius:16px"></div>
+      <div style="position:absolute;right:12px;top:12px;width:44px;height:44px;box-sizing:border-box;border-top:4px solid #F3E6CB;border-right:4px solid #F3E6CB;border-top-right-radius:16px"></div>
+      <div style="position:absolute;left:12px;bottom:12px;width:44px;height:44px;box-sizing:border-box;border-bottom:4px solid #F3E6CB;border-left:4px solid #F3E6CB;border-bottom-left-radius:16px"></div>
+      <div style="position:absolute;right:12px;bottom:12px;width:44px;height:44px;box-sizing:border-box;border-bottom:4px solid #F3E6CB;border-right:4px solid #F3E6CB;border-bottom-right-radius:16px"></div>
+    </div>
+    <span style="font-size:13px;font-weight:600;background:#3A2619;border-radius:999px;padding:8px 14px">Cadre l'assiette entière, vue de dessus</span>
+  </div>
+
+  <div style="margin:18px 25px 0;display:flex;flex-direction:column;gap:8px">
+    <label for="indice" style="font-size:13px;font-weight:700">Qu'y a-t-il dedans ? <span style="font-weight:500;color:#D9C5A0">(facultatif)</span></label>
+    <input id="indice" type="text" placeholder="ex. riz, sauce graine, poulet, un peu d'huile" style="box-sizing:border-box;width:100%;height:52px;border-radius:14px;border:1px solid #5A402B;background:#2E1D12;color:#F3E6CB;font-family:inherit;font-size:14px;padding:0 14px;outline:none">
+  </div>
+
+  <div style="position:absolute;left:0;right:0;bottom:34px;display:flex;align-items:center;justify-content:space-around;padding:0 24px">
+    <button type="button" style="width:92px;display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:0;color:#F3E6CB;font-family:inherit;padding:0;cursor:pointer">
+      <span style="width:52px;height:52px;border-radius:16px;background:#3A2619;display:flex;align-items:center;justify-content:center">
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F3E6CB" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
+      </span>
+      <span style="font-size:12px;font-weight:600">Galerie</span>
+    </button>
+    <a href="Resultat.dc.html" aria-label="Prendre la photo" style="width:84px;height:84px;border-radius:50%;box-sizing:border-box;border:4px solid #F3E6CB;display:flex;align-items:center;justify-content:center">
+      <span style="width:64px;height:64px;border-radius:50%;background:#F3E6CB;display:block"></span>
+    </a>
+    <a href="Plats.dc.html" style="width:92px;display:flex;flex-direction:column;align-items:center;gap:6px;color:#F3E6CB">
+      <span style="width:52px;height:52px;border-radius:16px;background:#3A2619;display:flex;align-items:center;justify-content:center">
+        <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F3E6CB" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>
+      </span>
+      <span style="font-size:12px;font-weight:600">Choisir un plat</span>
+    </a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

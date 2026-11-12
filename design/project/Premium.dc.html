@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Calbasse · Premium</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{text-decoration:none;color:inherit}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;overflow:hidden;background:#FBF5EA;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#2B1810">
+  <div style="padding:22px 24px 0;display:flex;flex-direction:column;gap:18px">
+
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <a href="Main.dc.html" aria-label="Fermer" style="width:44px;height:44px;border-radius:50%;background:#F3E6CB;display:flex;align-items:center;justify-content:center">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2B1810" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+      </a>
+      <span style="width:44px;height:44px;border-radius:50%;overflow:hidden;display:block;flex:none"><img src="../assets/logo-calbasse.jpg" alt="Logo Calbasse" style="width:138%;height:138%;margin:-19%;display:block"></span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <h1 style="margin:0;font-size:32px;line-height:1.1;font-weight:800;letter-spacing:-0.03em">Passe à Premium</h1>
+      <p style="margin:0;font-size:15px;line-height:1.5;color:#6B5444">Scanne tous tes repas, tous les jours. En gratuit, tu as 2 scans par jour.</p>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="width:26px;height:26px;border-radius:50%;background:#B04A1C;display:flex;align-items:center;justify-content:center;flex:none">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+        </span>
+        <span style="font-size:15px;font-weight:600">30 scans photo par jour</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="width:26px;height:26px;border-radius:50%;background:#B04A1C;display:flex;align-items:center;justify-content:center;flex:none">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+        </span>
+        <span style="font-size:15px;font-weight:600">Suivi détaillé de tes protéines</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="width:26px;height:26px;border-radius:50%;background:#B04A1C;display:flex;align-items:center;justify-content:center;flex:none">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+        </span>
+        <span style="font-size:15px;font-weight:600">Bilan de la semaine chaque dimanche</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="width:26px;height:26px;border-radius:50%;background:#B04A1C;display:flex;align-items:center;justify-content:center;flex:none">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+        </span>
+        <span style="font-size:15px;font-weight:600">Historique complet de tes repas</span>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button type="button" onClick="{{ pickM }}" style="{{ mStyle }}">
+        <span style="{{ mDot }}">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="{{ mCheck }}" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+        </span>
+        <span style="flex:1;display:flex;flex-direction:column;gap:2px">
+          <span style="font-size:16px;font-weight:800">Mensuel</span>
+          <span style="font-size:12px;color:#6B5444">Tu arrêtes quand tu veux</span>
+        </span>
+        <span style="font-size:18px;font-weight:800">2 000 <span style="font-size:12px;font-weight:700;color:#6B5444">FCFA / mois</span></span>
+      </button>
+
+      <button type="button" onClick="{{ pickA }}" style="{{ aStyle }}">
+        <span style="{{ aDot }}">
+          <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="{{ aCheck }}" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+        </span>
+        <span style="flex:1;display:flex;flex-direction:column;gap:2px">
+          <span style="display:flex;align-items:center;gap:8px;font-size:16px;font-weight:800">Annuel <span style="background:#2E6B3E;color:#FFFFFF;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:700">2 mois offerts</span></span>
+          <span style="font-size:12px;color:#6B5444">Soit environ 1 667 FCFA par mois</span>
+        </span>
+        <span style="font-size:18px;font-weight:800">20 000 <span style="font-size:12px;font-weight:700;color:#6B5444">FCFA / an</span></span>
+      </button>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#2B1810">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2E6B3E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><polyline points="9 12 11 14 15 10" /></svg>Mobile Money ou carte bancaire, via CinetPay</span>
+      <span style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#2B1810">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2E6B3E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12" /></svg>Sans renouvellement automatique</span>
+    </div>
+  </div>
+
+  <div style="position:absolute;left:24px;right:24px;bottom:28px;display:flex;flex-direction:column;gap:12px;align-items:stretch">
+    <a href="Main.dc.html" style="display:flex;align-items:center;justify-content:center;height:56px;border-radius:16px;background:#B04A1C;color:#FFFFFF;font-size:17px;font-weight:700">{{ cta }}</a>
+    <a href="Main.dc.html" style="text-align:center;font-size:14px;font-weight:700;color:#6B5444;padding:6px 0">Rester en gratuit</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { plan: 'm' };
+  }
+  renderVals() {
+    const p = this.state.plan;
+    const base = 'display:flex;align-items:center;gap:14px;text-align:left;width:100%;box-sizing:border-box;padding:16px;border-radius:20px;font-family:inherit;color:#2B1810;cursor:pointer;';
+    const on = 'background:#F8E3D4;border:2px solid #B04A1C;';
+    const off = 'background:#FFFFFF;border:2px solid #E8DAC0;';
+    const dotBase = 'width:24px;height:24px;border-radius:50%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;flex:none;';
+    const dotOn = 'background:#B04A1C;border:2px solid #B04A1C;';
+    const dotOff = 'background:#FFFFFF;border:2px solid #D9C5A0;';
+    return {
+      mStyle: base + (p === 'm' ? on : off),
+      aStyle: base + (p === 'a' ? on : off),
+      mDot: dotBase + (p === 'm' ? dotOn : dotOff),
+      aDot: dotBase + (p === 'a' ? dotOn : dotOff),
+      mCheck: p === 'm' ? '#FFFFFF' : 'transparent',
+      aCheck: p === 'a' ? '#FFFFFF' : 'transparent',
+      pickM: () => this.setState({ plan: 'm' }),
+      pickA: () => this.setState({ plan: 'a' }),
+      cta: p === 'm' ? 'Payer 2 000 FCFA' : 'Payer 20 000 FCFA'
+    };
+  }
+}
+</script>
+</body>
+</html>

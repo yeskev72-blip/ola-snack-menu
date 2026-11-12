@@ -9,7 +9,9 @@ import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
 import { Macros } from '@/components/Macros';
 import { Badge } from '@/components/Badge';
+import { FoodBadge } from '@/components/FoodBadge';
 import { Notice } from '@/components/Notice';
+import { Segmented } from '@/components/Segmented';
 import { Icon } from '@/components/Icon';
 import { RoundButton } from '@/components/Screen';
 import { t } from '@/i18n';
@@ -17,10 +19,13 @@ import { showToast } from '@/lib/toast';
 import { formatNumber } from '@/lib/format';
 import { analyzeMeal, isOnline } from '@/lib/analyze';
 import { buildCorrection } from '@/lib/corrections';
+import { OIL_LEVELS } from '@/lib/cookingOil';
 import { isUnverified } from '@/lib/foodStatus';
 import { useFoods } from '@/lib/foods';
 import { MEAL_TYPES, mealTypeLabel } from '@/lib/mealTypes';
 import { saveMeal } from '@/lib/meals';
+import { scanTiming } from '@/lib/scanTiming';
+import { sendScanTiming } from '@/lib/sendScanTiming';
 import { mealNutrition } from '@/lib/nutrition';
 import { gramsHint } from '@/lib/portionLabels';
 import { unitsFor } from '@/lib/portions';
@@ -39,7 +44,7 @@ export default function Result() {
   const [refining, setRefining] = useState(false);
 
   // Calories calculées avec la table foods ; l'IA ne fournit que les éléments et les grammes.
-  const nutrition = useMemo(() => mealNutrition(draft.items, byKey), [draft.items, byKey]);
+  const nutrition = useMemo(() => mealNutrition(draft.items, byKey, draft.oil), [draft.items, byKey, draft.oil]);
 
   const questions = draft.scan?.followUpAllowed ? draft.scan.questions : [];
   const allAnswered = questions.length > 0 && questions.every((q) => answers[q.id]);
@@ -76,12 +81,17 @@ export default function Result() {
       user_id: user.id,
       eaten_at: new Date().toISOString(),
       type_repas: draft.typeRepas,
+      huile: draft.oil,
       items,
       total: nutrition.total,
       confidence: draft.scan ? nutrition.confidence : null,
       photo_path: draft.scan?.photoPath ?? null,
       correction: correction ? { id: randomUUID(), ...correction, photo_path: draft.scan?.photoPath ?? null } : null,
     });
+    // Le repas est enregistré : c'est la fin du parcours mesuré. L'envoi part sans être attendu,
+    // une mesure ne doit ni retarder ni faire échouer ce qu'elle mesure.
+    const timing = scanTiming(draft.marks, Date.now());
+    if (timing) void sendScanTiming(timing, items.length);
     showToast((await isOnline()) ? t('result.saved') : t('result.savedOffline'));
     draft.reset();
     router.dismissTo('/');
@@ -185,7 +195,7 @@ export default function Result() {
                           {item.label}
                         </AppText>
                         {n.estimated ? <Badge label={t('result.estimated')} /> : null}
-                        {isUnverified(food) ? <Badge label={t('result.unverified')} /> : null}
+                        <FoodBadge food={food} />
                       </View>
                       <AppText variant="small">
                         {hint ? `${hint} · ` : ''}
@@ -200,6 +210,20 @@ export default function Result() {
                 );
               })}
             </View>
+          ) : null}
+
+          {/* Les lipides d'un plat sont le seul indice de l'huile qu'il contient : un plat sans
+              gras ne bouge pas, et proposer le réglage n'aurait alors aucun sens. */}
+          {nutrition.total.lipides > 0 ? (
+            <>
+              <AppText style={styles.section}>{t('result.oil')}</AppText>
+              <AppText variant="small">{t('result.oilHelp')}</AppText>
+              <Segmented
+                options={OIL_LEVELS.map((niveau) => ({ value: niveau, label: t(`result.oil_${niveau}`) }))}
+                value={draft.oil}
+                onChange={draft.setOil}
+              />
+            </>
           ) : null}
 
           <AppText style={styles.section}>{t('result.mealType')}</AppText>

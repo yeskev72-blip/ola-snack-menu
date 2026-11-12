@@ -4,6 +4,7 @@
  * Module pur : testé avec `node --test`.
  */
 
+import { applyOil, DEFAULT_OIL, type OilLevel } from './cookingOil.ts';
 import { round1 } from './format.ts';
 
 export type Per100g = { kcal: number; proteines: number; glucides: number; lipides: number };
@@ -85,8 +86,16 @@ export function rangeMargin(confidence: number): number {
   return Math.min(0.35, 0.1 + (RANGE_THRESHOLD - confidence) * 0.5);
 }
 
-export function mealNutrition(items: NutritionItem[], foods: ReadonlyMap<string, FoodValues>): MealNutrition {
-  const computed = items.map((item) => itemNutrition(item, foods));
+/**
+ * @param oil Quantité d'huile de cuisson par rapport à l'habitude. Appliquée aliment par
+ * aliment, pour que le détail d'un repas continue de s'additionner jusqu'à son total.
+ */
+export function mealNutrition(
+  items: NutritionItem[],
+  foods: ReadonlyMap<string, FoodValues>,
+  oil: OilLevel = DEFAULT_OIL,
+): MealNutrition {
+  const computed = items.map((item) => applyOil(itemNutrition(item, foods), oil));
   const total = computed.reduce<Nutrients>(
     (acc, n) => ({
       kcal: acc.kcal + n.kcal,

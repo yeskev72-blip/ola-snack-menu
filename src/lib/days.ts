@@ -2,6 +2,7 @@
  * Journées locales et agrégats pour l'historique. Module pur : testé avec `node --test`.
  */
 
+import type { MetricKey } from './focus.ts';
 import { round1 } from './format.ts';
 
 export type DayTotals = { day: string; kcal: number; proteines: number; glucides: number; lipides: number; meals: number };
@@ -48,10 +49,24 @@ export function totalsByDay(meals: MealLike[], days: string[]): DayTotals[] {
   });
 }
 
-/** Moyenne sur les journées renseignées uniquement (une journée vide n'est pas un jeûne). */
-export function averageKcal(days: DayTotals[]): number | null {
+/** Moyenne d'un chiffre sur les journées renseignées uniquement (une journée vide n'est pas un jeûne). */
+export function average(days: DayTotals[], key: MetricKey): number | null {
   const filled = days.filter((d) => d.meals > 0);
-  return filled.length ? round1(filled.reduce((s, d) => s + d.kcal, 0) / filled.length) : null;
+  return filled.length ? round1(filled.reduce((s, d) => s + d[key], 0) / filled.length) : null;
+}
+
+/**
+ * Nombre de journées où la cible est tenue.
+ *
+ * Les calories se jugent dans les deux sens : dépasser est un écart autant que manquer, d'où la
+ * fourchette de ± 10 %. Les protéines non — en manger plus que visé n'a jamais fait de mal, donc
+ * la journée compte dès que la cible est atteinte. La tolérance de 5 % évite qu'un gramme
+ * manquant fasse perdre une journée par ailleurs tenue.
+ */
+export function daysOnTarget(days: DayTotals[], key: MetricKey, target: number | null): number {
+  if (!target || target <= 0) return 0;
+  const tenue = key === 'kcal' ? (v: number) => Math.abs(v - target) <= target * 0.1 : (v: number) => v >= target * 0.95;
+  return days.filter((d) => d.meals > 0 && tenue(d[key])).length;
 }
 
 /** Graduations « rondes » de 0 au-dessus du maximum (500, 1000, 2000…). */
