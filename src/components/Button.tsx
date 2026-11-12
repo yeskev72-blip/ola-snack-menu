@@ -60,8 +60,10 @@ const styles = StyleSheet.create({
   },
   small: { minHeight: 44, paddingHorizontal: spacing.md + 2 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  primary: { backgroundColor: colors.primary },
-  primaryPressed: { backgroundColor: colors.primaryPressed },
+  // Terre cuite : sur la planche des fondations, c'est le bouton principal. L'encre reste la
+  // couleur des surfaces sombres et des états actifs, pas celle de l'action.
+  primary: { backgroundColor: colors.accent },
+  primaryPressed: { backgroundColor: colors.accentStrong },
   accent: { backgroundColor: colors.accent },
   accentPressed: { backgroundColor: '#7A3814' },
   secondary: { backgroundColor: colors.surface, borderWidth: 1.5, borderColor: colors.border },

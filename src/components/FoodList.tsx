@@ -84,6 +84,9 @@ export function FoodList({ onChoose, autoFocus }: { onChoose: (food: LocalFood) 
             <View style={styles.rowText}>
               <View style={styles.nameRow}>
                 <AppText style={styles.name}>{item.label_fr}</AppText>
+                {/* Seules les estimations sont signalées ici : presque toute la table est
+                    vérifiée, et une pastille sur chaque ligne n'apprendrait rien. La provenance
+                    complète s'affiche sur le détail d'un repas, comme sur la planche. */}
                 {isUnverified(item) ? <Badge label={t('result.unverified')} /> : null}
               </View>
               {portionHint(item) ? <AppText variant="small">{portionHint(item)}</AppText> : null}

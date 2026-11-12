@@ -1,22 +1,35 @@
 /**
- * Système de design Calbasse (refonte) : interface claire et épurée, gros chiffres, cartes blanches très
- * arrondies avec ombre douce, boutons pilule noirs. L'accent brun calebasse est réservé au scanner, à
- * l'anneau des calories et aux états actifs. Contraste AA minimum, cibles tactiles de 48 dp au moins.
+ * Système de design Calbasse. Les couleurs viennent des fondations visuelles livrées le
+ * 11 novembre (voir design/project/Fondations.dc.html).
+ *
+ * Terre cuite pour l'action, encre pour les surfaces sombres et les états actifs, feuille pour
+ * ce qui est vérifié. Fond sable chaud plutôt que blanc : l'écran doit rester lisible en plein
+ * soleil. Contraste AA minimum, cibles tactiles de 48 dp au moins.
  */
 export const colors = {
-  background: '#FBF8F3',
+  /** Fond de l'app : sable chaud, pas blanc. */
+  background: '#FBF5EA',
   surface: '#FFFFFF',
-  surfaceAlt: '#F3ECE1',
-  border: '#E6DCCD',
-  text: '#1B1511',
-  textMuted: '#685A4D',
-  primary: '#1B1511',
-  primaryPressed: '#3B2E24',
+  /** Sable : surfaces posées sur le fond, segments au repos. */
+  surfaceAlt: '#F3E6CB',
+  border: '#E8DAC0',
+  /** Encre. */
+  text: '#2B1810',
+  textMuted: '#6B5444',
+  /** Encre également : surfaces sombres, puces actives, sélection d'un segment. */
+  primary: '#2B1810',
+  primaryPressed: '#4A2E22',
   onPrimary: '#FFFFFF',
-  accent: '#9C4A1E',
-  accentSoft: '#F6E6D3',
+  /** Terre cuite : la couleur de l'action. */
+  accent: '#B04A1C',
+  /** Terre foncée : texte d'accent, et appui sur un bouton terre cuite. */
+  accentStrong: '#7A3416',
+  /** Terre douce : fond d'une sélection. */
+  accentSoft: '#F8E3D4',
   highlight: '#C98A0B',
-  success: '#1E7A4C',
+  /** Feuille : ce qui est vérifié, ce qui est atteint. */
+  success: '#2E6B3E',
+  successSoft: '#E2F0E2',
   danger: '#B42318',
   protein: '#D64545',
   carbs: '#E8A317',

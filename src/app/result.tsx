@@ -9,6 +9,7 @@ import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
 import { Macros } from '@/components/Macros';
 import { Badge } from '@/components/Badge';
+import { FoodBadge } from '@/components/FoodBadge';
 import { Notice } from '@/components/Notice';
 import { Icon } from '@/components/Icon';
 import { RoundButton } from '@/components/Screen';
@@ -185,7 +186,7 @@ export default function Result() {
                           {item.label}
                         </AppText>
                         {n.estimated ? <Badge label={t('result.estimated')} /> : null}
-                        {isUnverified(food) ? <Badge label={t('result.unverified')} /> : null}
+                        <FoodBadge food={food} />
                       </View>
                       <AppText variant="small">
                         {hint ? `${hint} · ` : ''}
