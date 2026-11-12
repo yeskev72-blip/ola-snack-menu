@@ -3,6 +3,7 @@ import { createContext, useContext, useMemo, useState, type ReactNode } from 're
 
 import type { AnalysisResponse, AnalyzedItem, NamedPortion, Question } from '@/lib/analyze';
 import type { PreparedPhoto } from '@/lib/preparePhoto';
+import { DEFAULT_OIL, type OilLevel } from '@/lib/cookingOil';
 import type { TypeRepas } from '@/lib/database.types';
 import type { LocalMeal } from '@/lib/meals';
 import { per100gFromPortion, type Per100g } from '@/lib/nutrition';
@@ -41,11 +42,14 @@ type Draft = {
   scan: ScanInfo | null;
   items: DraftItem[];
   typeRepas: TypeRepas;
+  /** Huile de cuisson par rapport à l'habitude, pour tout le repas. */
+  oil: OilLevel;
 };
 
 type Ctx = Draft & {
   setPhoto: (photo: PreparedPhoto | null) => void;
   setHint: (hint: string) => void;
+  setOil: (oil: OilLevel) => void;
   setTypeRepas: (type: TypeRepas) => void;
   applyAnalysis: (response: AnalysisResponse) => void;
   updateItem: (key: string, patch: Partial<Omit<DraftItem, 'key'>>) => void;
@@ -66,7 +70,7 @@ export function defaultTypeRepas(date = new Date()): TypeRepas {
   return 'diner';
 }
 
-const emptyDraft = (): Draft => ({ photo: null, hint: '', scan: null, items: [], typeRepas: defaultTypeRepas() });
+const emptyDraft = (): Draft => ({ photo: null, hint: '', scan: null, items: [], typeRepas: defaultTypeRepas(), oil: DEFAULT_OIL });
 
 function toDraftItem(item: AnalyzedItem): DraftItem {
   const other = item.food_key === 'autre';
@@ -92,6 +96,7 @@ export function ScanDraftProvider({ children }: { children: ReactNode }) {
       ...draft,
       setPhoto: (photo) => setDraft((d) => ({ ...d, photo })),
       setHint: (hint) => setDraft((d) => ({ ...d, hint })),
+      setOil: (oil) => setDraft((d) => ({ ...d, oil })),
       setTypeRepas: (typeRepas) => setDraft((d) => ({ ...d, typeRepas })),
       applyAnalysis: (response) =>
         setDraft((d) => ({

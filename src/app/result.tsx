@@ -11,6 +11,7 @@ import { Macros } from '@/components/Macros';
 import { Badge } from '@/components/Badge';
 import { FoodBadge } from '@/components/FoodBadge';
 import { Notice } from '@/components/Notice';
+import { Segmented } from '@/components/Segmented';
 import { Icon } from '@/components/Icon';
 import { RoundButton } from '@/components/Screen';
 import { t } from '@/i18n';
@@ -18,6 +19,7 @@ import { showToast } from '@/lib/toast';
 import { formatNumber } from '@/lib/format';
 import { analyzeMeal, isOnline } from '@/lib/analyze';
 import { buildCorrection } from '@/lib/corrections';
+import { OIL_LEVELS } from '@/lib/cookingOil';
 import { isUnverified } from '@/lib/foodStatus';
 import { useFoods } from '@/lib/foods';
 import { MEAL_TYPES, mealTypeLabel } from '@/lib/mealTypes';
@@ -40,7 +42,7 @@ export default function Result() {
   const [refining, setRefining] = useState(false);
 
   // Calories calculées avec la table foods ; l'IA ne fournit que les éléments et les grammes.
-  const nutrition = useMemo(() => mealNutrition(draft.items, byKey), [draft.items, byKey]);
+  const nutrition = useMemo(() => mealNutrition(draft.items, byKey, draft.oil), [draft.items, byKey, draft.oil]);
 
   const questions = draft.scan?.followUpAllowed ? draft.scan.questions : [];
   const allAnswered = questions.length > 0 && questions.every((q) => answers[q.id]);
@@ -201,6 +203,20 @@ export default function Result() {
                 );
               })}
             </View>
+          ) : null}
+
+          {/* Les lipides d'un plat sont le seul indice de l'huile qu'il contient : un plat sans
+              gras ne bouge pas, et proposer le réglage n'aurait alors aucun sens. */}
+          {nutrition.total.lipides > 0 ? (
+            <>
+              <AppText style={styles.section}>{t('result.oil')}</AppText>
+              <AppText variant="small">{t('result.oilHelp')}</AppText>
+              <Segmented
+                options={OIL_LEVELS.map((niveau) => ({ value: niveau, label: t(`result.oil_${niveau}`) }))}
+                value={draft.oil}
+                onChange={draft.setOil}
+              />
+            </>
           ) : null}
 
           <AppText style={styles.section}>{t('result.mealType')}</AppText>
