@@ -20,3 +20,6 @@ node tools/apercu/servir.mjs dist 8080 &
 
 Le profil servi est complet, donc l'app va directement au journal : c'est fait
 pour regarder les écrans, pas pour tester la vraie base.
+
+`PROFIL=vide node tools/apercu/faux-supabase.mjs` ne sert aucun profil : l'app part
+dans le parcours d'accueil, seul chemin vers l'écran de la cible.

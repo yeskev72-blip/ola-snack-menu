@@ -120,7 +120,7 @@ export default function Journal() {
         </Ring>
       </Pressable>
 
-      <MacroCards eaten={total} targets={macroTargets(target)} />
+      <MacroCards eaten={total} targets={macroTargets(target, profile)} />
 
       <AppText style={styles.section} accessibilityRole="header">
         {isToday ? t('journal.todayMeals') : t('journal.dayMeals')}

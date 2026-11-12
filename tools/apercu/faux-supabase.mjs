@@ -28,6 +28,12 @@ const profil = { id: UID, prenom: 'Arnaud', sexe: 'homme', age: 30, taille_cm: 1
   partage_photos: false, premium_until: null,
   created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
 
+/**
+ * PROFIL=vide sert un compte sans profil : l'app part alors dans le parcours d'accueil, seul
+ * moyen d'atteindre l'écran de la cible, qu'un profil complet saute.
+ */
+const VIDE = process.env.PROFIL === 'vide';
+
 http.createServer((req, res) => {
   const entetes = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*',
     'Access-Control-Allow-Methods': '*', 'Access-Control-Expose-Headers': '*',
@@ -37,7 +43,7 @@ http.createServer((req, res) => {
   let corps = [];
   if (chemin.startsWith('/auth/v1/signup') || chemin.startsWith('/auth/v1/token')) corps = session;
   else if (chemin.startsWith('/auth/v1/user')) corps = session.user;
-  else if (chemin.startsWith('/rest/v1/profiles')) corps = req.method === 'PATCH' ? profil : [profil];
+  else if (chemin.startsWith('/rest/v1/profiles')) corps = req.method === 'PATCH' ? profil : VIDE ? [] : [profil];
   else if (chemin.startsWith('/rest/v1/foods')) corps = plats;
   res.writeHead(200, entetes);
   res.end(JSON.stringify(corps));

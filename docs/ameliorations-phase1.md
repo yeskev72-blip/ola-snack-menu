@@ -38,6 +38,11 @@ beaucoup, et trop peu à celui qui sèche — exactement les deux profils de l'I
 préserver le muscle), puis répartir le reste des calories entre glucides et lipides. C'est une
 modification locale de `macroTargets`, testable dans `calories.test.ts`.
 
+**Fait le 12 novembre 2026.** Mesuré sur les profils ci-dessus : 70 kg en prise passe de 2,9 à
+1,8 g/kg, 90 kg en perte de 1,2 à 2,0 g/kg. Un plafond à 45 % des calories garde de quoi manger
+autre chose quand le poids est élevé et la cible basse. Sans poids ni objectif — profil
+incomplet — l'ancienne répartition en pourcentage s'applique telle quelle.
+
 ---
 
 ## 2. L'écran du jour met les calories en premier, pas les protéines
@@ -142,7 +147,9 @@ point 3 (sources vérifiables) est le préalable à tout démarchage de coach.
 
 1. ~~Écran « Détail et sources »~~ — fait le 12 novembre 2026 : provenance par aliment,
    mention du réglage d'huile, et signalement d'une valeur (`public.food_reports`).
-2. Cible protéines fondée sur le poids (bug de fond pour l'ICP, correction courte).
+2. ~~Cible protéines fondée sur le poids~~ — fait le 12 novembre 2026 : `PROTEIN_PER_KG`
+   (2,0 en perte, 1,8 en prise, 1,6 en maintien), plafonnée à 45 % des calories ; glucides et
+   lipides se partagent le reste, et les parts affichées se lisent sur les grammes retenus.
 3. Protéines en premier sur l'écran du jour et dans l'historique.
 4. Mesure du temps de saisie, puis ce qu'elle révèle.
 5. Envoi binaire de la photo et mode léger.

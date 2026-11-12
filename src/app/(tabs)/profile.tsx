@@ -76,7 +76,7 @@ export default function Profile() {
   const plan = planStatus(profile?.plan, profile?.premium_until);
   const remaining = plan.kind === 'premium' && plan.until ? daysLeft(plan.until) : null;
   const target = profile?.calories_cible ?? null;
-  const macros = target ? macroTargets(target) : null;
+  const macros = target ? macroTargets(target, profile) : null;
   const name = profile?.prenom || (isGuest ? t('profile.guestAccount') : t('profile.title'));
   const edit = () => router.push('/profile-edit');
   const short = (key: MessageKey) => t(key).split(' (')[0]!;

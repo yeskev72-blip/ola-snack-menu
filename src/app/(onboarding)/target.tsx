@@ -12,7 +12,7 @@ import { Notice } from '@/components/Notice';
 import { OnboardingScreen } from '@/components/OnboardingScreen';
 import { Stepper } from '@/components/Stepper';
 import { t } from '@/i18n';
-import { ACTIVITY_LEVELS, clampTarget, dailyTarget, MACRO_SPLIT, macroTargets, TARGET_BOUNDS } from '@/lib/calories';
+import { ACTIVITY_LEVELS, clampTarget, dailyTarget, type MacroTargets, macroShares, macroTargets, TARGET_BOUNDS } from '@/lib/calories';
 import { formatNumber } from '@/lib/format';
 import { useAction } from '@/lib/useAction';
 import { useOnboardingDraft } from '@/state/onboardingDraft';
@@ -23,17 +23,17 @@ const SIZE = 200;
 const STROKE = 16;
 
 /** Anneau tricolore : part des calories apportée par chaque macro. */
-function MacroRing({ kcal }: { kcal: number }) {
+function MacroRing({ kcal, shares }: { kcal: number; shares: MacroTargets }) {
   const r = (SIZE - STROKE) / 2;
   const c = 2 * Math.PI * r;
   const gap = 6;
   // Début de chaque arc : somme des parts précédentes.
-  const starts = MACROS.map((_, i) => MACROS.slice(0, i).reduce((sum, m) => sum + c * MACRO_SPLIT[m.key], 0));
+  const starts = MACROS.map((_, i) => MACROS.slice(0, i).reduce((sum, m) => sum + c * shares[m.key], 0));
   return (
     <View style={styles.ring}>
       <Svg width={SIZE} height={SIZE}>
         {MACROS.map((m, i) => {
-          const len = c * MACRO_SPLIT[m.key] - gap;
+          const len = c * shares[m.key] - gap;
           return (
             <Circle
               key={m.key}
@@ -94,7 +94,10 @@ export default function TargetScreen() {
 
   // Arrivée directe sur cet écran (ex. rechargement) : on reprend au début.
   if (computed === null) return <Redirect href="/goal" />;
-  const grams = macroTargets(target);
+  // Les protéines se calculent sur le poids : la répartition change d'un profil à l'autre, et
+  // les parts affichées se lisent sur les grammes retenus plutôt que sur une constante.
+  const grams = macroTargets(target, { poids_kg, objectif });
+  const shares = macroShares(grams);
 
   return (
     <OnboardingScreen
@@ -108,7 +111,7 @@ export default function TargetScreen() {
         </AppText>
       </View>
 
-      <MacroRing kcal={target} />
+      <MacroRing kcal={target} shares={shares} />
       <AppText variant="muted" style={styles.center}>
         {t(objectif === 'perte' ? 'onboarding.targetLose' : objectif === 'prise' ? 'onboarding.targetGain' : 'onboarding.targetMaintain')}
       </AppText>
@@ -139,7 +142,7 @@ export default function TargetScreen() {
               {formatNumber(grams[m.key])} {t('common.grams')}
             </AppText>
             <AppText variant="small" style={styles.pct}>
-              {Math.round(MACRO_SPLIT[m.key] * 100)} %
+              {Math.round(shares[m.key] * 100)} %
             </AppText>
           </View>
         ))}
