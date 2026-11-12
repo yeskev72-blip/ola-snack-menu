@@ -10,6 +10,7 @@ export type Objectif = 'perte' | 'maintien' | 'prise';
 export type Sexe = 'femme' | 'homme';
 export type Plan = 'free' | 'premium';
 export type TypeRepas = 'petit_dejeuner' | 'dejeuner' | 'diner' | 'en_cas';
+export type Huile = 'peu' | 'normal' | 'beaucoup';
 export type FoodCategorie =
   | 'feculent'
   | 'plat_complet'
@@ -64,6 +65,8 @@ type MealRow = {
   user_id: string;
   eaten_at: Timestamp;
   type_repas: TypeRepas;
+  /** Niveau d'huile retenu, déjà appliqué aux totaux et aux éléments. */
+  huile: Huile;
   photo_path: string | null;
   total_kcal: number;
   total_proteines: number;
@@ -98,6 +101,17 @@ type CorrectionRow = {
   created_at: Timestamp;
 };
 
+type FoodReportRow = {
+  id: string;
+  user_id: string;
+  /** Null pour un élément estimé par l'IA, absent de la table. */
+  food_key: string | null;
+  label: string;
+  meal_id: string | null;
+  message: string;
+  created_at: Timestamp;
+};
+
 type ScanUsageRow = { user_id: string; day: string; count: number };
 
 /** Champs du profil modifiables par l'utilisateur (droits par colonne en base). */
@@ -129,6 +143,7 @@ export type Database = {
           | 'id'
           | 'user_id'
           | 'eaten_at'
+          | 'huile'
           | 'photo_path'
           | 'total_kcal'
           | 'total_proteines'
@@ -141,6 +156,7 @@ export type Database = {
       >;
       meal_items: Table<MealItemRow, WithDefaults<MealItemRow, 'id' | 'position' | 'food_key' | 'estimated'>>;
       corrections: Table<CorrectionRow, WithDefaults<CorrectionRow, 'id' | 'user_id' | 'meal_id' | 'photo_path' | 'created_at'>>;
+      food_reports: Table<FoodReportRow, WithDefaults<FoodReportRow, 'id' | 'user_id' | 'food_key' | 'meal_id' | 'created_at'>, never>;
       scan_usage: Table<ScanUsageRow, never, never>;
     };
     Views: Record<never, never>;
@@ -159,3 +175,4 @@ export type Profile = ProfileRow;
 export type Food = FoodRow;
 export type Meal = MealRow;
 export type MealItem = MealItemRow;
+export type FoodReport = FoodReportRow;

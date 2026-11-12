@@ -3,6 +3,7 @@ import { openDatabaseAsync, type SQLiteDatabase } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
 import { AppState } from 'react-native';
 
+import { DEFAULT_OIL, isOilLevel, type OilLevel } from '@/lib/cookingOil';
 import type { Json, TypeRepas } from '@/lib/database.types';
 import { dayKey, lastDays, parseDayKey, totalsByDay, type DayTotals } from '@/lib/days';
 import type { Nutrients } from '@/lib/nutrition';
@@ -33,6 +34,8 @@ export type LocalMeal = {
   type_repas: TypeRepas;
   items: SavedItem[];
   total: Nutrients;
+  /** Niveau d'huile retenu, déjà appliqué aux items et au total ; sert à l'expliquer après coup. */
+  huile: OilLevel;
   confidence: number | null;
   photo_path: string | null;
   /** Correction à envoyer (prédiction de l'IA vs saisie finale) ; null si rien n'a changé. */
@@ -47,6 +50,7 @@ type Row = {
   type_repas: TypeRepas;
   items_json: string;
   total_json: string;
+  huile: string | null;
   confidence: number | null;
   photo_path: string | null;
   correction_json: string | null;
@@ -80,6 +84,11 @@ const MIGRATIONS = [
    CREATE INDEX IF NOT EXISTS meals_user_eaten ON meals (user_id, eaten_at);`,
   // v2 : suppression différée (synchronisée au retour du réseau)
   `ALTER TABLE meals ADD COLUMN deleted INTEGER NOT NULL DEFAULT 0;`,
+  // v3 : niveau d'huile, pour que le détail d'un repas puisse expliquer son total.
+  // Les repas déjà enregistrés ont été calculés sans réglage, donc au niveau habituel.
+  // La valeur est écrite en toutes lettres plutôt qu'interpolée : meals.sql.test.mjs rejoue ce
+  // SQL tel quel, et vérifie qu'elle reste égale à DEFAULT_OIL.
+  `ALTER TABLE meals ADD COLUMN huile TEXT NOT NULL DEFAULT 'normal';`,
 ];
 
 let database: SQLiteDatabase | null = null;
@@ -126,6 +135,7 @@ function fromRow(row: Row): LocalMeal {
     type_repas: row.type_repas,
     items: JSON.parse(row.items_json) as SavedItem[],
     total: JSON.parse(row.total_json) as Nutrients,
+    huile: isOilLevel(row.huile) ? row.huile : DEFAULT_OIL,
     confidence: row.confidence,
     photo_path: row.photo_path,
     correction: row.correction_json ? (JSON.parse(row.correction_json) as LocalMeal['correction']) : null,
@@ -169,14 +179,15 @@ function useLocalQuery<T>(load: (() => Promise<T>) | null, initial: T, deps: unk
 
 export async function saveMeal(meal: Omit<LocalMeal, 'synced'>): Promise<void> {
   await (await db()).runAsync(
-    `INSERT OR REPLACE INTO meals (id, user_id, eaten_at, type_repas, items_json, total_json, confidence, photo_path, correction_json, synced, deleted)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0)`,
+    `INSERT OR REPLACE INTO meals (id, user_id, eaten_at, type_repas, items_json, total_json, huile, confidence, photo_path, correction_json, synced, deleted)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0)`,
     meal.id,
     meal.user_id,
     meal.eaten_at,
     meal.type_repas,
     JSON.stringify(meal.items),
     JSON.stringify(meal.total),
+    meal.huile,
     meal.confidence,
     meal.photo_path,
     meal.correction ? JSON.stringify(meal.correction) : null,
@@ -285,6 +296,7 @@ async function pushMeal(meal: LocalMeal): Promise<void> {
     user_id: meal.user_id,
     eaten_at: meal.eaten_at,
     type_repas: meal.type_repas,
+    huile: meal.huile,
     photo_path: meal.photo_path,
     total_kcal: meal.total.kcal,
     total_proteines: meal.total.proteines,
@@ -390,15 +402,16 @@ async function pullRecent(userId: string): Promise<boolean> {
     for (const m of meals) {
       // INSERT OR IGNORE puis mise à jour seulement si la ligne locale est déjà synchronisée.
       await local.runAsync(
-        `INSERT OR IGNORE INTO meals (id, user_id, eaten_at, type_repas, items_json, total_json, confidence, photo_path, correction_json, synced, deleted)
-         VALUES (?, ?, ?, ?, '[]', '{}', NULL, NULL, NULL, 1, 0)`,
+        `INSERT OR IGNORE INTO meals (id, user_id, eaten_at, type_repas, items_json, total_json, huile, confidence, photo_path, correction_json, synced, deleted)
+         VALUES (?, ?, ?, ?, '[]', '{}', ?, NULL, NULL, NULL, 1, 0)`,
         m.id,
         m.user_id,
         m.eaten_at,
         m.type_repas,
+        DEFAULT_OIL,
       );
       await local.runAsync(
-        `UPDATE meals SET eaten_at = ?, type_repas = ?, items_json = ?, total_json = ?, confidence = ?, photo_path = ?
+        `UPDATE meals SET eaten_at = ?, type_repas = ?, items_json = ?, total_json = ?, huile = ?, confidence = ?, photo_path = ?
          WHERE id = ? AND synced = 1`,
         new Date(m.eaten_at).toISOString(),
         m.type_repas,
@@ -409,6 +422,7 @@ async function pullRecent(userId: string): Promise<boolean> {
           glucides: Number(m.total_glucides),
           lipides: Number(m.total_lipides),
         } satisfies Nutrients),
+        isOilLevel(m.huile) ? m.huile : DEFAULT_OIL,
         m.confidence_globale === null ? null : Number(m.confidence_globale),
         m.photo_path,
         m.id,

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { applyOil, DEFAULT_OIL, isOilLevel, OIL_LEVELS } from './cookingOil.ts';
+import { DEFAULT_OIL, OIL_LEVELS, applyOil, isOilLevel, removeOil } from './cookingOil.ts';
 
 const plat = { kcal: 465, proteines: 9, glucides: 80, lipides: 12 };
 
@@ -57,4 +57,18 @@ test('huile : isOilLevel refuse ce qui n’est pas un niveau', () => {
   for (const niveau of OIL_LEVELS) assert.equal(isOilLevel(niveau), true);
   for (const faux of ['', 'moyen', 'PEU', null, 3, undefined]) assert.equal(isOilLevel(faux), false);
   assert.equal(isOilLevel(DEFAULT_OIL), true);
+});
+
+test('retirer l’huile annule l’ajustement, au dixième près', () => {
+  for (const niveau of OIL_LEVELS) {
+    const base = { kcal: 465, proteines: 9, glucides: 60, lipides: 14.2 };
+    const retour = removeOil(applyOil(base, niveau), niveau);
+    assert.ok(Math.abs(retour.lipides - base.lipides) <= 0.1, `${niveau} : lipides ${retour.lipides}`);
+    assert.ok(Math.abs(retour.kcal - base.kcal) <= 1, `${niveau} : kcal ${retour.kcal}`);
+  }
+});
+
+test('retirer l’huile d’un plat sans gras ne change rien', () => {
+  const pomme = { kcal: 52, proteines: 0.3, glucides: 14, lipides: 0 };
+  assert.deepEqual(removeOil(pomme, 'beaucoup'), pomme);
 });

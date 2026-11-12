@@ -140,7 +140,8 @@ point 3 (sources vérifiables) est le préalable à tout démarchage de coach.
 
 ## Ordre proposé
 
-1. Écran « Détail et sources » (douleur bloquante, unanime chez les pros, différenciateur).
+1. ~~Écran « Détail et sources »~~ — fait le 12 novembre 2026 : provenance par aliment,
+   mention du réglage d'huile, et signalement d'une valeur (`public.food_reports`).
 2. Cible protéines fondée sur le poids (bug de fond pour l'ICP, correction courte).
 3. Protéines en premier sur l'écran du jour et dans l'historique.
 4. Mesure du temps de saisie, puis ce qu'elle révèle.

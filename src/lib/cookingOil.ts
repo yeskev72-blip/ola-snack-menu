@@ -39,7 +39,24 @@ type Adjustable = { kcal: number; lipides: number };
  * protéines ni les glucides du plat. Rien ne peut devenir négatif.
  */
 export function applyOil<T extends Adjustable>(valeurs: T, niveau: OilLevel): T {
-  const facteur = FACTORS[niveau];
+  return scaleFat(valeurs, FACTORS[niveau]);
+}
+
+/**
+ * Opération inverse : retrouve les valeurs d'un aliment avant l'ajustement d'huile.
+ *
+ * Sert quand une portion enregistrée doit repartir dans un calcul qui appliquera l'huile à son
+ * tour — refaire un repas, par exemple. Sans cela, un plat noté « beaucoup d'huile » verrait
+ * son gras majoré une deuxième fois.
+ *
+ * L'aller-retour n'est pas exact au dixième près, parce que chaque sens arrondit ; l'écart
+ * reste sous 0,1 g de lipides et 1 kcal, loin devant la précision d'une estimation de portion.
+ */
+export function removeOil<T extends Adjustable>(valeurs: T, niveau: OilLevel): T {
+  return scaleFat(valeurs, 1 / FACTORS[niveau]);
+}
+
+function scaleFat<T extends Adjustable>(valeurs: T, facteur: number): T {
   if (facteur === 1) return valeurs;
   const lipides = Math.max(0, round1(valeurs.lipides * facteur));
   const ecart = lipides - valeurs.lipides;

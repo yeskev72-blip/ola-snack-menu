@@ -12,10 +12,12 @@ import { supabase } from '@/lib/supabase';
 
 export type LocalFood = Pick<
   Food,
-  'food_key' | 'label_fr' | 'aliases' | 'categorie' | 'kcal_100g' | 'proteines_100g' | 'glucides_100g' | 'lipides_100g' | 'portion_reperes' | 'verified'
+  'food_key' | 'label_fr' | 'aliases' | 'categorie' | 'kcal_100g' | 'proteines_100g' | 'glucides_100g' | 'lipides_100g' | 'portion_reperes' | 'source' | 'verified'
 >;
 
-const CACHE_KEY = 'foods:v1';
+// v2 : la provenance (`source`) est affichée sur le détail d'un repas. Un cache v1 ne la
+// contient pas ; changer de clé le remplace au lieu de laisser l'écran muet.
+const CACHE_KEY = 'foods:v2';
 const MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 type Cache = { fetchedAt: number; foods: LocalFood[] };
@@ -36,7 +38,7 @@ async function readCache(): Promise<Cache | null> {
 async function fetchRemote(): Promise<LocalFood[] | null> {
   const { data, error } = await supabase
     .from('foods')
-    .select('food_key, label_fr, aliases, categorie, kcal_100g, proteines_100g, glucides_100g, lipides_100g, portion_reperes, verified')
+    .select('food_key, label_fr, aliases, categorie, kcal_100g, proteines_100g, glucides_100g, lipides_100g, portion_reperes, source, verified')
     .order('label_fr');
   if (error || !data) return null;
   await Storage.setItem(CACHE_KEY, JSON.stringify({ fetchedAt: Date.now(), foods: data } satisfies Cache));

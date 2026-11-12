@@ -79,6 +79,7 @@ export default function Result() {
       user_id: user.id,
       eaten_at: new Date().toISOString(),
       type_repas: draft.typeRepas,
+      huile: draft.oil,
       items,
       total: nutrition.total,
       confidence: draft.scan ? nutrition.confidence : null,

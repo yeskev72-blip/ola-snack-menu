@@ -3,7 +3,7 @@ import { createContext, useContext, useMemo, useState, type ReactNode } from 're
 
 import type { AnalysisResponse, AnalyzedItem, NamedPortion, Question } from '@/lib/analyze';
 import type { PreparedPhoto } from '@/lib/preparePhoto';
-import { DEFAULT_OIL, type OilLevel } from '@/lib/cookingOil';
+import { DEFAULT_OIL, removeOil, type OilLevel } from '@/lib/cookingOil';
 import type { TypeRepas } from '@/lib/database.types';
 import type { LocalMeal } from '@/lib/meals';
 import { per100gFromPortion, type Per100g } from '@/lib/nutrition';
@@ -56,7 +56,7 @@ type Ctx = Draft & {
   removeItem: (key: string) => void;
   addItem: (item: Omit<DraftItem, 'key'>) => string;
   /** Recharge un repas déjà enregistré dans le brouillon, pour le refaire sans rescanner. */
-  repeatMeal: (meal: Pick<LocalMeal, 'items' | 'type_repas'>) => void;
+  repeatMeal: (meal: Pick<LocalMeal, 'items' | 'type_repas' | 'huile'>) => void;
   /** Nouveau repas : saisie manuelle (sans photo) ou nouveau scan. */
   reset: () => void;
 };
@@ -127,6 +127,7 @@ export function ScanDraftProvider({ children }: { children: ReactNode }) {
         setDraft({
           ...emptyDraft(),
           typeRepas: meal.type_repas,
+          oil: meal.huile,
           items: meal.items.map((it) => ({
             key: randomUUID(),
             food_key: it.food_key,
@@ -135,8 +136,9 @@ export function ScanDraftProvider({ children }: { children: ReactNode }) {
             confidence: null,
             // Un aliment hors table garde les valeurs retenues ce jour-là : les recalculer
             // demanderait un nouvel appel à l'IA, et donnerait un autre résultat. Le repas
-            // enregistre les valeurs de la PORTION : il faut les ramener à 100 g.
-            estimate_100g: it.food_key ? null : per100gFromPortion(it),
+            // enregistre les valeurs de la PORTION : il faut les ramener à 100 g. L'huile y est
+            // déjà comprise, et le calcul la réappliquera : on la retire d'abord.
+            estimate_100g: it.food_key ? null : per100gFromPortion(removeOil(it, meal.huile)),
           })),
         }),
       reset: () => setDraft(emptyDraft()),
