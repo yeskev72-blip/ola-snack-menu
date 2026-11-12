@@ -5,6 +5,7 @@ import Svg, { G, Line, Path, Rect, Text as SvgText } from 'react-native-svg';
 import { t } from '@/i18n';
 import { formatNumber } from '@/lib/format';
 import { niceTicks, parseDayKey, type DayTotals } from '@/lib/days';
+import type { MetricKey } from '@/lib/focus';
 import { colors } from '@/theme';
 
 type Props = {
@@ -12,6 +13,10 @@ type Props = {
   target: number | null;
   selected: string | null;
   onSelect: (day: string) => void;
+  /** Le chiffre tracé : celui que l'objectif met en avant. */
+  metric: MetricKey;
+  /** Couleur des colonnes et de la ligne de cible, celle du chiffre tracé. */
+  color: string;
 };
 
 const HEIGHT = 200;
@@ -34,14 +39,14 @@ function columnPath(x: number, y: number, width: number, height: number): string
 const formatKcal = (v: number) => formatNumber(v);
 
 /**
- * Calories par jour : une seule série (pas de légende, le titre la nomme),
+ * Un chiffre par jour : une seule série (pas de légende, le titre la nomme),
  * ligne de référence pour la cible, sélection d'un jour au toucher.
  */
-export function DailyChart({ days, target, selected, onSelect }: Props) {
+export function DailyChart({ days, target, selected, onSelect, metric, color }: Props) {
   const [width, setWidth] = useState(0);
   const onLayout = (e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width);
 
-  const max = Math.max(target ?? 0, ...days.map((d) => d.kcal), 1);
+  const max = Math.max(target ?? 0, ...days.map((d) => d[metric]), 1);
   const ticks = niceTicks(max);
   const top = ticks[ticks.length - 1]!;
   const plotWidth = Math.max(width - AXIS_WIDTH, 0);
@@ -52,7 +57,7 @@ export function DailyChart({ days, target, selected, onSelect }: Props) {
   const labelEvery = days.length > 10 ? 7 : 1;
 
   return (
-    <View onLayout={onLayout} accessible accessibilityLabel={t('history.chartLabel', { days: days.length })}>
+    <View onLayout={onLayout} accessible accessibilityLabel={t(metric === 'proteines' ? 'history.chartLabelProt' : 'history.chartLabel', { days: days.length })}>
       {width > 0 ? (
         <Svg width={width} height={HEIGHT}>
           {/* Grille horizontale recessive et graduations rondes */}
@@ -67,15 +72,16 @@ export function DailyChart({ days, target, selected, onSelect }: Props) {
 
           {days.map((d, i) => {
             const x = AXIS_WIDTH + i * slot + (slot - barWidth) / 2;
-            const h = plotHeight * (d.kcal / top);
+            const valeur = d[metric];
+            const h = plotHeight * (valeur / top);
             const isSelected = d.day === selected;
             const date = parseDayKey(d.day);
             const isLast = i === days.length - 1;
             const showLabel = days.length <= 10 || (days.length - 1 - i) % labelEvery === 0;
             return (
               <G key={d.day}>
-                {d.kcal > 0 ? (
-                  <Path d={columnPath(x, y(d.kcal), barWidth, h)} fill={selected && !isSelected ? MUTED_BAR : colors.accent} />
+                {valeur > 0 ? (
+                  <Path d={columnPath(x, y(valeur), barWidth, h)} fill={selected && !isSelected ? MUTED_BAR : color} />
                 ) : null}
                 {showLabel ? (
                   <SvgText
@@ -95,7 +101,7 @@ export function DailyChart({ days, target, selected, onSelect }: Props) {
           })}
 
           {/* Ligne de référence de la cible (étiquetée dans l'en-tête de la carte) */}
-          {target ? <Line x1={AXIS_WIDTH} x2={width} y1={y(target)} y2={y(target)} stroke={colors.accent} strokeWidth={2} strokeDasharray="6 4" /> : null}
+          {target ? <Line x1={AXIS_WIDTH} x2={width} y1={y(target)} y2={y(target)} stroke={color} strokeWidth={2} strokeDasharray="6 4" /> : null}
         </Svg>
       ) : (
         <View style={{ height: HEIGHT }} />

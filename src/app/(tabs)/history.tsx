@@ -6,11 +6,13 @@ import { AppText } from '@/components/AppText';
 import { Card } from '@/components/Card';
 import { DailyChart } from '@/components/DailyChart';
 import { Icon } from '@/components/Icon';
-import { MACROS } from '@/components/Macros';
+import { MACROS, METRICS } from '@/components/Macros';
 import { Screen } from '@/components/Screen';
 import { Segmented } from '@/components/Segmented';
 import { dateLocale, t } from '@/i18n';
-import { averageKcal, type DayTotals, parseDayKey } from '@/lib/days';
+import { average, type DayTotals, daysOnTarget, parseDayKey } from '@/lib/days';
+import { macroTargets } from '@/lib/calories';
+import { type FocusMetric, primaryMetric } from '@/lib/focus';
 import { formatNumber } from '@/lib/format';
 import { syncMeals, todayKey, useDailyTotals } from '@/lib/meals';
 import { useSession } from '@/state/session';
@@ -31,9 +33,13 @@ export default function History() {
     }, [userId]),
   );
 
-  const target = profile?.calories_cible ?? null;
-  const average = averageKcal(days);
-  const onTarget = target ? days.filter((d) => d.meals > 0 && Math.abs(d.kcal - target) <= target * 0.1).length : 0;
+  // L'historique suit le même chiffre que l'écran du jour : juger la semaine aux calories quand
+  // la journée se joue sur les protéines donnerait deux verdicts qui ne parlent pas du même effort.
+  const primary = primaryMetric(profile?.objectif);
+  const kcalCible = profile?.calories_cible ?? null;
+  const target = primary === 'kcal' ? kcalCible : kcalCible ? macroTargets(kcalCible, profile).proteines : null;
+  const moyenne = average(days, primary);
+  const onTarget = daysOnTarget(days, primary, target);
   const filled = [...days].reverse().filter((d) => d.meals > 0);
   const focus = days.find((d) => d.day === selected) ?? null;
 
@@ -57,41 +63,46 @@ export default function History() {
         <View style={styles.chartHead}>
           <View>
             <AppText variant="small" style={styles.semi}>
-              {t('history.averageLabel')}
+              {t(primary === 'proteines' ? 'history.averageLabelProt' : 'history.averageLabel')}
             </AppText>
             <View style={styles.avgRow}>
-              <AppText style={styles.avg}>{average !== null ? formatNumber(average) : '–'}</AppText>
-              <AppText style={styles.avgUnit}>{t('common.kcal')}</AppText>
+              <AppText style={styles.avg}>{moyenne !== null ? formatNumber(moyenne) : '–'}</AppText>
+              <AppText style={styles.avgUnit}>{t(METRICS[primary].unit)}</AppText>
             </View>
           </View>
           {target ? (
             <View style={styles.key}>
-              <View style={styles.keyLine} />
+              <View style={[styles.keyLine, { borderColor: METRICS[primary].color }]} />
               <AppText variant="small" style={styles.semi}>
-                {t('history.targetLine', { kcal: formatNumber(target) })}
+                {t('history.targetLine', { cible: `${formatNumber(target)} ${t(METRICS[primary].unit)}` })}
               </AppText>
             </View>
           ) : null}
         </View>
-        <DailyChart days={days} target={target} selected={selected} onSelect={setSelected} />
+        <DailyChart days={days} target={target} selected={selected} onSelect={setSelected} metric={primary} color={METRICS[primary].color} />
         <AppText variant="small" style={styles.center}>
-          {average === null ? t('history.averageNone') : target ? t('history.daysOnTarget', { count: onTarget }) : t('history.tapHint')}
+          {moyenne === null
+            ? t('history.averageNone')
+            : target
+              ? t(primary === 'proteines' ? 'history.daysOnTargetProt' : 'history.daysOnTarget', { count: onTarget })
+              : t('history.tapHint')}
         </AppText>
       </Card>
 
-      {focus ? <DayCard day={focus} target={target} /> : null}
+      {focus ? <DayCard day={focus} target={target} primary={primary} /> : null}
 
       {filled.length > 0 ? <AppText style={styles.section}>{t('history.list')}</AppText> : null}
       {filled.filter((d) => d.day !== focus?.day).map((d) => (
-        <DayCard key={d.day} day={d} target={target} compact />
+        <DayCard key={d.day} day={d} target={target} primary={primary} compact />
       ))}
     </Screen>
   );
 }
 
-/** Carte d'une journée : date, calories, écart à la cible, macros ; ouvre le détail. */
-function DayCard({ day, target, compact }: { day: DayTotals; target: number | null; compact?: boolean }) {
-  const diff = target ? Math.round(day.kcal - target) : null;
+/** Carte d'une journée : date, chiffre mis en avant, écart à la cible, macros ; ouvre le détail. */
+function DayCard({ day, target, primary, compact }: { day: DayTotals; target: number | null; primary: FocusMetric; compact?: boolean }) {
+  const m = METRICS[primary];
+  const diff = target ? Math.round(day[primary] - target) : null;
   return (
     <Pressable
       accessibilityRole="button"
@@ -103,14 +114,16 @@ function DayCard({ day, target, compact }: { day: DayTotals; target: number | nu
       </View>
       <View style={styles.dayKcalRow}>
         <AppText style={compact ? styles.dayKcalSmall : styles.dayKcal}>
-          {formatNumber(day.kcal)} {t('common.kcal')}
+          {formatNumber(day[primary])} {t(m.unit)}
         </AppText>
         {diff !== null && day.meals > 0 ? (
-          <AppText style={styles.diff}>{t(diff >= 0 ? 'history.overTarget' : 'history.underTarget', { kcal: formatNumber(Math.abs(diff)) })}</AppText>
+          <AppText style={[styles.diff, primary === 'proteines' && diff >= 0 && styles.diffReached]}>
+            {t(diff >= 0 ? 'history.overTarget' : 'history.underTarget', { ecart: `${formatNumber(Math.abs(diff))} ${t(m.unit)}` })}
+          </AppText>
         ) : null}
       </View>
       <View style={styles.macros}>
-        {MACROS.map((m) => (
+        {MACROS.filter((macro) => macro.key !== primary).map((m) => (
           <View key={m.key} style={styles.macro}>
             <View style={[styles.dot, { backgroundColor: m.color }]} />
             <AppText style={styles.macroText}>
@@ -142,6 +155,7 @@ const styles = StyleSheet.create({
   dayKcal: { fontSize: 28, lineHeight: 34, fontWeight: '800', letterSpacing: -0.5 },
   dayKcalSmall: { fontSize: 20, lineHeight: 26, fontWeight: '800' },
   diff: { fontSize: 14, fontWeight: '700', color: colors.accent },
+  diffReached: { color: colors.success },
   macros: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 14, rowGap: 4 },
   macro: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   dot: { width: 8, height: 8, borderRadius: 4 },

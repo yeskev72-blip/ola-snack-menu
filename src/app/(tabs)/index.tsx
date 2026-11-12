@@ -9,7 +9,7 @@ import { DayMeals } from '@/components/DayMeals';
 import { Icon } from '@/components/Icon';
 import { InstallBanner } from '@/components/InstallBanner';
 import { Logo } from '@/components/Logo';
-import { MacroCards } from '@/components/Macros';
+import { MacroCards, METRICS } from '@/components/Macros';
 import { RemindersPrompt } from '@/components/RemindersPrompt';
 import { Notice } from '@/components/Notice';
 import { Ring } from '@/components/Ring';
@@ -18,6 +18,7 @@ import { weekOf, WeekStrip } from '@/components/WeekStrip';
 import { t } from '@/i18n';
 import { fetchScanStatus, type QuotaInfo } from '@/lib/analyze';
 import { macroTargets } from '@/lib/calories';
+import { primaryMetric, secondaryMetrics } from '@/lib/focus';
 import { formatNumber } from '@/lib/format';
 import { syncMeals, todayKey, useDailyTotals, useMealsOfDay, usePendingCount } from '@/lib/meals';
 import type { Nutrients } from '@/lib/nutrition';
@@ -64,7 +65,12 @@ export default function Journal() {
     { kcal: 0, proteines: 0, glucides: 0, lipides: 0 },
   );
   const target = profile?.calories_cible ?? 0;
-  const left = target - total.kcal;
+  const targets = { ...macroTargets(target, profile), kcal: target };
+  // En prise de masse, c'est la ration de protéines qui décide, pas le budget de calories.
+  const primary = primaryMetric(profile?.objectif);
+  const m = METRICS[primary];
+  // Un budget se décompte, une ration se cumule : le grand chiffre n'est donc pas le même.
+  const left = targets[primary] - total[primary];
   const over = left < 0;
   const isToday = selected === today;
 
@@ -103,24 +109,44 @@ export default function Journal() {
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`${formatNumber(Math.abs(left))} ${t('common.kcal')} ${over ? t('journal.over') : t('journal.remaining')}`}
+        accessibilityLabel={
+          primary === 'proteines'
+            ? `${formatNumber(total.proteines)} ${t('journal.proteinUnit')} ${t(over ? 'journal.proteinReached' : 'journal.proteinOf', { target: formatNumber(targets.proteines) })}`
+            : `${formatNumber(Math.abs(left))} ${t('common.kcal')} ${over ? t('journal.over') : t('journal.remaining')}`
+        }
         onPress={() => router.push({ pathname: '/day/[day]', params: { day: selected } })}
         style={({ pressed }) => [styles.summary, pressed && styles.pressed]}>
         <View style={styles.summaryText}>
-          <AppText style={[styles.big, over && styles.over]}>{formatNumber(Math.abs(left))}</AppText>
-          <AppText style={styles.bigLabel}>
-            {t('common.kcal')} {over ? t('journal.over') : t('journal.remaining')}
-          </AppText>
-          <AppText variant="small" style={styles.summaryHint}>
-            {t('journal.eatenOfTarget', { eaten: formatNumber(total.kcal), target: formatNumber(target) })}
-          </AppText>
+          {primary === 'proteines' ? (
+            <>
+              <AppText style={[styles.big, over && styles.reached]}>{formatNumber(total.proteines)}</AppText>
+              <AppText style={styles.bigLabel}>{t('journal.proteinUnit')}</AppText>
+              <AppText variant="small" style={[styles.summaryHint, over && styles.reachedHint]}>
+                {t(over ? 'journal.proteinReached' : 'journal.proteinOf', { target: formatNumber(targets.proteines) })}
+              </AppText>
+            </>
+          ) : (
+            <>
+              <AppText style={[styles.big, over && styles.over]}>{formatNumber(Math.abs(left))}</AppText>
+              <AppText style={styles.bigLabel}>
+                {t('common.kcal')} {over ? t('journal.over') : t('journal.remaining')}
+              </AppText>
+              <AppText variant="small" style={styles.summaryHint}>
+                {t('journal.eatenOfTarget', { eaten: formatNumber(total.kcal), target: formatNumber(target) })}
+              </AppText>
+            </>
+          )}
         </View>
-        <Ring progress={target > 0 ? total.kcal / target : 0} size={112} stroke={11} color={over ? colors.danger : colors.accent}>
-          <Icon name="flame" size={30} color={over ? colors.danger : colors.accent} />
+        <Ring
+          progress={targets[primary] > 0 ? total[primary] / targets[primary] : 0}
+          size={112}
+          stroke={11}
+          color={over ? (primary === 'kcal' ? colors.danger : colors.success) : m.color}>
+          <Icon name={m.icon} size={30} color={over ? (primary === 'kcal' ? colors.danger : colors.success) : m.ink} />
         </Ring>
       </Pressable>
 
-      <MacroCards eaten={total} targets={macroTargets(target, profile)} />
+      <MacroCards eaten={total} targets={targets} keys={secondaryMetrics(primary)} />
 
       <AppText style={styles.section} accessibilityRole="header">
         {isToday ? t('journal.todayMeals') : t('journal.dayMeals')}
@@ -177,6 +203,8 @@ const styles = StyleSheet.create({
   big: { fontSize: 48, lineHeight: 52, fontWeight: '800', letterSpacing: -1.5 },
   bigLabel: { fontSize: 16, lineHeight: 22, fontWeight: '600', color: colors.textMuted },
   summaryHint: { marginTop: spacing.sm, fontWeight: '600' },
+  reached: { color: colors.success },
+  reachedHint: { color: colors.success },
   over: { color: colors.danger },
   section: { marginTop: 6, fontSize: 18, lineHeight: 24, fontWeight: '800' },
   empty: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.lg },

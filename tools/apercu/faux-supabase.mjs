@@ -23,8 +23,11 @@ const session = {
     is_anonymous: true, app_metadata: {}, user_metadata: {}, identities: [],
     created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
 };
+/** OBJECTIF=prise|perte|maintien : l'écran du jour ne met pas le même chiffre en grand. */
+const OBJECTIF = process.env.OBJECTIF ?? 'maintien';
+
 const profil = { id: UID, prenom: 'Arnaud', sexe: 'homme', age: 30, taille_cm: 175, poids_kg: 70,
-  niveau_activite: 1.375, objectif: 'maintien', calories_cible: 2200, plan: 'free',
+  niveau_activite: 1.375, objectif: OBJECTIF, calories_cible: 2200, plan: 'free',
   partage_photos: false, premium_until: null,
   created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
 

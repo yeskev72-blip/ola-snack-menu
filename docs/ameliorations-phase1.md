@@ -59,6 +59,15 @@ kcal. Les protéines n'obtiennent jamais de verdict, ni au jour ni à la semaine
 calories en second ; dans l'historique, ajouter une moyenne protéines et compter les jours où la
 cible protéines est atteinte.
 
+**Fait le 12 novembre 2026.** `src/lib/focus.ts` décide du chiffre mis en avant ; l'écran du jour
+et l'historique le lisent tous les deux, pour ne pas juger la semaine sur un effort que la journée
+ne mesure pas.
+
+Les deux chiffres ne se lisent pas dans le même sens, et les écrans le montrent : un budget de
+calories se décompte (« 864 kcal restantes », rouge au dépassement), une ration de protéines se
+cumule (« 150 g · cible atteinte », vert). Une journée compte comme tenue à ± 10 % pour les
+calories, mais dès 95 % de la cible pour les protéines — en manger plus n'a jamais été un écart.
+
 ---
 
 ## 3. Rien ne montre d'où vient un chiffre — c'est la seule douleur bloquante citée par 4 pros sur 4
@@ -150,7 +159,10 @@ point 3 (sources vérifiables) est le préalable à tout démarchage de coach.
 2. ~~Cible protéines fondée sur le poids~~ — fait le 12 novembre 2026 : `PROTEIN_PER_KG`
    (2,0 en perte, 1,8 en prise, 1,6 en maintien), plafonnée à 45 % des calories ; glucides et
    lipides se partagent le reste, et les parts affichées se lisent sur les grammes retenus.
-3. Protéines en premier sur l'écran du jour et dans l'historique.
+3. ~~Protéines en premier sur l'écran du jour et dans l'historique~~ — fait le 12 novembre 2026 :
+   `primaryMetric` met les protéines en grand quand l'objectif est la prise de masse, les
+   calories passant en carte ; l'historique suit le même chiffre (moyenne, ligne de cible,
+   journées tenues).
 4. Mesure du temps de saisie, puis ce qu'elle révèle.
 5. Envoi binaire de la photo et mode léger.
 6. Diviseur de portion pour le plat partagé.

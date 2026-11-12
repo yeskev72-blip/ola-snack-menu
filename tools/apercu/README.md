@@ -23,3 +23,6 @@ pour regarder les écrans, pas pour tester la vraie base.
 
 `PROFIL=vide node tools/apercu/faux-supabase.mjs` ne sert aucun profil : l'app part
 dans le parcours d'accueil, seul chemin vers l'écran de la cible.
+
+`OBJECTIF=prise` sert un profil en prise de masse : l'écran du jour et
+l'historique passent alors les protéines devant les calories.
