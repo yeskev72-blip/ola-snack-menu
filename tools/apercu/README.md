@@ -26,3 +26,7 @@ dans le parcours d'accueil, seul chemin vers l'écran de la cible.
 
 `OBJECTIF=prise` sert un profil en prise de masse : l'écran du jour et
 l'historique passent alors les protéines devant les calories.
+
+L'analyse d'une photo répond toujours « riz jollof, 300 g » après `ANALYSE_MS`
+(1,5 s par défaut), ce qui permet de parcourir un scan entier. Les mesures de temps
+de saisie que l'app dépose s'affichent dans la sortie du serveur.

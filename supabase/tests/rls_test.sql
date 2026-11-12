@@ -255,5 +255,70 @@ exception when insufficient_privilege then null;
 end $$;
 reset role;
 
+-- Sources, signalements et niveau d'huile. C est l'invité : un compte anonyme a les mêmes droits.
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000c","role":"authenticated"}', true);
+insert into public.meals (id, type_repas) values ('44444444-4444-4444-8444-444444444444', 'dejeuner');
+do $$ begin
+  assert (select huile from public.meals where id = '44444444-4444-4444-8444-444444444444') = 'normal', 'huile : niveau habituel par défaut';
+  insert into public.food_reports (label, meal_id, message) values ('Riz jollof', '44444444-4444-4444-8444-444444444444', 'Trop bas');
+  assert (select count(*) from public.food_reports) = 1, 'C relit son signalement';
+end $$;
+do $$ begin
+  update public.meals set huile = 'énormément' where id = '44444444-4444-4444-8444-444444444444';
+  raise exception 'DEVAIT ÉCHOUER : niveau d''huile inconnu';
+exception when check_violation then null;
+end $$;
+do $$ begin
+  insert into public.food_reports (user_id, label, message) values ('00000000-0000-0000-0000-00000000000b', 'Riz', 'Au nom de B');
+  raise exception 'DEVAIT ÉCHOUER : signalement au nom d''un autre';
+exception when insufficient_privilege then null;
+end $$;
+
+-- Temps de saisie : l'app dépose, ne relit pas.
+insert into public.scan_timings (total_ms, prep_ms, analysis_ms, review_ms, items, platform, network)
+values (20000, 800, 9000, 8000, 2, 'web', '3g'), (41000, 900, 25000, 12000, 1, 'android', '3g');
+do $$ begin
+  perform 1 from public.scan_timings;
+  raise exception 'DEVAIT ÉCHOUER : lecture des temps de saisie par un client';
+exception when insufficient_privilege then null;
+end $$;
+do $$ begin
+  perform 1 from public.scan_timings_daily;
+  raise exception 'DEVAIT ÉCHOUER : lecture du résumé des temps par un client';
+exception when insufficient_privilege then null;
+end $$;
+do $$ begin
+  insert into public.scan_timings (user_id, total_ms, prep_ms, analysis_ms, review_ms, items, platform, network)
+  values ('00000000-0000-0000-0000-00000000000b', 1, 0, 0, 0, 1, 'web', 'wifi');
+  raise exception 'DEVAIT ÉCHOUER : temps de saisie au nom d''un autre';
+exception when insufficient_privilege then null;
+end $$;
+do $$ begin
+  insert into public.scan_timings (total_ms, prep_ms, analysis_ms, review_ms, items, platform, network)
+  values (1800001, 0, 0, 0, 1, 'web', 'wifi');
+  raise exception 'DEVAIT ÉCHOUER : parcours de plus de 30 minutes';
+exception when check_violation then null;
+end $$;
+reset role;
+
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-00000000000b","role":"authenticated"}', true);
+do $$ begin
+  assert (select count(*) from public.food_reports) = 0, 'B ne voit pas le signalement de C';
+end $$;
+reset role;
+
+set local role service_role;
+do $$
+declare r record;
+begin
+  select * into r from public.scan_timings_daily where network = '3g';
+  assert r.saisies = 2, 'résumé : deux saisies en 3G';
+  assert r.pct_sous_30s = 50, 'résumé : une saisie sur deux sous 30 s';
+  assert r.mediane_s = 30.5, 'résumé : médiane entre 20 s et 41 s';
+end $$;
+reset role;
+
 select 'Tous les tests RLS sont passés' as resultat;
 rollback;

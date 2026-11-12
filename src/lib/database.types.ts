@@ -11,6 +11,22 @@ export type Sexe = 'femme' | 'homme';
 export type Plan = 'free' | 'premium';
 export type TypeRepas = 'petit_dejeuner' | 'dejeuner' | 'diner' | 'en_cas';
 export type Huile = 'peu' | 'normal' | 'beaucoup';
+
+/** Temps de saisie d'un repas scanné : l'app dépose la ligne et ne la relit jamais. */
+export type ScanTimingRow = {
+  id: number;
+  user_id: string;
+  total_ms: number;
+  prep_ms: number;
+  analysis_ms: number;
+  review_ms: number;
+  attempts: number;
+  follow_up: boolean;
+  items: number;
+  platform: 'web' | 'android' | 'ios';
+  network: 'wifi' | '2g' | '3g' | '4g' | '5g' | 'cellular' | 'unknown';
+  created_at: string;
+};
 export type FoodCategorie =
   | 'feculent'
   | 'plat_complet'
@@ -157,6 +173,7 @@ export type Database = {
       meal_items: Table<MealItemRow, WithDefaults<MealItemRow, 'id' | 'position' | 'food_key' | 'estimated'>>;
       corrections: Table<CorrectionRow, WithDefaults<CorrectionRow, 'id' | 'user_id' | 'meal_id' | 'photo_path' | 'created_at'>>;
       food_reports: Table<FoodReportRow, WithDefaults<FoodReportRow, 'id' | 'user_id' | 'food_key' | 'meal_id' | 'created_at'>, never>;
+      scan_timings: Table<ScanTimingRow, WithDefaults<ScanTimingRow, 'id' | 'user_id' | 'attempts' | 'follow_up' | 'created_at'>, never>;
       scan_usage: Table<ScanUsageRow, never, never>;
     };
     Views: Record<never, never>;

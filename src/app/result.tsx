@@ -24,6 +24,8 @@ import { isUnverified } from '@/lib/foodStatus';
 import { useFoods } from '@/lib/foods';
 import { MEAL_TYPES, mealTypeLabel } from '@/lib/mealTypes';
 import { saveMeal } from '@/lib/meals';
+import { scanTiming } from '@/lib/scanTiming';
+import { sendScanTiming } from '@/lib/sendScanTiming';
 import { mealNutrition } from '@/lib/nutrition';
 import { gramsHint } from '@/lib/portionLabels';
 import { unitsFor } from '@/lib/portions';
@@ -86,6 +88,10 @@ export default function Result() {
       photo_path: draft.scan?.photoPath ?? null,
       correction: correction ? { id: randomUUID(), ...correction, photo_path: draft.scan?.photoPath ?? null } : null,
     });
+    // Le repas est enregistré : c'est la fin du parcours mesuré. L'envoi part sans être attendu,
+    // une mesure ne doit ni retarder ni faire échouer ce qu'elle mesure.
+    const timing = scanTiming(draft.marks, Date.now());
+    if (timing) void sendScanTiming(timing, items.length);
     showToast((await isOnline()) ? t('result.saved') : t('result.savedOffline'));
     draft.reset();
     router.dismissTo('/');

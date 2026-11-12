@@ -101,6 +101,20 @@ sur un vrai téléphone en 3G. Si l'on dépasse 30 s, c'est le chiffre qui pilot
 suivants. Permettre aussi un premier scan avant l'onboarding (le mode invité existe, l'onboarding
 le précède encore).
 
+**Instrumenté le 12 novembre 2026.** Chaque repas enregistré à partir d'une photo fraîche dépose
+dans `public.scan_timings` la durée totale (de la photo choisie au repas enregistré) et celle de
+trois étapes : préparation de la photo, analyse, relecture. S'y ajoutent le nombre d'essais, la
+plateforme et le réseau. À lire dans le SQL Editor :
+
+```sql
+select * from public.scan_timings_daily order by day desc;
+```
+
+Limites à connaître en lisant les chiffres : le chronomètre part quand l'appareil photo rend
+l'image, pas au déclencheur (ce temps-là appartient au système) ; un enregistrement fait sans
+réseau n'envoie pas sa mesure ; sur le web le réseau est une classe de débit, pas la technologie.
+Le premier scan avant l'onboarding reste à faire.
+
 ---
 
 ## 5. Un tiers de la photo envoyée ne sert à rien
@@ -163,6 +177,8 @@ point 3 (sources vérifiables) est le préalable à tout démarchage de coach.
    `primaryMetric` met les protéines en grand quand l'objectif est la prise de masse, les
    calories passant en carte ; l'historique suit le même chiffre (moyenne, ligne de cible,
    journées tenues).
-4. Mesure du temps de saisie, puis ce qu'elle révèle.
+4. ~~Mesure du temps de saisie~~ — instrumentée le 12 novembre 2026 (`public.scan_timings`).
+   Reste à lire ce qu'elle révèle après quelques jours d'usage réel, et le premier scan avant
+   l'onboarding, qui n'est pas fait.
 5. Envoi binaire de la photo et mode léger.
 6. Diviseur de portion pour le plat partagé.
